@@ -10,6 +10,8 @@ import HomePage from './pages/public/HomePage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import DashboardPage from './pages/user/DashboardPage';
+import CatalogPage from './pages/public/CatalogPage';
+import MediaDetailPage from './pages/media/MediaDetailPage';
 
 // Configuration React Query
 const queryClient = new QueryClient({
@@ -62,8 +64,9 @@ function App() {
                   </ProtectedRoute>
                 } />
                 
-                {/* Routes publiques temporaires */}
-                <Route path="catalog" element={<div className="page-container py-16 text-center"><h1>Catalogue (à venir)</h1></div>} />
+                {/* Routes publiques */}
+                <Route path="catalog" element={<CatalogPage />} />
+                <Route path="media/:id" element={<MediaDetailPage />} />
                 <Route path="about" element={<div className="page-container py-16 text-center"><h1>À propos (à venir)</h1></div>} />
                 <Route path="contact" element={<div className="page-container py-16 text-center"><h1>Contact (à venir)</h1></div>} />
                 

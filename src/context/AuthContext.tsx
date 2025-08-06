@@ -38,13 +38,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const userData = JSON.parse(storedUser);
           setUser(userData);
           
-          // Optionnel: Vérifier la validité du token avec une requête au serveur
-          try {
-            await authService.getCurrentUser();
-          } catch (error) {
-            // Token invalide, déconnecter
-            logout();
-          }
+          // Vérifier la validité du token avec une requête au serveur (optionnel)
+          // Pour l'instant, on fait confiance au localStorage
+          console.log('✅ Utilisateur restauré depuis le localStorage:', userData.name);
+        } else {
+          console.log('❌ Pas de token ou d\'utilisateur en localStorage');
         }
       } catch (error) {
         console.error('Erreur lors de l\'initialisation de l\'auth:', error);

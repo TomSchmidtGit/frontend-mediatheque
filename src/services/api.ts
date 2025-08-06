@@ -123,7 +123,7 @@ api.interceptors.response.use(
       toast.error('Accès refusé. Vous n\'avez pas les permissions nécessaires.');
     } else if (error.response?.status === 404) {
       toast.error('Ressource non trouvée.');
-    } else if (error.response?.status >= 500) {
+    } else if (error.response?.status && error.response.status >= 500) {
       toast.error('Erreur serveur. Veuillez réessayer plus tard.');
     }
 
