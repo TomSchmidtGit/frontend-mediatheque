@@ -185,8 +185,9 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
               {media.averageRating.toFixed(1)}
             </span>
             <span className="text-xs text-gray-500">
-              ({media.reviews.length} avis)
+              ({Array.isArray(media.reviews) ? media.reviews.length : 0} avis)
             </span>
+
           </div>
         )}
 
@@ -196,11 +197,11 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
           </p>
         )}
 
-        {media.tags && media.tags.length > 0 && (
+        {Array.isArray(media.tags) && media.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 pt-2">
             {media.tags.slice(0, 3).map((tag) => (
               <span
-                key={tag._id}
+                key={typeof tag === 'object' ? tag._id : tag}
                 className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700"
               >
                 #{typeof tag === 'object' ? tag.name : tag}
@@ -213,6 +214,7 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
             )}
           </div>
         )}
+
       </div>
     </Link>
   );
