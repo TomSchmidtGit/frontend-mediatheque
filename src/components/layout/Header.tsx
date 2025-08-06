@@ -106,7 +106,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
             )}
           </nav>
 
-          {/* Actions utilisateur - Desktop uniquement pour non-connectés */}
+          {/* Actions utilisateur */}
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <Menu as="div" className="relative">
@@ -203,7 +203,8 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                 </Transition>
               </Menu>
             ) : (
-              <div className="flex items-center space-x-3">
+              // ✅ Cacher les boutons en mobile
+              <div className="hidden md:flex items-center space-x-3">
                 <Link
                   to="/login"
                   className="text-gray-600 hover:text-gray-900 font-medium text-sm px-3 py-2 rounded-md hover:bg-gray-100 transition-all duration-200"

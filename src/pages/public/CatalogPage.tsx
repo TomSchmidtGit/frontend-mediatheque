@@ -1,5 +1,5 @@
 // src/pages/public/CatalogPage.tsx
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
   Squares2X2Icon, 
@@ -15,12 +15,20 @@ import type { MediaFilters } from '../../types';
 import mediaService from '../../services/mediaService';
 import { cn } from '../../utils'; 
 
+// Interface pour les données de pagination
+interface PaginatedData {
+  data: any[];
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+}
+
 const CatalogPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
 
-  // État local pour la recherche (sans déclencher de re-render)
+  // État local pour la recherche (input en temps réel)
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
   const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   
@@ -35,7 +43,7 @@ const CatalogPage: React.FC = () => {
     favorites: searchParams.get('favorites') === 'true' || false,
   }));
 
-  // Fonction pour appliquer la recherche avec délai
+  // Fonction pour appliquer la recherche avec délai (sans changer l'URL)
   const handleSearchInputChange = useCallback((value: string) => {
     setSearchInput(value);
     
@@ -89,23 +97,31 @@ const CatalogPage: React.FC = () => {
     staleTime: 30 * 60 * 1000, // 30 minutes
   });
 
-  // Synchroniser les filtres avec l'URL
+  // Synchroniser les filtres avec l'URL (seulement pour les filtres non-recherche)
   useEffect(() => {
     const newSearchParams = new URLSearchParams();
     
     Object.entries(appliedFilters).forEach(([key, value]) => {
+      // Ne pas mettre à jour l'URL pour chaque changement de recherche
+      if (key === 'search' && searchTimeoutRef.current) {
+        return; // Skip pendant la saisie
+      }
+      
       if (value && value !== '' && value !== 1 && value !== false) {
         newSearchParams.set(key, value.toString());
       }
     });
 
-    setSearchParams(newSearchParams, { replace: true });
+    // Mise à jour de l'URL seulement si ce ne sont pas des changements temporaires de recherche
+    if (!searchTimeoutRef.current) {
+      setSearchParams(newSearchParams, { replace: true });
+    }
   }, [appliedFilters, setSearchParams]);
 
   // Gestion du changement de filtres (sauf recherche)
   const handleFiltersChange = (newFilters: MediaFilters) => {
     setAppliedFilters(newFilters);
-    // Synchroniser l'input de recherche
+    // Synchroniser l'input de recherche si changé depuis les filtres
     if (newFilters.search !== searchInput) {
       setSearchInput(newFilters.search || '');
     }
@@ -122,7 +138,6 @@ const CatalogPage: React.FC = () => {
   const handleToggleFavorite = async (mediaId: string, isFavorite: boolean) => {
     try {
       await mediaService.toggleFavorite(mediaId);
-      // Optionnel : Mettre à jour le cache local ou refetch
     } catch (error) {
       throw error; // Laisser MediaCard gérer l'erreur
     }
@@ -166,16 +181,29 @@ const CatalogPage: React.FC = () => {
       updatedAt: new Date().toISOString(),
     }));
 
+    // Filtrer selon la recherche si présente
+    let filteredMedia = mockMedia;
+    if (appliedFilters.search) {
+      const searchTerm = appliedFilters.search.toLowerCase();
+      filteredMedia = mockMedia.filter(media => 
+        media.title.toLowerCase().includes(searchTerm) ||
+        media.author.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    const startIndex = ((appliedFilters.page || 1) - 1) * (appliedFilters.limit || 12);
+    const endIndex = startIndex + (appliedFilters.limit || 12);
+
     return {
-      data: mockMedia.slice((appliedFilters.page! - 1) * appliedFilters.limit!, appliedFilters.page! * appliedFilters.limit!),
-      currentPage: appliedFilters.page!,
-      totalPages: Math.ceil(mockMedia.length / appliedFilters.limit!),
-      totalItems: mockMedia.length
+      data: filteredMedia.slice(startIndex, endIndex),
+      currentPage: appliedFilters.page || 1,
+      totalPages: Math.ceil(filteredMedia.length / (appliedFilters.limit || 12)),
+      totalItems: filteredMedia.length
     };
   };
 
   // Utiliser les données factices si pas de données réelles
-  const displayData = mediaData || generateMockData();
+  const displayData: PaginatedData = mediaData || generateMockData();
 
   if (mediaError) {
     return (
