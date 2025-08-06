@@ -28,7 +28,6 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
   );
   const [isToggling, setIsToggling] = useState(false);
 
-  // Icône selon le type de média
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'book':
@@ -42,7 +41,6 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
     }
   };
 
-  // Couleur selon le type
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'book':
@@ -56,10 +54,9 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
     }
   };
 
-  // Gestion des favoris
   const handleToggleFavorite = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Empêcher la navigation
-    
+    e.preventDefault();
+
     if (!isAuthenticated) {
       toast.error('Connectez-vous pour ajouter aux favoris');
       return;
@@ -69,18 +66,17 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
     try {
       const newFavoriteState = !isFavorite;
       setIsFavorite(newFavoriteState);
-      
+
       if (onToggleFavorite) {
         await onToggleFavorite(media._id, newFavoriteState);
       }
-      
+
       toast.success(
         newFavoriteState 
           ? 'Ajouté aux favoris' 
           : 'Retiré des favoris'
       );
     } catch (error) {
-      // Revenir à l'état précédent en cas d'erreur
       setIsFavorite(!isFavorite);
       toast.error('Erreur lors de la modification');
     } finally {
@@ -88,7 +84,6 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
     }
   };
 
-  // Affichage des étoiles pour la note
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
       <StarIcon
@@ -104,8 +99,10 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
   };
 
   return (
-    <div className="group relative bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-      {/* Image du média */}
+    <Link
+      to={`/media/${media._id}`}
+      className="group relative bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 block"
+    >
       <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
         {media.imageUrl ? (
           <img
@@ -119,10 +116,8 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
             {getTypeIcon(media.type)}
           </div>
         )}
-        
-        {/* Overlay avec badges */}
+
         <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
-          {/* Badge type */}
           <span className={cn(
             'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
             getTypeColor(media.type)
@@ -130,8 +125,7 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
             {getTypeIcon(media.type)}
             <span className="ml-1">{formatters.mediaType(media.type)}</span>
           </span>
-          
-          {/* Bouton favori */}
+
           <button
             onClick={handleToggleFavorite}
             disabled={isToggling}
@@ -151,7 +145,6 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
           </button>
         </div>
 
-        {/* Badge disponibilité */}
         <div className="absolute bottom-3 right-3">
           <span className={cn(
             'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
@@ -168,68 +161,60 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
         </div>
       </div>
 
-      {/* Contenu */}
-      <Link to={`/media/${media._id}`} className="block p-4">
-        <div className="space-y-2">
-          {/* Titre */}
-          <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors">
-            {media.title}
-          </h3>
-          
-          {/* Auteur et année */}
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <UserIcon className="h-3 w-3" />
-            <span className="truncate">{media.author}</span>
-            <span>•</span>
-            <div className="flex items-center">
-              <CalendarIcon className="h-3 w-3 mr-1" />
-              <span>{media.year}</span>
-            </div>
+      <div className="p-4 space-y-2">
+        <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors">
+          {media.title}
+        </h3>
+
+        <div className="flex items-center space-x-2 text-sm text-gray-600">
+          <UserIcon className="h-3 w-3" />
+          <span className="truncate">{media.author}</span>
+          <span>•</span>
+          <div className="flex items-center">
+            <CalendarIcon className="h-3 w-3 mr-1" />
+            <span>{media.year}</span>
           </div>
-          
-          {/* Note moyenne */}
-          {media.averageRating > 0 && (
-            <div className="flex items-center space-x-2">
-              <div className="flex items-center space-x-1">
-                {renderStars(media.averageRating)}
-              </div>
-              <span className="text-sm text-gray-600">
-                {media.averageRating.toFixed(1)}
-              </span>
-              <span className="text-xs text-gray-500">
-                ({media.reviews.length} avis)
-              </span>
-            </div>
-          )}
-          
-          {/* Description */}
-          {media.description && (
-            <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-              {media.description}
-            </p>
-          )}
-          
-          {/* Tags */}
-          {media.tags && media.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 pt-2">
-              {media.tags.slice(0, 3).map((tag) => (
-                <span
-                  key={tag._id}
-                  className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700"
-                >
-                  #{typeof tag === 'object' ? tag.name : tag}
-                </span>
-              ))}
-              {media.tags.length > 3 && (
-                <span className="text-xs text-gray-500 py-1">
-                  +{media.tags.length - 3} autres
-                </span>
-              )}
-            </div>
-          )}
         </div>
-      </Link>
-    </div>
+
+        {media.averageRating > 0 && (
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
+              {renderStars(media.averageRating)}
+            </div>
+            <span className="text-sm text-gray-600">
+              {media.averageRating.toFixed(1)}
+            </span>
+            <span className="text-xs text-gray-500">
+              ({media.reviews.length} avis)
+            </span>
+          </div>
+        )}
+
+        {media.description && (
+          <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+            {media.description}
+          </p>
+        )}
+
+        {media.tags && media.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 pt-2">
+            {media.tags.slice(0, 3).map((tag) => (
+              <span
+                key={tag._id}
+                className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700"
+              >
+                #{typeof tag === 'object' ? tag.name : tag}
+              </span>
+            ))}
+            {media.tags.length > 3 && (
+              <span className="text-xs text-gray-500 py-1">
+                +{media.tags.length - 3} autres
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </Link>
   );
 };
 
