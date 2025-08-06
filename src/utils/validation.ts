@@ -10,7 +10,7 @@ export const loginSchema = z.object({
   password: z
     .string()
     .min(1, 'Le mot de passe est requis')
-    .min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
+    .min(5, 'Le mot de passe doit contenir au moins 5 caractères'),
 });
 
 // Schéma de validation pour l'inscription

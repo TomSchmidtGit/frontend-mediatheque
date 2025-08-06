@@ -5,9 +5,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import MainLayout from './components/layout/MainLayout';
+import ProtectedRoute from './components/common/ProtectedRoute';
 import HomePage from './pages/public/HomePage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import DashboardPage from './pages/user/DashboardPage';
 
 // Configuration React Query
 const queryClient = new QueryClient({
@@ -31,10 +33,36 @@ function App() {
                 <Route path="login" element={<LoginPage />} />
                 <Route path="register" element={<RegisterPage />} />
                 
-                {/* Routes protégées - on les ajoutera plus tard */}
-                <Route path="dashboard" element={<div className="page-container py-16 text-center"><h1>Dashboard (à venir)</h1></div>} />
-                <Route path="favorites" element={<div className="page-container py-16 text-center"><h1>Favoris (à venir)</h1></div>} />
-                <Route path="settings" element={<div className="page-container py-16 text-center"><h1>Paramètres (à venir)</h1></div>} />
+                {/* Routes protégées */}
+                <Route path="dashboard" element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="favorites" element={
+                  <ProtectedRoute>
+                    <div className="page-container py-16 text-center"><h1>Mes Favoris (à venir)</h1></div>
+                  </ProtectedRoute>
+                } />
+                <Route path="my-borrows" element={
+                  <ProtectedRoute>
+                    <div className="page-container py-16 text-center"><h1>Mes Emprunts (à venir)</h1></div>
+                  </ProtectedRoute>
+                } />
+                <Route path="settings" element={
+                  <ProtectedRoute>
+                    <div className="page-container py-16 text-center"><h1>Paramètres (à venir)</h1></div>
+                  </ProtectedRoute>
+                } />
+                
+                {/* Routes admin */}
+                <Route path="admin" element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <div className="page-container py-16 text-center"><h1>Admin Dashboard (à venir)</h1></div>
+                  </ProtectedRoute>
+                } />
+                
+                {/* Routes publiques temporaires */}
                 <Route path="catalog" element={<div className="page-container py-16 text-center"><h1>Catalogue (à venir)</h1></div>} />
                 <Route path="about" element={<div className="page-container py-16 text-center"><h1>À propos (à venir)</h1></div>} />
                 <Route path="contact" element={<div className="page-container py-16 text-center"><h1>Contact (à venir)</h1></div>} />
