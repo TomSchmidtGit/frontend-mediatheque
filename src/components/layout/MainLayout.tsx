@@ -23,9 +23,7 @@ const MainLayout: React.FC = () => {
         )} */}
         
         <main className={`flex-1 ${isAuthenticated ? 'lg:ml-0' : ''}`}>
-          <div className="py-6">
-            <Outlet />
-          </div>
+          <Outlet />
         </main>
       </div>
     </div>

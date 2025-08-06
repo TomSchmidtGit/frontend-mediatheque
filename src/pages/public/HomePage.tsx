@@ -12,11 +12,11 @@ import {
 
 const HomePage: React.FC = () => {
   return (
-    <div className="bg-white">
+    <div className="bg-white min-h-screen overflow-x-hidden">
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden pt-6">
         <div className="page-container">
-          <div className="relative z-10 pt-14 pb-16 sm:pb-20 md:pb-24 lg:pb-28 xl:pb-32">
+          <div className="relative z-10 pt-8 pb-16 sm:pb-20 md:pb-24 lg:pb-28 xl:pb-32">
             <div className="text-center">
               <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold text-gray-900 mb-6 animate-fade-in">
                 Bienvenue à la{' '}

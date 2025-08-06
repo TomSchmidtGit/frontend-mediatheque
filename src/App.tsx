@@ -6,8 +6,8 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import MainLayout from './components/layout/MainLayout';
 import HomePage from './pages/public/HomePage';
-// import LoginPage from './pages/auth/LoginPage'; // On les créera plus tard
-// import RegisterPage from './pages/auth/RegisterPage';
+import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
 
 // Configuration React Query
 const queryClient = new QueryClient({
@@ -28,8 +28,8 @@ function App() {
             <Routes>
               <Route path="/" element={<MainLayout />}>
                 <Route index element={<HomePage />} />
-                <Route path="login" element={<div className="page-container py-16 text-center"><h1>Page de connexion (à venir)</h1></div>} />
-                <Route path="register" element={<div className="page-container py-16 text-center"><h1>Page d'inscription (à venir)</h1></div>} />
+                <Route path="login" element={<LoginPage />} />
+                <Route path="register" element={<RegisterPage />} />
                 
                 {/* Routes protégées - on les ajoutera plus tard */}
                 <Route path="dashboard" element={<div className="page-container py-16 text-center"><h1>Dashboard (à venir)</h1></div>} />
