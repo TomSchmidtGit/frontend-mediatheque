@@ -7,15 +7,15 @@ import {
   AdjustmentsHorizontalIcon,
   SparklesIcon
 } from '@heroicons/react/24/outline';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import MediaCard from '../../components/catalog/MediaCard';
 import CatalogFilters from '../../components/catalog/CatalogFilters';
 import Pagination from '../../components/common/Pagination';
 import type { MediaFilters } from '../../types';
 import mediaService from '../../services/mediaService';
 import { cn } from '../../utils'; 
+import { useAuth } from '../../context/AuthContext';
 
-// Interface pour les données de pagination
 interface PaginatedData {
   data: any[];
   currentPage: number;
@@ -27,12 +27,13 @@ const CatalogPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
 
-  // État local pour la recherche (input en temps réel)
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
   const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   
-  // État des filtres appliqués (pour les requêtes API)
+  // ✅ État des filtres SANS favorites
   const [appliedFilters, setAppliedFilters] = useState<MediaFilters>(() => ({
     page: parseInt(searchParams.get('page') || '1'),
     limit: parseInt(searchParams.get('limit') || '12'),
@@ -40,19 +41,16 @@ const CatalogPage: React.FC = () => {
     type: searchParams.get('type') as any || '',
     category: searchParams.get('category') || '',
     tags: searchParams.get('tags') || '',
-    favorites: searchParams.get('favorites') === 'true' || false,
   }));
 
-  // Fonction pour appliquer la recherche avec délai (sans changer l'URL)
+  // Fonction pour appliquer la recherche avec délai
   const handleSearchInputChange = useCallback((value: string) => {
     setSearchInput(value);
     
-    // Annuler le timeout précédent
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
     
-    // Programmer la mise à jour des filtres après 500ms
     searchTimeoutRef.current = setTimeout(() => {
       setAppliedFilters(prev => ({
         ...prev,
@@ -62,7 +60,6 @@ const CatalogPage: React.FC = () => {
     }, 500);
   }, []);
 
-  // Cleanup du timeout au démontage
   useEffect(() => {
     return () => {
       if (searchTimeoutRef.current) {
@@ -71,7 +68,6 @@ const CatalogPage: React.FC = () => {
     };
   }, []);
 
-  // Requête pour récupérer les médias
   const {
     data: mediaData,
     isLoading: mediaLoading,
@@ -80,70 +76,63 @@ const CatalogPage: React.FC = () => {
   } = useQuery({
     queryKey: ['media', appliedFilters],
     queryFn: () => mediaService.getMedia(appliedFilters),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
-  // Requête pour récupérer les catégories
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
     queryFn: () => mediaService.getCategories(),
-    staleTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 30 * 60 * 1000,
   });
 
-  // Requête pour récupérer les tags
   const { data: tags = [] } = useQuery({
     queryKey: ['tags'],
     queryFn: () => mediaService.getTags(),
-    staleTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 30 * 60 * 1000,
   });
 
-  // Synchroniser les filtres avec l'URL (seulement pour les filtres non-recherche)
+  // Synchroniser les filtres avec l'URL (SANS favorites)
   useEffect(() => {
     const newSearchParams = new URLSearchParams();
     
     Object.entries(appliedFilters).forEach(([key, value]) => {
-      // Ne pas mettre à jour l'URL pour chaque changement de recherche
       if (key === 'search' && searchTimeoutRef.current) {
-        return; // Skip pendant la saisie
+        return;
       }
       
-      if (value && value !== '' && value !== 1 && value !== false) {
+      if (value && value !== '' && value !== 1) {
         newSearchParams.set(key, value.toString());
       }
     });
 
-    // Mise à jour de l'URL seulement si ce ne sont pas des changements temporaires de recherche
     if (!searchTimeoutRef.current) {
       setSearchParams(newSearchParams, { replace: true });
     }
   }, [appliedFilters, setSearchParams]);
 
-  // Gestion du changement de filtres (sauf recherche)
   const handleFiltersChange = (newFilters: MediaFilters) => {
     setAppliedFilters(newFilters);
-    // Synchroniser l'input de recherche si changé depuis les filtres
     if (newFilters.search !== searchInput) {
       setSearchInput(newFilters.search || '');
     }
   };
 
-  // Gestion de la pagination
   const handlePageChange = (page: number) => {
     setAppliedFilters(prev => ({ ...prev, page }));
-    // Scroll vers le haut lors du changement de page
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Gestion des favoris
   const handleToggleFavorite = async (mediaId: string, isFavorite: boolean) => {
     try {
       await mediaService.toggleFavorite(mediaId);
+      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      return Promise.resolve();
     } catch (error) {
-      throw error; // Laisser MediaCard gérer l'erreur
+      throw error;
     }
   };
 
-  // Génération de données factices pour la démo
+  // ✅ Génération de données factices SANS filtre favoris
   const generateMockData = () => {
     const mockMedia = Array.from({ length: 24 }, (_, index) => ({
       _id: `mock-${index + 1}`,
@@ -181,14 +170,20 @@ const CatalogPage: React.FC = () => {
       updatedAt: new Date().toISOString(),
     }));
 
-    // Filtrer selon la recherche si présente
     let filteredMedia = mockMedia;
+
+    // Appliquer la recherche textuelle
     if (appliedFilters.search) {
       const searchTerm = appliedFilters.search.toLowerCase();
-      filteredMedia = mockMedia.filter(media => 
+      filteredMedia = filteredMedia.filter(media => 
         media.title.toLowerCase().includes(searchTerm) ||
         media.author.toLowerCase().includes(searchTerm)
       );
+    }
+
+    // Appliquer le filtre par type
+    if (appliedFilters.type) {
+      filteredMedia = filteredMedia.filter(media => media.type === appliedFilters.type);
     }
 
     const startIndex = ((appliedFilters.page || 1) - 1) * (appliedFilters.limit || 12);
@@ -202,7 +197,6 @@ const CatalogPage: React.FC = () => {
     };
   };
 
-  // Utiliser les données factices si pas de données réelles
   const displayData: PaginatedData = mediaData || generateMockData();
 
   if (mediaError) {
@@ -314,7 +308,6 @@ const CatalogPage: React.FC = () => {
 
             {/* Grille des médias */}
             {mediaLoading ? (
-              // État de chargement
               <div className="text-center py-16">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
                 <p className="text-gray-600">Chargement des médias...</p>
@@ -347,7 +340,6 @@ const CatalogPage: React.FC = () => {
                 />
               </>
             ) : (
-              // Aucun résultat
               <div className="text-center py-16">
                 <SparklesIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">

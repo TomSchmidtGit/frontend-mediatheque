@@ -6,11 +6,9 @@ import {
   FunnelIcon,
   BookOpenIcon,
   FilmIcon,
-  MusicalNoteIcon,
-  HeartIcon
+  MusicalNoteIcon
 } from '@heroicons/react/24/outline';
 import type { MediaFilters, Category, Tag } from '../../types';
-import { useAuth } from '../../context/AuthContext';
 import { cn } from '../../utils';
 
 interface CatalogFiltersProps {
@@ -32,7 +30,6 @@ const CatalogFilters: React.FC<CatalogFiltersProps> = ({
   searchInput,
   onSearchInputChange
 }) => {
-  const { isAuthenticated } = useAuth();
   // Types de médias avec icônes
   const mediaTypes = [
     { value: 'book', label: 'Livres', icon: BookOpenIcon, color: 'text-blue-600' },
@@ -57,13 +54,12 @@ const CatalogFilters: React.FC<CatalogFiltersProps> = ({
     });
   };
 
-  // Vérifier si des filtres sont actifs
+  // ✅ Vérifier si des filtres sont actifs (SANS favorites)
   const hasActiveFilters = !!(
     searchInput || 
     filters.type || 
     filters.category || 
-    filters.tags ||
-    filters.favorites
+    filters.tags
   );
 
   return (
@@ -152,7 +148,7 @@ const CatalogFilters: React.FC<CatalogFiltersProps> = ({
             value={filters.category || ''}
             onChange={(e) => updateFilter('category', e.target.value)}
             disabled={loading}
-            className="input w-full text-base" // text-base pour une meilleure lisibilité mobile
+            className="input w-full text-base"
           >
             <option value="">Toutes les catégories</option>
             {categories.map((category) => (
@@ -161,29 +157,6 @@ const CatalogFilters: React.FC<CatalogFiltersProps> = ({
               </option>
             ))}
           </select>
-        </div>
-      )}
-
-      {/* Filtre Mes Favoris (si connecté) */}
-      {isAuthenticated && (
-        <div className="space-y-3">
-          <label className="block text-sm font-medium text-gray-700">
-            Mes préférences
-          </label>
-          <div className="flex items-center">
-            <input
-              id="favorites-filter"
-              type="checkbox"
-              checked={filters.favorites || false}
-              onChange={(e) => updateFilter('favorites', e.target.checked)}
-              disabled={loading}
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-            />
-            <label htmlFor="favorites-filter" className="ml-3 flex items-center text-sm">
-              <HeartIcon className="h-4 w-4 text-red-500 mr-1" />
-              <span className="text-gray-700">Mes favoris uniquement</span>
-            </label>
-          </div>
         </div>
       )}
 
@@ -239,18 +212,6 @@ const CatalogFilters: React.FC<CatalogFiltersProps> = ({
                 <button
                   onClick={() => onSearchInputChange('')}
                   className="ml-1 hover:text-blue-600"
-                >
-                  <XMarkIcon className="h-3 w-3" />
-                </button>
-              </span>
-            )}
-            
-            {filters.favorites && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                Mes favoris
-                <button
-                  onClick={() => updateFilter('favorites', false)}
-                  className="ml-1 hover:text-red-600"
                 >
                   <XMarkIcon className="h-3 w-3" />
                 </button>

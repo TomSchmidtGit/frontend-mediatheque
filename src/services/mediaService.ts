@@ -1,63 +1,88 @@
-// src/services/mediaService.ts
+// src/services/mediaService.ts - VERSION CORRIGÉE POUR LES FAVORIS
 import api from './api';
 import type { Media, PaginatedResponse, MediaFilters, Category, Tag } from '../types';
 
 class MediaService {
   /**
-   * Récupérer tous les médias avec filtres et pagination
+   * Récupérer tous les médias avec filtres et pagination (SANS favoris)
    */
   async getMedia(filters: MediaFilters = {}): Promise<PaginatedResponse<Media>> {
     const params = new URLSearchParams();
     
-    // Ajouter les paramètres de filtrage
     if (filters.page) params.append('page', filters.page.toString());
     if (filters.limit) params.append('limit', filters.limit.toString());
+    if (filters.search) params.append('search', filters.search);
     if (filters.type) params.append('type', filters.type);
     if (filters.category) params.append('category', filters.category);
     if (filters.tags) params.append('tags', filters.tags);
-    if (filters.search) params.append('search', filters.search);
 
     const response = await api.get<PaginatedResponse<Media>>(`/media?${params}`);
     return response.data;
   }
 
   /**
-   * Récupérer un média par ID
+   * Méthode spécialisée pour les favoris
    */
+  async getFavorites(page: number = 1, limit: number = 12): Promise<PaginatedResponse<Media>> {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    
+    console.log('📡 Récupération des favoris - page:', page, 'limit:', limit);
+    const response = await api.get<PaginatedResponse<Media>>(`/users/favorites?${params}`);
+    console.log('✅ Favoris reçus:', response.data);
+    return response.data;
+  }
+
   async getMediaById(id: string): Promise<Media> {
     const response = await api.get<Media>(`/media/${id}`);
     return response.data;
   }
 
-  /**
-   * Récupérer toutes les catégories
-   */
   async getCategories(): Promise<Category[]> {
     const response = await api.get<Category[]>('/categories');
     return response.data;
   }
 
-  /**
-   * Récupérer tous les tags
-   */
   async getTags(): Promise<Tag[]> {
     const response = await api.get<Tag[]>('/tags');
     return response.data;
   }
 
   /**
-   * Ajouter/retirer un média des favoris
+   * ✅ Toggle favori
    */
   async toggleFavorite(mediaId: string): Promise<{ message: string }> {
-    const response = await api.post<{ message: string }>('/users/favorites/toggle', {
-      mediaId
-    });
-    return response.data;
+    console.log('💖 Toggle favori pour média:', mediaId);
+    
+    try {
+      const response = await api.post<{ message: string }>('/users/favorites/toggle', {
+        mediaId
+      });
+      
+      console.log('✅ Réponse toggle favori:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Erreur toggle favori:', error);
+      throw error;
+    }
   }
 
   /**
-   * Ajouter un avis sur un média
+   * ✅ Nouvelle méthode pour récupérer la liste des IDs favoris
    */
+  async getFavoriteIds(): Promise<string[]> {
+    try {
+      console.log('📡 Récupération des IDs favoris...');
+      const response = await api.get<{ favoriteIds: string[] }>('/users/favorites/ids');
+      console.log('✅ IDs favoris reçus:', response.data.favoriteIds);
+      return response.data.favoriteIds || [];
+    } catch (error) {
+      console.error('❌ Erreur récupération IDs favoris:', error);
+      return [];
+    }
+  }
+
   async addReview(mediaId: string, rating: number, comment?: string): Promise<Media> {
     const response = await api.post<Media>(`/media/${mediaId}/reviews`, {
       rating,
@@ -66,9 +91,6 @@ class MediaService {
     return response.data;
   }
 
-  /**
-   * Modifier un avis sur un média
-   */
   async updateReview(mediaId: string, rating: number, comment?: string): Promise<Media> {
     const response = await api.put<Media>(`/media/${mediaId}/reviews`, {
       rating,
