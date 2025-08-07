@@ -1,4 +1,4 @@
-// src/pages/user/FavoritesPage.tsx
+// src/pages/user/FavoritesPage.tsx - VERSION SIMPLIFIÉE
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -22,7 +22,6 @@ const FavoritesPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-  const [showBulkActions, setShowBulkActions] = useState(false);
   const limit = 12;
 
   const {
@@ -37,23 +36,20 @@ const FavoritesPage: React.FC = () => {
     staleTime: 0,
   });
 
-  // ✅ Mutation corrigée pour bien gérer les favoris
   const removeFavoriteMutation = useMutation({
     mutationFn: (mediaId: string) => mediaService.toggleFavorite(mediaId),
     onMutate: async (mediaId: string) => {
       await queryClient.cancelQueries({ queryKey: ['favorites'] });
       
-      // Mise à jour optimiste du contexte utilisateur
+      // ✅ Mise à jour optimiste
       if (user?.favorites) {
         const updatedFavorites = user.favorites.filter(id => id !== mediaId);
         updateUser({ favorites: updatedFavorites });
       }
       
-      // Retirer de la sélection si présent
       setSelectedItems(prev => {
         const newSelection = new Set(prev);
         newSelection.delete(mediaId);
-        setShowBulkActions(newSelection.size > 0);
         return newSelection;
       });
     },
@@ -62,42 +58,12 @@ const FavoritesPage: React.FC = () => {
       toast.success('Retiré des favoris');
     },
     onError: (error, mediaId) => {
-      // Rollback en cas d'erreur
+      // Rollback
       if (user?.favorites) {
         const restoredFavorites = [...user.favorites, mediaId];
         updateUser({ favorites: restoredFavorites });
       }
-      console.error('Erreur lors de la suppression:', error);
-      toast.error('Erreur lors de la suppression');
-    }
-  });
-
-  const removeBulkFavoritesMutation = useMutation({
-    mutationFn: async (mediaIds: string[]) => {
-      const promises = mediaIds.map(id => mediaService.toggleFavorite(id));
-      await Promise.all(promises);
-    },
-    onMutate: async (mediaIds: string[]) => {
-      await queryClient.cancelQueries({ queryKey: ['favorites'] });
-      
-      if (user?.favorites) {
-        const updatedFavorites = user.favorites.filter(id => !mediaIds.includes(id));
-        updateUser({ favorites: updatedFavorites });
-      }
-      
-      setSelectedItems(new Set());
-      setShowBulkActions(false);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['favorites'] });
-      toast.success('Favoris supprimés');
-    },
-    onError: (error, mediaIds) => {
-      if (user?.favorites) {
-        const restoredFavorites = [...user.favorites, ...mediaIds];
-        updateUser({ favorites: restoredFavorites });
-      }
-      console.error('Erreur lors de la suppression groupée:', error);
+      console.error('Erreur:', error);
       toast.error('Erreur lors de la suppression');
     }
   });
@@ -110,7 +76,6 @@ const FavoritesPage: React.FC = () => {
       newSelection.delete(mediaId);
     }
     setSelectedItems(newSelection);
-    setShowBulkActions(newSelection.size > 0);
   };
 
   const handleSelectAll = () => {
@@ -118,23 +83,22 @@ const FavoritesPage: React.FC = () => {
     
     if (selectedItems.size === favoritesData.data.length) {
       setSelectedItems(new Set());
-      setShowBulkActions(false);
     } else {
       const allIds = new Set(favoritesData.data.map(media => media._id));
       setSelectedItems(allIds);
-      setShowBulkActions(true);
     }
   };
 
-  // ✅ Gestion corrigée du toggle favoris - toujours retirer quand on est sur la page favoris
-  const handleToggleFavorite = async (mediaId: string, isFavorite: boolean) => {
-    // Sur la page favoris, on retire toujours le média des favoris
+  // ✅ Handler simple pour retirer des favoris
+  const handleRemoveFavorite = async (mediaId: string) => {
     await removeFavoriteMutation.mutateAsync(mediaId);
   };
 
-  const handleBulkRemove = () => {
+  const handleBulkRemove = async () => {
     if (selectedItems.size > 0) {
-      removeBulkFavoritesMutation.mutate(Array.from(selectedItems));
+      const promises = Array.from(selectedItems).map(id => removeFavoriteMutation.mutateAsync(id));
+      await Promise.all(promises);
+      setSelectedItems(new Set());
     }
   };
 
@@ -214,18 +178,13 @@ const FavoritesPage: React.FC = () => {
             </h1>
           </div>
           <p className="text-gray-600 text-lg">
-            Retrouvez tous les médias que vous avez ajoutés à vos favoris
+            {favoritesData.totalItems} média{favoritesData.totalItems > 1 ? 's' : ''} en favoris
           </p>
         </div>
 
         <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
             <div className="flex items-center space-x-4">
-              <p className="text-sm text-gray-600">
-                <span className="font-medium">{favoritesData.totalItems}</span>
-                {' '}favori{favoritesData.totalItems > 1 ? 's' : ''}
-              </p>
-              
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -246,14 +205,14 @@ const FavoritesPage: React.FC = () => {
             </div>
 
             <div className="flex items-center space-x-4">
-              {showBulkActions && (
+              {selectedItems.size > 0 && (
                 <button
                   onClick={handleBulkRemove}
-                  disabled={removeBulkFavoritesMutation.isPending}
+                  disabled={removeFavoriteMutation.isPending}
                   className="flex items-center px-3 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors"
                 >
                   <TrashIcon className="h-4 w-4 mr-1" />
-                  {removeBulkFavoritesMutation.isPending ? 'Suppression...' : 'Retirer la sélection'}
+                  {removeFavoriteMutation.isPending ? 'Suppression...' : 'Retirer la sélection'}
                 </button>
               )}
 
@@ -305,9 +264,11 @@ const FavoritesPage: React.FC = () => {
                 />
               </div>
               
+              {/* ✅ MediaCard avec la prop isInFavoritesPage */}
               <MediaCard
                 media={media}
-                onToggleFavorite={handleToggleFavorite}
+                onToggleFavorite={handleRemoveFavorite}
+                isInFavoritesPage={true}
               />
             </div>
           ))}

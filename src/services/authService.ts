@@ -1,6 +1,6 @@
-// src/services/authService.ts
+// src/services/authService.ts - SANS ROUTE PROFILE
 import api from './api';
-import type { AuthResponse, User } from '../types';
+import type { AuthResponse } from '../types';
 
 class AuthService {
   /**
@@ -48,13 +48,6 @@ class AuthService {
     }
   }
 
-  /**
-   * Récupérer les données de l'utilisateur connecté
-   */
-  async getCurrentUser(): Promise<User> {
-    const response = await api.get<User>('/auth/me');
-    return response.data;
-  }
 }
 
 export default new AuthService();
