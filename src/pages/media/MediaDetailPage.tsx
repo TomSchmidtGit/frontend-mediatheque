@@ -1,4 +1,4 @@
-// src/pages/public/MediaDetailPage.tsx
+// src/pages/media/MediaDetailPage.tsx - Avec fonctionnalité d'emprunt
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -44,11 +44,24 @@ const MediaDetailPage: React.FC = () => {
     enabled: !!id,
   });
 
+  // Mutation pour emprunter un média - DÉSACTIVÉE (gestion en présentiel)
+  // const borrowMediaMutation = useMutation({
+  //   mutationFn: (mediaId: string) => borrowService.borrowMedia(mediaId),
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ['media', id] });
+  //     queryClient.invalidateQueries({ queryKey: ['my-borrows'] });
+  //     toast.success('Média emprunté avec succès ! Vous pouvez le consulter dans "Mes emprunts".');
+  //   },
+  //   onError: (error: any) => {
+  //     const message = error.response?.data?.message || 'Erreur lors de l\'emprunt';
+  //     toast.error(message);
+  //   }
+  // });
+
   // Mutation pour les favoris
   const toggleFavoriteMutation = useMutation({
     mutationFn: (mediaId: string) => mediaService.toggleFavorite(mediaId),
     onSuccess: () => {
-      // Optimistically update local state
       setIsFavorite(!isFavorite);
       queryClient.invalidateQueries({ queryKey: ['media', id] });
       toast.success(isFavorite ? 'Retiré des favoris' : 'Ajouté aux favoris');
@@ -74,7 +87,7 @@ const MediaDetailPage: React.FC = () => {
     }
   });
 
-  // État local pour les favoris (synchronisé avec le user mais gérable localement)
+  // État local pour les favoris
   const [isFavorite, setIsFavorite] = useState(
     user?.favorites?.includes(id || '') || false
   );
@@ -84,7 +97,7 @@ const MediaDetailPage: React.FC = () => {
     setIsFavorite(user?.favorites?.includes(id || '') || false);
   }, [user?.favorites, id]);
 
-  // Données factices pour la démo (si pas de vraies données)
+  // Données factices pour la démo
   const mockMedia: Media = {
     _id: id || '',
     title: 'Le Seigneur des Anneaux - La Communauté de l\'Anneau',
@@ -185,6 +198,24 @@ const MediaDetailPage: React.FC = () => {
     toggleFavoriteMutation.mutate(displayMedia._id);
   };
 
+  // Gestion de l'emprunt - DÉSACTIVÉE (gestion en présentiel uniquement)
+  // const handleBorrow = () => {
+  //   if (!isAuthenticated) {
+  //     toast.error('Connectez-vous pour emprunter ce média');
+  //     navigate('/login');
+  //     return;
+  //   }
+
+  //   if (!displayMedia.available) {
+  //     toast.error('Ce média n\'est pas disponible');
+  //     return;
+  //   }
+
+  //   if (confirm(`Voulez-vous emprunter "${displayMedia.title}" ?`)) {
+  //     borrowMediaMutation.mutate(displayMedia._id);
+  //   }
+  // };
+
   // Soumission d'un avis
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -284,12 +315,20 @@ const MediaDetailPage: React.FC = () => {
 
                 {/* Actions */}
                 <div className="space-y-3">
-                  {displayMedia.available && (
-                    <button className="w-full btn-primary">
-                      <ClockIcon className="h-4 w-4 mr-2" />
-                      Emprunter
-                    </button>
-                  )}
+                  {/* Affichage du statut sans possibilité d'emprunter */}
+                  <div className={cn(
+                    'w-full px-4 py-3 rounded-md text-center font-medium',
+                    displayMedia.available 
+                      ? 'bg-green-50 text-green-700 border border-green-200' 
+                      : 'bg-red-50 text-red-700 border border-red-200'
+                  )}>
+                    <ClockIcon className="h-4 w-4 inline mr-2" />
+                    {displayMedia.available ? 'Disponible en médiathèque' : 'Actuellement emprunté'}
+                  </div>
+
+                  <div className="text-center text-xs text-gray-500 italic px-2">
+                    Les emprunts se font uniquement en présentiel à la médiathèque
+                  </div>
                   
                   <button
                     onClick={handleToggleFavorite}

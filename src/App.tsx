@@ -11,6 +11,7 @@ import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import DashboardPage from './pages/user/DashboardPage';
 import FavoritesPage from './pages/user/FavoritesPages';
+import MyBorrowsPage from './pages/user/MyBorrowsPage';
 import CatalogPage from './pages/public/CatalogPage';
 import MediaDetailPage from './pages/media/MediaDetailPage';
 
@@ -49,7 +50,7 @@ function App() {
                 } />
                 <Route path="my-borrows" element={
                   <ProtectedRoute>
-                    <div className="page-container py-16 text-center"><h1>Mes Emprunts (à venir)</h1></div>
+                    <MyBorrowsPage />
                   </ProtectedRoute>
                 } />
                 <Route path="settings" element={
