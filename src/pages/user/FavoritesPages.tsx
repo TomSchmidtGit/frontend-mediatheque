@@ -1,4 +1,4 @@
-// src/pages/user/FavoritesPage.tsx
+// src/pages/user/FavoritesPage.tsx - VERSION CORRIGÉE
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -25,7 +25,7 @@ const FavoritesPage: React.FC = () => {
   const [showBulkActions, setShowBulkActions] = useState(false);
   const limit = 12;
 
-  // Requête pour récupérer les favoris - VRAIES DONNÉES uniquement
+  // ✅ Requête corrigée pour utiliser la méthode spécialisée getFavorites
   const {
     data: favoritesData,
     isLoading,
@@ -33,20 +33,15 @@ const FavoritesPage: React.FC = () => {
     refetch
   } = useQuery({
     queryKey: ['favorites', currentPage],
-    queryFn: () => mediaService.getMedia({ 
-      favorites: true, 
-      page: currentPage, 
-      limit 
-    }),
+    queryFn: () => mediaService.getFavorites(currentPage, limit),
     enabled: !!user,
-    // Ne pas utiliser de données de secours (pas de fallback)
+    staleTime: 0, // ✅ Pas de cache pour les favoris
   });
 
-  // Mutation pour retirer un favori
+  // ✅ Mutation améliorée avec invalidation du cache
   const removeFavoriteMutation = useMutation({
     mutationFn: (mediaId: string) => mediaService.toggleFavorite(mediaId),
     onMutate: async (mediaId: string) => {
-      // Annuler les requêtes en cours
       await queryClient.cancelQueries({ queryKey: ['favorites'] });
       
       // Mise à jour optimiste du contexte utilisateur
@@ -64,8 +59,9 @@ const FavoritesPage: React.FC = () => {
       });
     },
     onSuccess: () => {
-      // Invalider et refetch les favoris
+      // ✅ Invalider tous les caches liés aux favoris et médias
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['media'] });
       toast.success('Retiré des favoris');
     },
     onError: (error, mediaId) => {
@@ -74,11 +70,12 @@ const FavoritesPage: React.FC = () => {
         const restoredFavorites = [...user.favorites, mediaId];
         updateUser({ favorites: restoredFavorites });
       }
+      console.error('Erreur lors de la suppression:', error);
       toast.error('Erreur lors de la suppression');
     }
   });
 
-  // Mutation pour retirer plusieurs favoris
+  // ✅ Mutation pour suppression groupée avec invalidation
   const removeBulkFavoritesMutation = useMutation({
     mutationFn: async (mediaIds: string[]) => {
       const promises = mediaIds.map(id => mediaService.toggleFavorite(id));
@@ -97,7 +94,9 @@ const FavoritesPage: React.FC = () => {
       setShowBulkActions(false);
     },
     onSuccess: () => {
+      // ✅ Invalidation complète des caches
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['media'] });
       toast.success('Favoris supprimés');
     },
     onError: (error, mediaIds) => {
@@ -106,6 +105,7 @@ const FavoritesPage: React.FC = () => {
         const restoredFavorites = [...user.favorites, ...mediaIds];
         updateUser({ favorites: restoredFavorites });
       }
+      console.error('Erreur lors de la suppression groupée:', error);
       toast.error('Erreur lors de la suppression');
     }
   });
@@ -135,7 +135,7 @@ const FavoritesPage: React.FC = () => {
     }
   };
 
-  // Gestion du toggle favoris
+  // ✅ Gestion améliorée du toggle favoris avec invalidation
   const handleToggleFavorite = async (mediaId: string, isFavorite: boolean) => {
     if (!isFavorite) {
       // L'utilisateur retire des favoris

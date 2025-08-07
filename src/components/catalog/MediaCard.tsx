@@ -1,4 +1,4 @@
-// src/components/catalog/MediaCard.tsx
+// src/components/catalog/MediaCard.tsx - VERSION CORRIGÉE
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -24,16 +24,17 @@ interface MediaCardProps {
 const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
   const { user, isAuthenticated, updateUser } = useAuth();
   
-  // État local synchronisé avec les favoris de l'utilisateur
-  const [isFavorite, setIsFavorite] = useState(false);
+  // ✅ Correction : Calcul direct de l'état favori
+  const isFavoriteFromContext = user?.favorites?.includes(media._id) || false;
+  
+  // État local pour la gestion optimiste avec synchronisation
+  const [isFavorite, setIsFavorite] = useState(isFavoriteFromContext);
   const [isToggling, setIsToggling] = useState(false);
 
-  // Synchroniser l'état des favoris avec les données utilisateur
+  // ✅ Synchroniser l'état local avec le contexte utilisateur à chaque changement
   useEffect(() => {
-    if (user?.favorites && Array.isArray(user.favorites)) {
-      setIsFavorite(user.favorites.includes(media._id));
-    }
-  }, [user?.favorites, media._id]);
+    setIsFavorite(isFavoriteFromContext);
+  }, [isFavoriteFromContext]);
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -69,14 +70,16 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
       return;
     }
 
+    if (isToggling) return; // Éviter les clics multiples
+
     setIsToggling(true);
     const newFavoriteState = !isFavorite;
     
     try {
-      // Mise à jour optimiste de l'UI
+      // ✅ Mise à jour optimiste immédiate
       setIsFavorite(newFavoriteState);
       
-      // Mettre à jour la liste des favoris dans le contexte utilisateur
+      // ✅ Mettre à jour le contexte utilisateur immédiatement
       if (user) {
         const updatedFavorites = newFavoriteState
           ? [...(user.favorites || []), media._id]
@@ -96,14 +99,17 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
           : 'Retiré des favoris'
       );
     } catch (error) {
-      // Rollback en cas d'erreur
+      // ✅ Rollback en cas d'erreur
+      console.error('Erreur lors du toggle favori:', error);
       setIsFavorite(!newFavoriteState);
+      
       if (user) {
         const rollbackFavorites = !newFavoriteState
           ? [...(user.favorites || []), media._id]
           : (user.favorites || []).filter(id => id !== media._id);
         updateUser({ favorites: rollbackFavorites });
       }
+      
       toast.error('Erreur lors de la modification');
     } finally {
       setIsToggling(false);

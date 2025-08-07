@@ -7,27 +7,34 @@ class MediaService {
    * Récupérer tous les médias avec filtres et pagination
    */
   async getMedia(filters: MediaFilters = {}): Promise<PaginatedResponse<Media>> {
-    // Si c'est une requête pour les favoris, utiliser l'endpoint spécialisé
-    if (filters.favorites) {
-      const params = new URLSearchParams();
-      if (filters.page) params.append('page', filters.page.toString());
-      if (filters.limit) params.append('limit', filters.limit.toString());
-      
-      const response = await api.get<PaginatedResponse<Media>>(`/users/favorites?${params}`);
-      return response.data;
-    }
-    
     const params = new URLSearchParams();
     
-    // Ajouter les paramètres de filtrage normaux
+    // ✅ Gestion unifiée des paramètres
     if (filters.page) params.append('page', filters.page.toString());
     if (filters.limit) params.append('limit', filters.limit.toString());
+    if (filters.search) params.append('search', filters.search);
     if (filters.type) params.append('type', filters.type);
     if (filters.category) params.append('category', filters.category);
     if (filters.tags) params.append('tags', filters.tags);
-    if (filters.search) params.append('search', filters.search);
+    
+    // ✅ Correction : Utiliser l'endpoint media avec le paramètre favorites
+    if (filters.favorites) {
+      params.append('favorites', 'true');
+    }
 
     const response = await api.get<PaginatedResponse<Media>>(`/media?${params}`);
+    return response.data;
+  }
+
+  /**
+   * ✅ Méthode spécialisée pour les favoris (pour la page favoris uniquement)
+   */
+  async getFavorites(page: number = 1, limit: number = 12): Promise<PaginatedResponse<Media>> {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    
+    const response = await api.get<PaginatedResponse<Media>>(`/users/favorites?${params}`);
     return response.data;
   }
 
