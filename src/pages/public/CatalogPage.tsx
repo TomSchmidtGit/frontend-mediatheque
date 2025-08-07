@@ -1,4 +1,4 @@
-// src/pages/public/CatalogPage.tsx - VERSION CORRIGÉE
+// src/pages/public/CatalogPage.tsx
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { 
@@ -16,7 +16,6 @@ import mediaService from '../../services/mediaService';
 import { cn } from '../../utils'; 
 import { useAuth } from '../../context/AuthContext';
 
-// Interface pour les données de pagination
 interface PaginatedData {
   data: any[];
   currentPage: number;
@@ -29,13 +28,12 @@ const CatalogPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const queryClient = useQueryClient();
-  const { user } = useAuth(); // ✅ Ajout pour suivre les changements de favoris
+  const { user } = useAuth();
 
-  // État local pour la recherche (input en temps réel)
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
   const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   
-  // État des filtres appliqués (pour les requêtes API)
+  // ✅ État des filtres SANS favorites
   const [appliedFilters, setAppliedFilters] = useState<MediaFilters>(() => ({
     page: parseInt(searchParams.get('page') || '1'),
     limit: parseInt(searchParams.get('limit') || '12'),
@@ -43,15 +41,7 @@ const CatalogPage: React.FC = () => {
     type: searchParams.get('type') as any || '',
     category: searchParams.get('category') || '',
     tags: searchParams.get('tags') || '',
-    favorites: searchParams.get('favorites') === 'true' || false,
   }));
-
-  // ✅ Invalider le cache quand les favoris changent
-  useEffect(() => {
-    if (appliedFilters.favorites) {
-      queryClient.invalidateQueries({ queryKey: ['media'] });
-    }
-  }, [user?.favorites, queryClient, appliedFilters.favorites]);
 
   // Fonction pour appliquer la recherche avec délai
   const handleSearchInputChange = useCallback((value: string) => {
@@ -70,7 +60,6 @@ const CatalogPage: React.FC = () => {
     }, 500);
   }, []);
 
-  // Cleanup du timeout au démontage
   useEffect(() => {
     return () => {
       if (searchTimeoutRef.current) {
@@ -79,7 +68,6 @@ const CatalogPage: React.FC = () => {
     };
   }, []);
 
-  // ✅ Requête corrigée avec invalidation des favoris
   const {
     data: mediaData,
     isLoading: mediaLoading,
@@ -88,24 +76,22 @@ const CatalogPage: React.FC = () => {
   } = useQuery({
     queryKey: ['media', appliedFilters],
     queryFn: () => mediaService.getMedia(appliedFilters),
-    staleTime: appliedFilters.favorites ? 0 : 5 * 60 * 1000, // ✅ Pas de cache pour les favoris
+    staleTime: 5 * 60 * 1000,
   });
 
-  // Requête pour récupérer les catégories
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
     queryFn: () => mediaService.getCategories(),
     staleTime: 30 * 60 * 1000,
   });
 
-  // Requête pour récupérer les tags
   const { data: tags = [] } = useQuery({
     queryKey: ['tags'],
     queryFn: () => mediaService.getTags(),
     staleTime: 30 * 60 * 1000,
   });
 
-  // Synchroniser les filtres avec l'URL
+  // Synchroniser les filtres avec l'URL (SANS favorites)
   useEffect(() => {
     const newSearchParams = new URLSearchParams();
     
@@ -114,7 +100,7 @@ const CatalogPage: React.FC = () => {
         return;
       }
       
-      if (value && value !== '' && value !== 1 && value !== false) {
+      if (value && value !== '' && value !== 1) {
         newSearchParams.set(key, value.toString());
       }
     });
@@ -124,7 +110,6 @@ const CatalogPage: React.FC = () => {
     }
   }, [appliedFilters, setSearchParams]);
 
-  // Gestion du changement de filtres
   const handleFiltersChange = (newFilters: MediaFilters) => {
     setAppliedFilters(newFilters);
     if (newFilters.search !== searchInput) {
@@ -132,28 +117,22 @@ const CatalogPage: React.FC = () => {
     }
   };
 
-  // Gestion de la pagination
   const handlePageChange = (page: number) => {
     setAppliedFilters(prev => ({ ...prev, page }));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // ✅ Gestion améliorée des favoris avec invalidation du cache
   const handleToggleFavorite = async (mediaId: string, isFavorite: boolean) => {
     try {
       await mediaService.toggleFavorite(mediaId);
-      
-      // ✅ Invalider toutes les requêtes de médias après le toggle
-      queryClient.invalidateQueries({ queryKey: ['media'] });
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
-      
       return Promise.resolve();
     } catch (error) {
       throw error;
     }
   };
 
-  // Génération de données factices pour la démo
+  // ✅ Génération de données factices SANS filtre favoris
   const generateMockData = () => {
     const mockMedia = Array.from({ length: 24 }, (_, index) => ({
       _id: `mock-${index + 1}`,
@@ -193,12 +172,7 @@ const CatalogPage: React.FC = () => {
 
     let filteredMedia = mockMedia;
 
-    // ✅ Appliquer le filtre des favoris
-    if (appliedFilters.favorites && user?.favorites) {
-      filteredMedia = filteredMedia.filter(media => user.favorites.includes(media._id));
-    }
-
-    // ✅ Appliquer la recherche textuelle
+    // Appliquer la recherche textuelle
     if (appliedFilters.search) {
       const searchTerm = appliedFilters.search.toLowerCase();
       filteredMedia = filteredMedia.filter(media => 
@@ -207,7 +181,7 @@ const CatalogPage: React.FC = () => {
       );
     }
 
-    // ✅ Appliquer le filtre par type
+    // Appliquer le filtre par type
     if (appliedFilters.type) {
       filteredMedia = filteredMedia.filter(media => media.type === appliedFilters.type);
     }
@@ -223,7 +197,6 @@ const CatalogPage: React.FC = () => {
     };
   };
 
-  // Utiliser les données factices si pas de données réelles
   const displayData: PaginatedData = mediaData || generateMockData();
 
   if (mediaError) {
@@ -297,7 +270,6 @@ const CatalogPage: React.FC = () => {
                       <>
                         <span className="font-medium">{displayData.totalItems}</span>
                         {' '}média{displayData.totalItems > 1 ? 's' : ''} trouvé{displayData.totalItems > 1 ? 's' : ''}
-                        {appliedFilters.favorites && ' dans vos favoris'}
                       </>
                     )}
                   </p>
@@ -336,7 +308,6 @@ const CatalogPage: React.FC = () => {
 
             {/* Grille des médias */}
             {mediaLoading ? (
-              // État de chargement
               <div className="text-center py-16">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
                 <p className="text-gray-600">Chargement des médias...</p>
@@ -369,17 +340,13 @@ const CatalogPage: React.FC = () => {
                 />
               </>
             ) : (
-              // Aucun résultat
               <div className="text-center py-16">
                 <SparklesIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
                   Aucun média trouvé
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  {appliedFilters.favorites 
-                    ? "Vous n'avez pas encore de favoris correspondant à ces critères."
-                    : "Essayez de modifier vos critères de recherche."
-                  }
+                  Essayez de modifier vos critères de recherche.
                 </p>
                 <button
                   onClick={() => {

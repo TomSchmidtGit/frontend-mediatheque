@@ -1,4 +1,4 @@
-// src/components/catalog/MediaCard.tsx - VERSION CORRIGÉE
+// src/components/catalog/MediaCard.tsx - VERSION CORRIGÉE FINALE
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -24,17 +24,27 @@ interface MediaCardProps {
 const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
   const { user, isAuthenticated, updateUser } = useAuth();
   
-  // ✅ Correction : Calcul direct de l'état favori
+  // ✅ Calcul correct de l'état favori depuis le contexte utilisateur
   const isFavoriteFromContext = user?.favorites?.includes(media._id) || false;
   
-  // État local pour la gestion optimiste avec synchronisation
+  // État local synchronisé avec le contexte
   const [isFavorite, setIsFavorite] = useState(isFavoriteFromContext);
   const [isToggling, setIsToggling] = useState(false);
 
-  // ✅ Synchroniser l'état local avec le contexte utilisateur à chaque changement
+  // ✅ Synchroniser l'état local avec le contexte utilisateur
   useEffect(() => {
     setIsFavorite(isFavoriteFromContext);
   }, [isFavoriteFromContext]);
+
+  // ✅ Debug pour voir les valeurs
+  console.log('MediaCard Debug:', {
+    mediaId: media._id,
+    mediaTitle: media.title,
+    userFavorites: user?.favorites,
+    isFavoriteFromContext,
+    isFavorite,
+    isAuthenticated
+  });
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -70,7 +80,7 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
       return;
     }
 
-    if (isToggling) return; // Éviter les clics multiples
+    if (isToggling) return;
 
     setIsToggling(true);
     const newFavoriteState = !isFavorite;
@@ -158,17 +168,19 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
             <span className="ml-1">{formatters.mediaType(media.type)}</span>
           </span>
 
+          {/* ✅ TOUJOURS afficher le bouton favori - pas de condition isAuthenticated ici */}
           <button
             onClick={handleToggleFavorite}
-            disabled={isToggling}
+            disabled={isToggling || !isAuthenticated}
             className={cn(
               'p-2 rounded-full backdrop-blur-sm transition-all duration-200',
               'hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
               isFavorite 
                 ? 'bg-red-500/90 hover:bg-red-600/90' 
                 : 'bg-white/90 hover:bg-white',
-              isToggling && 'opacity-75 cursor-not-allowed'
+              (isToggling || !isAuthenticated) && 'opacity-75 cursor-not-allowed'
             )}
+            title={!isAuthenticated ? 'Connectez-vous pour ajouter aux favoris' : isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
           >
             {isFavorite ? (
               <HeartIconSolid className="h-4 w-4 text-white" />

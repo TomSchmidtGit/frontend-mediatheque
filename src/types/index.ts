@@ -1,5 +1,4 @@
 // src/types/index.ts
-
 export interface User {
   _id: string;
   name: string;
@@ -124,7 +123,7 @@ export interface AuthResponse {
   email: string;
   accessToken: string;
   refreshToken?: string;
-  token?: string; // Pour la compatibilité avec register
+  token?: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -139,7 +138,7 @@ export interface ApiError {
   errors?: string[];
 }
 
-// Filtres pour la recherche de médias
+// ✅ Filtres pour la recherche de médias SANS favorites
 export interface MediaFilters {
   page?: number;
   limit?: number;
@@ -147,5 +146,4 @@ export interface MediaFilters {
   category?: string;
   tags?: string;
   search?: string;
-  favorites?: boolean;
 }

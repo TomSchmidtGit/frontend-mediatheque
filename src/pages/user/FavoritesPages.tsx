@@ -1,4 +1,4 @@
-// src/pages/user/FavoritesPage.tsx - VERSION CORRIGÉE
+// src/pages/user/FavoritesPage.tsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -25,7 +25,6 @@ const FavoritesPage: React.FC = () => {
   const [showBulkActions, setShowBulkActions] = useState(false);
   const limit = 12;
 
-  // ✅ Requête corrigée pour utiliser la méthode spécialisée getFavorites
   const {
     data: favoritesData,
     isLoading,
@@ -35,10 +34,10 @@ const FavoritesPage: React.FC = () => {
     queryKey: ['favorites', currentPage],
     queryFn: () => mediaService.getFavorites(currentPage, limit),
     enabled: !!user,
-    staleTime: 0, // ✅ Pas de cache pour les favoris
+    staleTime: 0,
   });
 
-  // ✅ Mutation améliorée avec invalidation du cache
+  // ✅ Mutation corrigée pour bien gérer les favoris
   const removeFavoriteMutation = useMutation({
     mutationFn: (mediaId: string) => mediaService.toggleFavorite(mediaId),
     onMutate: async (mediaId: string) => {
@@ -59,9 +58,7 @@ const FavoritesPage: React.FC = () => {
       });
     },
     onSuccess: () => {
-      // ✅ Invalider tous les caches liés aux favoris et médias
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
-      queryClient.invalidateQueries({ queryKey: ['media'] });
       toast.success('Retiré des favoris');
     },
     onError: (error, mediaId) => {
@@ -75,7 +72,6 @@ const FavoritesPage: React.FC = () => {
     }
   });
 
-  // ✅ Mutation pour suppression groupée avec invalidation
   const removeBulkFavoritesMutation = useMutation({
     mutationFn: async (mediaIds: string[]) => {
       const promises = mediaIds.map(id => mediaService.toggleFavorite(id));
@@ -84,7 +80,6 @@ const FavoritesPage: React.FC = () => {
     onMutate: async (mediaIds: string[]) => {
       await queryClient.cancelQueries({ queryKey: ['favorites'] });
       
-      // Mise à jour optimiste
       if (user?.favorites) {
         const updatedFavorites = user.favorites.filter(id => !mediaIds.includes(id));
         updateUser({ favorites: updatedFavorites });
@@ -94,13 +89,10 @@ const FavoritesPage: React.FC = () => {
       setShowBulkActions(false);
     },
     onSuccess: () => {
-      // ✅ Invalidation complète des caches
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
-      queryClient.invalidateQueries({ queryKey: ['media'] });
       toast.success('Favoris supprimés');
     },
     onError: (error, mediaIds) => {
-      // Rollback
       if (user?.favorites) {
         const restoredFavorites = [...user.favorites, ...mediaIds];
         updateUser({ favorites: restoredFavorites });
@@ -110,7 +102,6 @@ const FavoritesPage: React.FC = () => {
     }
   });
 
-  // Gestion des sélections multiples
   const handleSelectItem = (mediaId: string, selected: boolean) => {
     const newSelection = new Set(selectedItems);
     if (selected) {
@@ -135,15 +126,12 @@ const FavoritesPage: React.FC = () => {
     }
   };
 
-  // ✅ Gestion améliorée du toggle favoris avec invalidation
+  // ✅ Gestion corrigée du toggle favoris - toujours retirer quand on est sur la page favoris
   const handleToggleFavorite = async (mediaId: string, isFavorite: boolean) => {
-    if (!isFavorite) {
-      // L'utilisateur retire des favoris
-      await removeFavoriteMutation.mutateAsync(mediaId);
-    }
+    // Sur la page favoris, on retire toujours le média des favoris
+    await removeFavoriteMutation.mutateAsync(mediaId);
   };
 
-  // Gestion des actions groupées
   const handleBulkRemove = () => {
     if (selectedItems.size > 0) {
       removeBulkFavoritesMutation.mutate(Array.from(selectedItems));
@@ -175,12 +163,10 @@ const FavoritesPage: React.FC = () => {
     );
   }
 
-  // Si pas de données ou pas de favoris
   if (!favoritesData || favoritesData.data.length === 0) {
     return (
       <div className="bg-gray-50 min-h-screen">
         <div className="page-container py-8">
-          {/* Header */}
           <div className="mb-8">
             <div className="flex items-center space-x-3 mb-4">
               <HeartIcon className="h-8 w-8 text-red-500" />
@@ -193,7 +179,6 @@ const FavoritesPage: React.FC = () => {
             </p>
           </div>
 
-          {/* État vide */}
           <div className="text-center py-20">
             <HeartIcon className="h-24 w-24 text-gray-300 mx-auto mb-6" />
             <h3 className="text-2xl font-medium text-gray-900 mb-4">
@@ -221,7 +206,6 @@ const FavoritesPage: React.FC = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="page-container py-8">
-        {/* Header */}
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-4">
             <HeartIcon className="h-8 w-8 text-red-500" />
@@ -234,17 +218,14 @@ const FavoritesPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Barre d'outils */}
         <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
-            {/* Compteur et sélections */}
             <div className="flex items-center space-x-4">
               <p className="text-sm text-gray-600">
                 <span className="font-medium">{favoritesData.totalItems}</span>
                 {' '}favori{favoritesData.totalItems > 1 ? 's' : ''}
               </p>
               
-              {/* Actions de sélection */}
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -264,9 +245,7 @@ const FavoritesPage: React.FC = () => {
               )}
             </div>
 
-            {/* Actions et vue */}
             <div className="flex items-center space-x-4">
-              {/* Actions groupées */}
               {showBulkActions && (
                 <button
                   onClick={handleBulkRemove}
@@ -278,7 +257,6 @@ const FavoritesPage: React.FC = () => {
                 </button>
               )}
 
-              {/* Mode d'affichage */}
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-600">Affichage :</span>
                 <div className="flex rounded-md border border-gray-300 overflow-hidden">
@@ -310,7 +288,6 @@ const FavoritesPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Grille des médias */}
         <div className={cn(
           'grid gap-6 mb-8',
           viewMode === 'grid'
@@ -319,7 +296,6 @@ const FavoritesPage: React.FC = () => {
         )}>
           {favoritesData.data.map((media) => (
             <div key={media._id} className="relative">
-              {/* Checkbox de sélection */}
               <div className="absolute top-3 left-3 z-10">
                 <input
                   type="checkbox"
@@ -337,7 +313,6 @@ const FavoritesPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Pagination */}
         {favoritesData.totalPages > 1 && (
           <Pagination
             currentPage={favoritesData.currentPage}
@@ -349,7 +324,6 @@ const FavoritesPage: React.FC = () => {
           />
         )}
 
-        {/* Message informatif */}
         <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-start">
             <SparklesIcon className="h-5 w-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
