@@ -6,13 +6,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   UserCircleIcon,
   KeyIcon,
-  BellIcon,
   ShieldCheckIcon,
-  ExclamationTriangleIcon,
-  PhotoIcon
+  ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import FormField from '../../components/forms/FormField';
+import DeleteAccountModal from '../../components/modals/DeleteAccountModal';
 import userService from '../../services/userService';
 import { profileSchema, passwordSchema } from '../../utils/validation';
 import type { ProfileFormData, PasswordFormData } from '../../utils/validation';
@@ -20,12 +19,13 @@ import { cn } from '../../utils';
 import toast from 'react-hot-toast';
 
 const SettingsPage: React.FC = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, logout } = useAuth();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences' | 'account'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'account'>('profile');
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Formulaire de profil
   const {
@@ -86,6 +86,11 @@ const SettingsPage: React.FC = () => {
     changePasswordMutation.mutate(data);
   };
 
+  const handleDeleteSuccess = () => {
+    toast.success('Compte supprimé avec succès');
+    logout();
+  };
+
   const tabs = [
     {
       id: 'profile' as const,
@@ -98,12 +103,6 @@ const SettingsPage: React.FC = () => {
       name: 'Sécurité',
       icon: KeyIcon,
       description: 'Mot de passe et sécurité'
-    },
-    {
-      id: 'preferences' as const,
-      name: 'Préférences',
-      icon: BellIcon,
-      description: 'Notifications et préférences'
     },
     {
       id: 'account' as const,
@@ -170,28 +169,6 @@ const SettingsPage: React.FC = () => {
                 </div>
 
                 <form onSubmit={handleSubmitProfile(onSubmitProfile)} className="p-6 space-y-6">
-                  {/* Photo de profil */}
-                  <div className="flex items-center space-x-6">
-                    <div className="h-20 w-20 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-lg">
-                      <span className="text-2xl font-semibold text-white">
-                        {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-900 mb-2">Photo de profil</h3>
-                      <div className="flex items-center space-x-3">
-                        <button
-                          type="button"
-                          className="flex items-center px-3 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                        >
-                          <PhotoIcon className="h-4 w-4 mr-2" />
-                          Changer la photo
-                        </button>
-                        <span className="text-xs text-gray-500">JPG, PNG jusqu'à 2MB</span>
-                      </div>
-                    </div>
-                  </div>
-
                   <div className="grid md:grid-cols-2 gap-6">
                     <FormField
                       {...registerProfile('name')}
@@ -355,75 +332,6 @@ const SettingsPage: React.FC = () => {
               </div>
             )}
 
-            {/* Onglet Préférences */}
-            {activeTab === 'preferences' && (
-              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <BellIcon className="h-5 w-5 mr-2" />
-                    Préférences
-                  </h2>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Personnalisez votre expérience
-                  </p>
-                </div>
-
-                <div className="p-6 space-y-6">
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-900 mb-4">Notifications par email</h3>
-                    <div className="space-y-4">
-                      {[
-                        { id: 'borrow-reminders', label: 'Rappels d\'échéance', description: 'Recevoir des rappels avant la date de retour' },
-                        { id: 'new-releases', label: 'Nouvelles acquisitions', description: 'Être informé des nouveaux médias disponibles' },
-                        { id: 'recommendations', label: 'Recommandations', description: 'Recevoir des suggestions personnalisées' },
-                        { id: 'account-security', label: 'Sécurité du compte', description: 'Notifications importantes sur votre compte' }
-                      ].map((pref) => (
-                        <div key={pref.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-                          <div className="flex-1">
-                            <label htmlFor={pref.id} className="text-sm font-medium text-gray-900 cursor-pointer">
-                              {pref.label}
-                            </label>
-                            <p className="text-xs text-gray-500 mt-1">{pref.description}</p>
-                          </div>
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              id={pref.id}
-                              className="sr-only peer"
-                              defaultChecked={pref.id === 'account-security'}
-                            />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="pt-6 border-t border-gray-200">
-                    <h3 className="text-sm font-medium text-gray-900 mb-4">Préférences d'affichage</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Nombre d'éléments par page
-                        </label>
-                        <select className="input w-full max-w-xs">
-                          <option value="12">12 éléments</option>
-                          <option value="24">24 éléments</option>
-                          <option value="48">48 éléments</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end pt-6 border-t border-gray-200">
-                    <button className="btn-primary">
-                      Enregistrer les préférences
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Onglet Compte */}
             {activeTab === 'account' && (
               <div className="space-y-6">
@@ -473,18 +381,6 @@ const SettingsPage: React.FC = () => {
                       </button>
                     </div>
 
-                    <div className="flex items-center justify-between py-4 border-b border-gray-100">
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-900">Désactiver le compte</h3>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Désactiver temporairement votre compte
-                        </p>
-                      </div>
-                      <button className="px-4 py-2 text-sm font-medium text-orange-700 bg-orange-50 border border-orange-200 rounded-md hover:bg-orange-100 transition-colors">
-                        Désactiver
-                      </button>
-                    </div>
-
                     <div className="flex items-center justify-between py-4">
                       <div>
                         <h3 className="text-sm font-medium text-red-900">Supprimer le compte</h3>
@@ -492,7 +388,10 @@ const SettingsPage: React.FC = () => {
                           Supprimer définitivement votre compte et toutes vos données
                         </p>
                       </div>
-                      <button className="px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors">
+                      <button 
+                        onClick={() => setShowDeleteModal(true)}
+                        className="px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors"
+                      >
                         <ExclamationTriangleIcon className="h-4 w-4 mr-1 inline" />
                         Supprimer
                       </button>
@@ -503,6 +402,13 @@ const SettingsPage: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* Modal de suppression de compte */}
+        <DeleteAccountModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onSuccess={handleDeleteSuccess}
+        />
       </div>
     </div>
   );

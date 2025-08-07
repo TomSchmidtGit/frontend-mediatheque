@@ -1,4 +1,4 @@
-// src/services/userService.ts - VERSION MISE À JOUR
+// src/services/userService.ts
 import api from './api';
 import type { User, PaginatedResponse, Media } from '../types';
 
@@ -53,35 +53,12 @@ class UserService {
   }
 
   /**
-   * Uploader un avatar (optionnel)
-   */
-  async uploadAvatar(file: File): Promise<{ imageUrl: string }> {
-    const formData = new FormData();
-    formData.append('avatar', file);
-    
-    const response = await api.post<{ imageUrl: string }>('/users/me/avatar', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  }
-
-  /**
    * Exporter les données utilisateur
    */
   async exportData(): Promise<Blob> {
     const response = await api.get('/users/me/export', {
       responseType: 'blob'
     });
-    return response.data;
-  }
-
-  /**
-   * Désactiver le compte temporairement
-   */
-  async deactivateAccount(): Promise<{ message: string }> {
-    const response = await api.patch<{ message: string }>('/users/me/deactivate');
     return response.data;
   }
 

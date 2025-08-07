@@ -1,4 +1,4 @@
-// src/App.tsx - MISE À JOUR AVEC SETTINGSPAGE
+// src/App.tsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -12,7 +12,7 @@ import RegisterPage from './pages/auth/RegisterPage';
 import DashboardPage from './pages/user/DashboardPage';
 import FavoritesPage from './pages/user/FavoritesPages';
 import MyBorrowsPage from './pages/user/MyBorrowsPage';
-import SettingsPage from './pages/user/SettingsPage'; // ✅ IMPORT DE LA VRAIE PAGE
+import SettingsPage from './pages/user/SettingsPage';
 import CatalogPage from './pages/public/CatalogPage';
 import MediaDetailPage from './pages/media/MediaDetailPage';
 

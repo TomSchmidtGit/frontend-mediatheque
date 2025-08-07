@@ -85,26 +85,6 @@ export const formatters = {
 };
 
 /**
- * Génération d'avatars avec initiales
- */
-export const generateAvatar = (name: string): string => {
-  const initials = name
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase())
-    .join('')
-    .slice(0, 2);
-  
-  const colors = [
-    'bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500',
-    'bg-purple-500', 'bg-pink-500', 'bg-indigo-500', 'bg-teal-500'
-  ];
-  
-  const colorIndex = name.length % colors.length;
-  
-  return `<div class="inline-flex items-center justify-center w-10 h-10 rounded-full text-white font-medium ${colors[colorIndex]}">${initials}</div>`;
-};
-
-/**
  * Validation d'email
  */
 export const isValidEmail = (email: string): boolean => {
@@ -140,16 +120,4 @@ export const truncate = (text: string, maxLength: number): string => {
  */
 export const generateId = (): string => {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
-};
-
-/**
- * Conversion de File en base64
- */
-export const fileToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = error => reject(error);
-  });
 };
