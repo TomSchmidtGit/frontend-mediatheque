@@ -1,4 +1,4 @@
-// src/App.tsx
+// src/App.tsx - MISE À JOUR AVEC SETTINGSPAGE
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -12,6 +12,7 @@ import RegisterPage from './pages/auth/RegisterPage';
 import DashboardPage from './pages/user/DashboardPage';
 import FavoritesPage from './pages/user/FavoritesPages';
 import MyBorrowsPage from './pages/user/MyBorrowsPage';
+import SettingsPage from './pages/user/SettingsPage'; // ✅ IMPORT DE LA VRAIE PAGE
 import CatalogPage from './pages/public/CatalogPage';
 import MediaDetailPage from './pages/media/MediaDetailPage';
 
@@ -53,9 +54,10 @@ function App() {
                     <MyBorrowsPage />
                   </ProtectedRoute>
                 } />
+                {/* ✅ VRAIE PAGE SETTINGS */}
                 <Route path="settings" element={
                   <ProtectedRoute>
-                    <div className="page-container py-16 text-center"><h1>Paramètres (à venir)</h1></div>
+                    <SettingsPage />
                   </ProtectedRoute>
                 } />
                 
