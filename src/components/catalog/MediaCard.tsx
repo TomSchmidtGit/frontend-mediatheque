@@ -1,4 +1,4 @@
-// src/components/catalog/MediaCard.tsx - VERSION CORRIGÉE FINALE
+// src/components/catalog/MediaCard.tsx - VERSION AVEC DEBUGGING AMÉLIORÉ
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -15,6 +15,7 @@ import type { Media } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { formatters, cn } from '../../utils';
 import toast from 'react-hot-toast';
+import mediaService from '../../services/mediaService';
 
 interface MediaCardProps {
   media: Media;
@@ -36,15 +37,19 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
     setIsFavorite(isFavoriteFromContext);
   }, [isFavoriteFromContext]);
 
-  // ✅ Debug pour voir les valeurs
-  console.log('MediaCard Debug:', {
-    mediaId: media._id,
-    mediaTitle: media.title,
-    userFavorites: user?.favorites,
-    isFavoriteFromContext,
-    isFavorite,
-    isAuthenticated
-  });
+  // ✅ Debug amélioré pour voir les valeurs
+  useEffect(() => {
+    console.log('MediaCard Debug:', {
+      mediaId: media._id,
+      mediaTitle: media.title,
+      userFavorites: user?.favorites,
+      userFavoritesLength: user?.favorites?.length || 0,
+      isFavoriteFromContext,
+      isFavorite,
+      isAuthenticated,
+      userId: user?._id
+    });
+  }, [media._id, media.title, user?.favorites, isFavoriteFromContext, isFavorite, isAuthenticated, user?._id]);
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -85,6 +90,13 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
     setIsToggling(true);
     const newFavoriteState = !isFavorite;
     
+    console.log('🔄 Toggle favori:', {
+      mediaId: media._id,
+      currentState: isFavorite,
+      newState: newFavoriteState,
+      currentFavorites: user?.favorites
+    });
+    
     try {
       // ✅ Mise à jour optimiste immédiate
       setIsFavorite(newFavoriteState);
@@ -95,8 +107,17 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
           ? [...(user.favorites || []), media._id]
           : (user.favorites || []).filter(id => id !== media._id);
         
+        console.log('🔄 Mise à jour contexte:', {
+          before: user.favorites,
+          after: updatedFavorites
+        });
+        
         updateUser({ favorites: updatedFavorites });
       }
+
+      // ✅ Appel API avec meilleure gestion
+      const result = await mediaService.toggleFavorite(media._id);
+      console.log('✅ Résultat API toggle:', result);
 
       // Appeler la fonction de callback si fournie
       if (onToggleFavorite) {
@@ -105,18 +126,20 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
 
       toast.success(
         newFavoriteState 
-          ? 'Ajouté aux favoris' 
-          : 'Retiré des favoris'
+          ? '💖 Ajouté aux favoris' 
+          : '💔 Retiré des favoris'
       );
     } catch (error) {
       // ✅ Rollback en cas d'erreur
-      console.error('Erreur lors du toggle favori:', error);
+      console.error('❌ Erreur lors du toggle favori:', error);
       setIsFavorite(!newFavoriteState);
       
       if (user) {
         const rollbackFavorites = !newFavoriteState
           ? [...(user.favorites || []), media._id]
           : (user.favorites || []).filter(id => id !== media._id);
+        
+        console.log('↩️ Rollback contexte:', rollbackFavorites);
         updateUser({ favorites: rollbackFavorites });
       }
       
@@ -168,7 +191,7 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
             <span className="ml-1">{formatters.mediaType(media.type)}</span>
           </span>
 
-          {/* ✅ TOUJOURS afficher le bouton favori - pas de condition isAuthenticated ici */}
+          {/* ✅ Bouton favori avec debugging visuel */}
           <button
             onClick={handleToggleFavorite}
             disabled={isToggling || !isAuthenticated}
@@ -180,9 +203,21 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
                 : 'bg-white/90 hover:bg-white',
               (isToggling || !isAuthenticated) && 'opacity-75 cursor-not-allowed'
             )}
-            title={!isAuthenticated ? 'Connectez-vous pour ajouter aux favoris' : isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+            title={
+              !isAuthenticated 
+                ? 'Connectez-vous pour ajouter aux favoris' 
+                : isFavorite 
+                  ? 'Retirer des favoris' 
+                  : 'Ajouter aux favoris'
+            }
+            style={{
+              // ✅ Debug visuel : bordure colorée selon l'état
+              border: isFavorite ? '2px solid red' : '2px solid gray'
+            }}
           >
-            {isFavorite ? (
+            {isToggling ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
+            ) : isFavorite ? (
               <HeartIconSolid className="h-4 w-4 text-white" />
             ) : (
               <HeartIcon className="h-4 w-4 text-gray-600" />
@@ -259,6 +294,13 @@ const MediaCard: React.FC<MediaCardProps> = ({ media, onToggleFavorite }) => {
           </div>
         )}
       </div>
+
+      {/* ✅ Debug visuel en bas de la carte */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="absolute bottom-0 left-0 right-0 bg-black/75 text-white text-xs p-1">
+          Fav: {isFavorite ? '❤️' : '🤍'} | Auth: {isAuthenticated ? '✅' : '❌'} | Count: {user?.favorites?.length || 0}
+        </div>
+      )}
     </Link>
   );
 };
