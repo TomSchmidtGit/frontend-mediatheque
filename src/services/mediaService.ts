@@ -1,4 +1,4 @@
-// src/services/mediaService.ts
+// src/services/mediaService.ts - VERSION CORRIGÉE
 import api from './api';
 import type { Media, PaginatedResponse, MediaFilters, Category, Tag } from '../types';
 
@@ -7,9 +7,19 @@ class MediaService {
    * Récupérer tous les médias avec filtres et pagination
    */
   async getMedia(filters: MediaFilters = {}): Promise<PaginatedResponse<Media>> {
+    // Si c'est une requête pour les favoris, utiliser l'endpoint spécialisé
+    if (filters.favorites) {
+      const params = new URLSearchParams();
+      if (filters.page) params.append('page', filters.page.toString());
+      if (filters.limit) params.append('limit', filters.limit.toString());
+      
+      const response = await api.get<PaginatedResponse<Media>>(`/users/favorites?${params}`);
+      return response.data;
+    }
+    
     const params = new URLSearchParams();
     
-    // Ajouter les paramètres de filtrage
+    // Ajouter les paramètres de filtrage normaux
     if (filters.page) params.append('page', filters.page.toString());
     if (filters.limit) params.append('limit', filters.limit.toString());
     if (filters.type) params.append('type', filters.type);
