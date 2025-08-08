@@ -1,4 +1,4 @@
-// src/App.tsx
+// src/App.tsx - Mise à jour avec routes admin média
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -18,6 +18,7 @@ import MediaDetailPage from './pages/media/MediaDetailPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminUserDetailPage from './pages/admin/AdminUserDetailPage';
+import AdminMediaPage from './pages/admin/AdminMediaPage';
 
 // Configuration React Query
 const queryClient = new QueryClient({
@@ -79,17 +80,22 @@ function App() {
                     <AdminUserDetailPage />
                   </ProtectedRoute>
                 } />
-                
-                {/* TODO: Ajouter les autres routes admin */}
-                {/* 
                 <Route path="admin/media" element={
                   <ProtectedRoute requireAdmin={true}>
                     <AdminMediaPage />
                   </ProtectedRoute>
                 } />
+                
+                {/* TODO: Ajouter les autres routes admin */}
+                {/* 
                 <Route path="admin/borrows" element={
                   <ProtectedRoute requireAdmin={true}>
                     <AdminBorrowsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="admin/categories" element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <AdminCategoriesPage />
                   </ProtectedRoute>
                 } />
                 */}
