@@ -79,6 +79,7 @@ const UserEditModal: React.FC<UserEditModalProps> = ({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       queryClient.invalidateQueries({ queryKey: ['admin-user', user!._id] });
+      queryClient.invalidateQueries({ queryKey: ['admin-user-stats'] });
       toast.success('Utilisateur mis à jour avec succès');
       handleClose();
     },
