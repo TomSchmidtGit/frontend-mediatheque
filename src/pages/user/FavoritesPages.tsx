@@ -42,8 +42,12 @@ const FavoritesPage: React.FC = () => {
       await queryClient.cancelQueries({ queryKey: ['favorites'] });
       
       // ✅ Mise à jour optimiste
-      if (user?.favorites) {
-        const updatedFavorites = user.favorites.filter(id => id !== mediaId);
+      if (user?.favorites && Array.isArray(user.favorites)) {
+        const updatedFavorites = user.favorites.filter((favorite: any) => {
+          // Si c'est un objet Media, on compare avec _id, sinon c'est un string ID
+          const favoriteId = typeof favorite === 'object' ? favorite._id : favorite;
+          return favoriteId !== mediaId;
+        });
         updateUser({ favorites: updatedFavorites });
       }
       
@@ -59,7 +63,7 @@ const FavoritesPage: React.FC = () => {
     },
     onError: (error, mediaId) => {
       // Rollback
-      if (user?.favorites) {
+      if (user?.favorites && Array.isArray(user.favorites)) {
         const restoredFavorites = [...user.favorites, mediaId];
         updateUser({ favorites: restoredFavorites });
       }

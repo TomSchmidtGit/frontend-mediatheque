@@ -16,6 +16,8 @@ import SettingsPage from './pages/user/SettingsPage';
 import CatalogPage from './pages/public/CatalogPage';
 import MediaDetailPage from './pages/media/MediaDetailPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import AdminUsersPage from './pages/admin/AdminUsersPage';
+import AdminUserDetailPage from './pages/admin/AdminUserDetailPage';
 
 // Configuration React Query
 const queryClient = new QueryClient({
@@ -67,14 +69,19 @@ function App() {
                     <AdminDashboardPage />
                   </ProtectedRoute>
                 } />
-                
-                {/* TODO: Ajouter les routes admin pour la gestion */}
-                {/* 
                 <Route path="admin/users" element={
                   <ProtectedRoute requireAdmin={true}>
                     <AdminUsersPage />
                   </ProtectedRoute>
                 } />
+                <Route path="admin/users/:userId" element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <AdminUserDetailPage />
+                  </ProtectedRoute>
+                } />
+                
+                {/* TODO: Ajouter les autres routes admin */}
+                {/* 
                 <Route path="admin/media" element={
                   <ProtectedRoute requireAdmin={true}>
                     <AdminMediaPage />

@@ -346,8 +346,8 @@ const SettingsPage: React.FC = () => {
                   <div className="p-6">
                     <div className="grid md:grid-cols-3 gap-6">
                       <div className="text-center p-4 bg-blue-50 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">
-                          {user?.favorites?.length || 0}
+                        <div className="text-2xl font-bold text-gray-900">
+                          {Array.isArray(user?.favorites) ? user.favorites.length : 0}
                         </div>
                         <div className="text-sm text-gray-600">Favoris</div>
                       </div>
