@@ -6,23 +6,20 @@ import {
   MagnifyingGlassIcon,
   PencilIcon,
   EyeIcon,
-  UserPlusIcon,
   FunnelIcon,
   XMarkIcon,
   CheckCircleIcon,
   XCircleIcon,
   ShieldCheckIcon,
-  ArrowPathIcon,
-  CalendarIcon
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
-import { Menu } from '@headlessui/react';
 import { Link } from 'react-router-dom';
 import Pagination from '../../components/common/Pagination';
 import UserEditModal from '../../components/admin/UserEditModal';
 import adminUserService from '../../services/adminUserService';
 import type { User } from '../../types';
 import type { UserFilters } from '../../services/adminUserService';
-import { formatDate, formatters, cn } from '../../utils';
+import { formatDate, cn } from '../../utils';
 import toast from 'react-hot-toast';
 
 const AdminUsersPage: React.FC = () => {
@@ -43,8 +40,7 @@ const AdminUsersPage: React.FC = () => {
     data: usersData,
     isLoading,
     error,
-    refetch,
-    dataUpdatedAt
+    refetch
   } = useQuery({
     queryKey: ['admin-users', filters],
     queryFn: () => adminUserService.getUsers(filters),
@@ -185,23 +181,7 @@ const AdminUsersPage: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <div className="text-right text-sm">
-                <p className="text-gray-600">Dernière mise à jour</p>
-                <div className="flex items-center font-medium text-gray-900">
-                  <CalendarIcon className="h-4 w-4 mr-1" />
-                  {dataUpdatedAt ? formatDate.timeAgo(new Date(dataUpdatedAt)) : 'Jamais'}
-                </div>
-              </div>
               
-              <button
-                onClick={() => refetch()}
-                disabled={isLoading}
-                className="btn-secondary"
-                title="Actualiser les données"
-              >
-                <ArrowPathIcon className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                Actualiser
-              </button>
             </div>
           </div>
         </div>

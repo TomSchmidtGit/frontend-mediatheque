@@ -10,7 +10,6 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   ArrowPathIcon,
-  CalendarIcon,
   UserIcon,
   BookOpenIcon,
   FilmIcon,
@@ -58,19 +57,11 @@ const AdminBorrowsPage: React.FC = () => {
     data: borrowsData,
     isLoading,
     error,
-    refetch,
-    dataUpdatedAt
+    refetch
   } = useQuery({
     queryKey: ['admin-borrows', filters],
     queryFn: () => adminBorrowService.getBorrows(filters),
     staleTime: 2 * 60 * 1000,
-  });
-
-  // Query pour les statistiques
-  const { data: borrowStats } = useQuery({
-    queryKey: ['admin-borrow-stats'],
-    queryFn: () => adminBorrowService.getBorrowStats(),
-    staleTime: 5 * 60 * 1000,
   });
 
   // Mutation pour retourner un emprunt
@@ -318,23 +309,7 @@ const AdminBorrowsPage: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <div className="text-right text-sm">
-                <p className="text-gray-600">Dernière mise à jour</p>
-                <div className="flex items-center font-medium text-gray-900">
-                  <CalendarIcon className="h-4 w-4 mr-1" />
-                  {dataUpdatedAt ? formatDate.timeAgo(new Date(dataUpdatedAt)) : 'Jamais'}
-                </div>
-              </div>
               
-              <button
-                onClick={() => refetch()}
-                disabled={isLoading}
-                className="btn-secondary"
-                title="Actualiser les données"
-              >
-                <ArrowPathIcon className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                Actualiser
-              </button>
               
               <button
                 onClick={() => setShowCreateModal(true)}

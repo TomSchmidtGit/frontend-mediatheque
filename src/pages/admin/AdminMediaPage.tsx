@@ -14,8 +14,7 @@ import {
   XMarkIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ArrowPathIcon,
-  CalendarIcon
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 import Pagination from '../../components/common/Pagination';
@@ -23,7 +22,7 @@ import MediaFormModal from '../../components/admin/MediaFormModal';
 import adminMediaService from '../../services/adminMediaService';
 import type { Media } from '../../types';
 import type { MediaFilters } from '../../services/adminMediaService';
-import { formatDate, formatters, cn } from '../../utils';
+import { formatters, cn } from '../../utils';
 import toast from 'react-hot-toast';
 
 const AdminMediaPage: React.FC = () => {
@@ -44,8 +43,7 @@ const AdminMediaPage: React.FC = () => {
     data: mediaData,
     isLoading,
     error,
-    refetch,
-    dataUpdatedAt
+    refetch
   } = useQuery({
     queryKey: ['admin-media', filters],
     queryFn: () => adminMediaService.getMedia(filters),
@@ -205,23 +203,7 @@ const AdminMediaPage: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-4">
-              <div className="text-right text-sm">
-                <p className="text-gray-600">Dernière mise à jour</p>
-                <div className="flex items-center font-medium text-gray-900">
-                  <CalendarIcon className="h-4 w-4 mr-1" />
-                  {dataUpdatedAt ? formatDate.timeAgo(new Date(dataUpdatedAt)) : 'Jamais'}
-                </div>
-              </div>
               
-              <button
-                onClick={() => refetch()}
-                disabled={isLoading}
-                className="btn-secondary"
-                title="Actualiser les données"
-              >
-                <ArrowPathIcon className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                Actualiser
-              </button>
               
               <button
                 onClick={handleCreateMedia}

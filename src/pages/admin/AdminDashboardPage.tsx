@@ -3,22 +3,21 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { 
   ChartBarIcon,
-  ArrowPathIcon,
-  CalendarIcon
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
+import { Link } from 'react-router-dom';
 import StatsCards from '../../components/admin/StatsCards';
 import RecentActivity from '../../components/admin/RecentActivity';
 import AlertsPanel from '../../components/admin/AlertsPanel';
 import dashboardService from '../../services/dashboardService';
-import { formatDate } from '../../utils';
+ 
 
 const AdminDashboardPage: React.FC = () => {
   const {
     data: dashboardStats,
     isLoading,
     error,
-    refetch,
-    dataUpdatedAt
+    refetch
   } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: () => dashboardService.getDashboardStats(),
@@ -69,29 +68,62 @@ const AdminDashboardPage: React.FC = () => {
               </p>
             </div>
             
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm text-gray-600">Dernière mise à jour</p>
-                <div className="flex items-center text-sm font-medium text-gray-900">
-                  <CalendarIcon className="h-4 w-4 mr-1" />
-                  {dataUpdatedAt ? formatDate.timeAgo(new Date(dataUpdatedAt)) : 'Jamais'}
-                </div>
-              </div>
-              
-              <button
-                onClick={handleRefresh}
-                disabled={isLoading}
-                className="btn-secondary flex items-center"
-                title="Actualiser les données"
-              >
-                <ArrowPathIcon className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                Actualiser
-              </button>
-            </div>
           </div>
         </div>
 
         <div className="space-y-8">
+          {/* Gestion administrateur */}
+          <section>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Gestion administrateur
+            </h2>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  Gestion des utilisateurs
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Voir et gérer tous les utilisateurs de la médiathèque
+                </p>
+                <Link 
+                  to="/admin/users"
+                  className="btn-primary w-full text-sm"
+                >
+                  Gérer les utilisateurs
+                </Link>
+              </div>
+
+              <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  Gestion des médias
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Ajouter, modifier ou supprimer des médias
+                </p>
+                <Link 
+                  to="/admin/media"
+                  className="btn-primary w-full text-sm"
+                >
+                  Gérer les médias
+                </Link>
+              </div>
+
+              <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  Gestion des emprunts
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Suivre et gérer tous les emprunts en cours
+                </p>
+                <Link 
+                  to="/admin/borrows"
+                  className="btn-primary w-full text-sm"
+                >
+                  Gérer les emprunts
+                </Link>
+              </div>
+            </div>
+          </section>
           {/* Cartes de statistiques */}
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
@@ -164,58 +196,7 @@ const AdminDashboardPage: React.FC = () => {
             </section>
           )}
 
-          {/* Actions rapides */}
-          <section>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Actions rapides
-            </h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                <h3 className="font-semibold text-gray-900 mb-2">
-                  Gestion des utilisateurs
-                </h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Voir et gérer tous les utilisateurs de la médiathèque
-                </p>
-                <button 
-                  onClick={() => window.location.href = '/admin/users'}
-                  className="btn-primary w-full text-sm"
-                >
-                  Gérer les utilisateurs
-                </button>
-              </div>
-
-              <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                <h3 className="font-semibold text-gray-900 mb-2">
-                  Gestion des médias
-                </h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Ajouter, modifier ou supprimer des médias
-                </p>
-                <button 
-                  onClick={() => window.location.href = '/admin/media'}
-                  className="btn-primary w-full text-sm"
-                >
-                  Gérer les médias
-                </button>
-              </div>
-
-              <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                <h3 className="font-semibold text-gray-900 mb-2">
-                  Gestion des emprunts
-                </h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  Suivre et gérer tous les emprunts en cours
-                </p>
-                <button 
-                  onClick={() => window.location.href = '/admin/borrows'}
-                  className="btn-primary w-full text-sm"
-                >
-                  Gérer les emprunts
-                </button>
-              </div>
-            </div>
-          </section>
+          
 
           {/* Informations système */}
           <section>
