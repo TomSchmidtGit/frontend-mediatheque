@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import type { User, AuthResponse } from '../types';
 import { tokenManager } from '../services/api';
 import authService from '../services/authService';
+import userService from '../services/userService';
 import mediaService from '../services/mediaService';
 import toast from 'react-hot-toast';
 
@@ -51,6 +52,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // ✅ Fonction pour récupérer les informations complètes de l'utilisateur
+  const fetchUserProfile = async (): Promise<User | null> => {
+    try {
+      const userProfile = await userService.getProfile();
+      console.log('✅ Profil utilisateur récupéré:', userProfile.name, 'Rôle:', userProfile.role);
+      return userProfile;
+    } catch (error) {
+      console.error('❌ Erreur lors de la récupération du profil:', error);
+      return null;
+    }
+  };
+
   // ✅ Initialisation de l'auth au chargement
   useEffect(() => {
     const initAuth = async () => {
@@ -62,12 +75,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const userData = JSON.parse(storedUser);
           console.log('🔄 Restauration utilisateur depuis localStorage:', userData.name);
           
-          // Enrichir avec les favoris à jour
-          const enrichedUser = await enrichUserWithFavorites(userData);
-          setUser(enrichedUser);
-          localStorage.setItem('user', JSON.stringify(enrichedUser));
-          
-          console.log('✅ Utilisateur restauré avec favoris:', enrichedUser.name, enrichedUser.favorites?.length, 'favoris');
+          // Récupérer les informations complètes depuis l'API
+          const freshUserProfile = await fetchUserProfile();
+          if (freshUserProfile) {
+            // Enrichir avec les favoris à jour
+            const enrichedUser = await enrichUserWithFavorites(freshUserProfile);
+            setUser(enrichedUser);
+            localStorage.setItem('user', JSON.stringify(enrichedUser));
+            
+            console.log('✅ Utilisateur restauré avec profil complet:', enrichedUser.name, 'Rôle:', enrichedUser.role, enrichedUser.favorites?.length, 'favoris');
+          } else {
+            console.log('❌ Impossible de récupérer le profil utilisateur, déconnexion');
+            logout();
+          }
         } else {
           console.log('❌ Pas de token ou d\'utilisateur en localStorage');
         }
@@ -90,25 +110,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Stocker les tokens
       tokenManager.setTokens(response.accessToken, response.refreshToken);
 
-      // Créer l'utilisateur de base depuis la réponse
-      const baseUser: User = {
-        _id: response._id,
-        name: response.name,
-        email: response.email,
-        role: 'user', // Valeur par défaut, à ajuster selon ton API
-        favorites: [],
-        actif: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+      // Récupérer les informations complètes de l'utilisateur
+      const userProfile = await fetchUserProfile();
+      if (!userProfile) {
+        throw new Error('Impossible de récupérer les informations utilisateur');
+      }
 
       // Enrichir avec les favoris
-      const enrichedUser = await enrichUserWithFavorites(baseUser);
+      const enrichedUser = await enrichUserWithFavorites(userProfile);
       setUser(enrichedUser);
       localStorage.setItem('user', JSON.stringify(enrichedUser));
       
       toast.success(`Bienvenue, ${enrichedUser.name} !`);
-      console.log('✅ Connexion réussie:', enrichedUser.name, enrichedUser.favorites?.length, 'favoris');
+      console.log('✅ Connexion réussie:', enrichedUser.name, 'Rôle:', enrichedUser.role, enrichedUser.favorites?.length, 'favoris');
     } catch (error: any) {
       const message = error.response?.data?.message || 'Erreur lors de la connexion';
       toast.error(message);
@@ -127,23 +141,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const token = response.token || response.accessToken;
       tokenManager.setTokens(token);
 
-      // Créer l'utilisateur de base
-      const baseUser: User = {
-        _id: response._id,
-        name: response.name,
-        email: response.email,
-        role: 'user',
-        favorites: [], // Nouveau utilisateur, pas de favoris
-        actif: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+      // Récupérer les informations complètes de l'utilisateur
+      const userProfile = await fetchUserProfile();
+      if (!userProfile) {
+        throw new Error('Impossible de récupérer les informations utilisateur');
+      }
 
-      setUser(baseUser);
-      localStorage.setItem('user', JSON.stringify(baseUser));
+      setUser(userProfile);
+      localStorage.setItem('user', JSON.stringify(userProfile));
       
       toast.success(`Bienvenue, ${response.name} ! Votre compte a été créé avec succès.`);
-      console.log('✅ Inscription réussie:', baseUser.name);
+      console.log('✅ Inscription réussie:', userProfile.name, 'Rôle:', userProfile.role);
     } catch (error: any) {
       const message = error.response?.data?.message || 'Erreur lors de l\'inscription';
       toast.error(message);
@@ -176,10 +184,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const refreshUserData = async () => {
     if (user) {
       try {
-        const enrichedUser = await enrichUserWithFavorites(user);
-        setUser(enrichedUser);
-        localStorage.setItem('user', JSON.stringify(enrichedUser));
-        console.log('🔄 Données utilisateur rafraîchies:', enrichedUser.favorites?.length, 'favoris');
+        const freshUserProfile = await fetchUserProfile();
+        if (freshUserProfile) {
+          const enrichedUser = await enrichUserWithFavorites(freshUserProfile);
+          setUser(enrichedUser);
+          localStorage.setItem('user', JSON.stringify(enrichedUser));
+          console.log('🔄 Données utilisateur rafraîchies:', enrichedUser.favorites?.length, 'favoris');
+        }
       } catch (error) {
         console.error('Erreur lors du rafraîchissement des données:', error);
       }
