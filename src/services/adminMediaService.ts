@@ -36,6 +36,8 @@ interface UpdateMediaData {
 }
 
 class AdminMediaService {
+  // ===== GESTION DES MÉDIAS =====
+
   /**
    * Récupérer tous les médias avec filtres admin
    */
@@ -146,19 +148,13 @@ class AdminMediaService {
     return response.data;
   }
 
+  // ===== GESTION DES CATÉGORIES =====
+
   /**
    * Récupérer toutes les catégories
    */
   async getCategories(): Promise<Category[]> {
     const response = await api.get<Category[]>('/categories');
-    return response.data;
-  }
-
-  /**
-   * Récupérer tous les tags
-   */
-  async getTags(): Promise<Tag[]> {
-    const response = await api.get<Tag[]>('/tags');
     return response.data;
   }
 
@@ -171,12 +167,72 @@ class AdminMediaService {
   }
 
   /**
+   * Mettre à jour une catégorie
+   */
+  async updateCategory(categoryId: string, name: string): Promise<Category> {
+    const response = await api.put<Category>(`/categories/${categoryId}`, { name });
+    return response.data;
+  }
+
+  /**
+   * Supprimer une catégorie
+   */
+  async deleteCategory(categoryId: string): Promise<{ message: string }> {
+    const response = await api.delete<{ message: string }>(`/categories/${categoryId}`);
+    return response.data;
+  }
+
+  /**
+   * Récupérer une catégorie par son ID
+   */
+  async getCategoryById(categoryId: string): Promise<Category> {
+    const response = await api.get<Category>(`/categories/${categoryId}`);
+    return response.data;
+  }
+
+  // ===== GESTION DES TAGS =====
+
+  /**
+   * Récupérer tous les tags
+   */
+  async getTags(): Promise<Tag[]> {
+    const response = await api.get<Tag[]>('/tags');
+    return response.data;
+  }
+
+  /**
    * Créer un tag
    */
   async createTag(name: string): Promise<Tag> {
     const response = await api.post<Tag>('/tags', { name });
     return response.data;
   }
+
+  /**
+   * Mettre à jour un tag
+   */
+  async updateTag(tagId: string, name: string): Promise<Tag> {
+    const response = await api.put<Tag>(`/tags/${tagId}`, { name });
+    return response.data;
+  }
+
+  /**
+   * Supprimer un tag
+   */
+  async deleteTag(tagId: string): Promise<{ message: string }> {
+    const response = await api.delete<{ message: string }>(`/tags/${tagId}`);
+    return response.data;
+  }
+
+  /**
+   * Récupérer un tag par son ID
+   */
+  async getTagById(tagId: string): Promise<Tag> {
+    const response = await api.get<Tag>(`/tags/${tagId}`);
+    return response.data;
+  }
+
+  // ===== STATISTIQUES =====
 
   /**
    * Statistiques des médias
@@ -205,6 +261,74 @@ class AdminMediaService {
     };
     
     return stats;
+  }
+
+  /**
+   * Statistiques des catégories et tags
+   */
+  async getCategoriesTagsStats(): Promise<{
+    categories: {
+      total: number;
+      withMedia: number;
+      withoutMedia: number;
+    };
+    tags: {
+      total: number;
+      mostUsed: Array<{
+        _id: string;
+        name: string;
+        count: number;
+      }>;
+    };
+  }> {
+    const [categories, tags, allMedia] = await Promise.all([
+      this.getCategories(),
+      this.getTags(),
+      this.getMedia({ limit: 1000 })
+    ]);
+
+    // Compter les médias par catégorie
+    const categoriesWithMedia = new Set();
+    allMedia.data.forEach(media => {
+      if (media.category) {
+        categoriesWithMedia.add(media.category._id);
+      }
+    });
+
+    // Compter l'utilisation des tags
+    const tagUsage = new Map<string, number>();
+    allMedia.data.forEach(media => {
+      if (media.tags && Array.isArray(media.tags)) {
+        media.tags.forEach(tag => {
+          const tagId = typeof tag === 'object' ? tag._id : tag;
+          tagUsage.set(tagId, (tagUsage.get(tagId) || 0) + 1);
+        });
+      }
+    });
+
+    const mostUsedTags = Array.from(tagUsage.entries())
+      .map(([tagId, count]) => {
+        const tag = tags.find(t => t._id === tagId);
+        return {
+          _id: tagId,
+          name: tag?.name || 'Tag inconnu',
+          count
+        };
+      })
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    return {
+      categories: {
+        total: categories.length,
+        withMedia: categoriesWithMedia.size,
+        withoutMedia: categories.length - categoriesWithMedia.size
+      },
+      tags: {
+        total: tags.length,
+        mostUsed: mostUsedTags
+      }
+    };
   }
 }
 

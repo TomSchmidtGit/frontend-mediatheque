@@ -218,7 +218,7 @@ const AdminMediaPage: React.FC = () => {
 
         {/* Statistiques rapides */}
         {mediaStats && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
             <div className="bg-white rounded-xl border border-gray-200 p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -266,6 +266,16 @@ const AdminMediaPage: React.FC = () => {
                   <p className="text-2xl font-bold text-purple-600">{mediaStats.byType.movie}</p>
                 </div>
                 <FilmIcon className="h-8 w-8 text-purple-500" />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Musiques</p>
+                  <p className="text-2xl font-bold text-green-600">{mediaStats.byType.music}</p>
+                </div>
+                <MusicalNoteIcon className="h-8 w-8 text-green-500" />
               </div>
             </div>
           </div>

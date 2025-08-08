@@ -1,4 +1,4 @@
-// src/App.tsx - Mise à jour avec route admin emprunts
+// src/App.tsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -20,6 +20,7 @@ import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminUserDetailPage from './pages/admin/AdminUserDetailPage';
 import AdminMediaPage from './pages/admin/AdminMediaPage';
 import AdminBorrowsPage from './pages/admin/AdminBorrowsPage';
+import AdminCategoriesPage from './pages/admin/AdminCategoriesPage';
 
 // Configuration React Query
 const queryClient = new QueryClient({
@@ -91,15 +92,11 @@ function App() {
                     <AdminBorrowsPage />
                   </ProtectedRoute>
                 } />
-                
-                {/* TODO: Ajouter les autres routes admin */}
-                {/* 
                 <Route path="admin/categories" element={
                   <ProtectedRoute requireAdmin={true}>
                     <AdminCategoriesPage />
                   </ProtectedRoute>
                 } />
-                */}
                 
                 {/* Routes publiques */}
                 <Route path="catalog" element={<CatalogPage />} />

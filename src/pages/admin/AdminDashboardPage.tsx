@@ -77,7 +77,7 @@ const AdminDashboardPage: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
               Gestion administrateur
             </h2>
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
                 <h3 className="font-semibold text-gray-900 mb-2">
                   Gestion des utilisateurs
@@ -122,8 +122,24 @@ const AdminDashboardPage: React.FC = () => {
                   Gérer les emprunts
                 </Link>
               </div>
+
+              <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
+                  Gestion des catégories & tags
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Organiser la collection avec des catégories et tags
+                </p>
+                <Link 
+                  to="/admin/categories"
+                  className="btn-primary w-full text-sm"
+                >
+                  Gérer les catégories
+                </Link>
+              </div>
             </div>
           </section>
+
           {/* Cartes de statistiques */}
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
@@ -196,8 +212,6 @@ const AdminDashboardPage: React.FC = () => {
             </section>
           )}
 
-          
-
           {/* Informations système */}
           <section>
             <div className="bg-gradient-to-r from-primary-50 to-blue-50 border border-primary-200 rounded-lg p-6">
@@ -211,7 +225,8 @@ const AdminDashboardPage: React.FC = () => {
                     <li>• Surveillez régulièrement les emprunts en retard pour maintenir une bonne circulation</li>
                     <li>• Analysez les médias populaires pour identifier les tendances d'emprunt</li>
                     <li>• Encouragez les utilisateurs inactifs à découvrir de nouveaux contenus</li>
-                    <li>• Utilisez les alertes pour anticiper les problèmes potentiels</li>
+                    <li>• Utilisez les catégories et tags pour une meilleure organisation de votre collection</li>
+                    <li>• Consultez les alertes pour anticiper les problèmes potentiels</li>
                   </ul>
                 </div>
               </div>
