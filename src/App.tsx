@@ -21,6 +21,7 @@ import AdminUserDetailPage from './pages/admin/AdminUserDetailPage';
 import AdminMediaPage from './pages/admin/AdminMediaPage';
 import AdminBorrowsPage from './pages/admin/AdminBorrowsPage';
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage';
+import ScrollToTop from './components/common/ScrollToTop';
 
 // Configuration React Query
 const queryClient = new QueryClient({
@@ -37,6 +38,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <AuthProvider>
+          <ScrollToTop />
           <div className="App">
             <Routes>
               <Route path="/" element={<MainLayout />}>
