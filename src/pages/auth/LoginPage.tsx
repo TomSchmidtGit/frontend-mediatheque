@@ -1,5 +1,5 @@
 // src/pages/auth/LoginPage.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,12 +12,22 @@ import { cn } from '../../utils';
 
 const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const { login, loading } = useAuth();
+  const { login, loading, isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
   // Récupérer la page de redirection ou aller au dashboard par défaut
   const from = location.state?.from?.pathname || '/dashboard';
+
+  // Redirection automatique si l'utilisateur est déjà connecté
+  useEffect(() => {
+    if (isAuthenticated && !loading) {
+      // Si l'utilisateur est admin et qu'il n'y a pas de redirection spécifique,
+      // on peut le rediriger vers l'admin, sinon vers le dashboard user
+      const redirectTo = isAdmin && from === '/dashboard' ? '/admin' : from;
+      navigate(redirectTo, { replace: true });
+    }
+  }, [isAuthenticated, loading, navigate, from, isAdmin]);
 
   const {
     register,
@@ -35,7 +45,7 @@ const LoginPage: React.FC = () => {
   const onSubmit = async (data: LoginFormData) => {
     try {
       await login(data.email, data.password);
-      navigate(from, { replace: true });
+      // La redirection sera gérée par l'useEffect après la connexion
     } catch (error: any) {
       // Gestion des erreurs spécifiques
       const message = error.response?.data?.message || 'Erreur lors de la connexion';
@@ -49,6 +59,24 @@ const LoginPage: React.FC = () => {
       }
     }
   };
+
+  // Afficher un loader pendant la vérification de l'authentification
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Vérification de votre session...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Si l'utilisateur est connecté, on ne devrait pas arriver ici grâce à l'useEffect,
+  // mais on ajoute une sécurité supplémentaire
+  if (isAuthenticated) {
+    return null; // La redirection sera gérée par l'useEffect
+  }
 
   return (
     <div className="min-h-screen flex auth-page">
