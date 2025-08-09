@@ -15,6 +15,12 @@ import MyBorrowsPage from './pages/user/MyBorrowsPage';
 import SettingsPage from './pages/user/SettingsPage';
 import CatalogPage from './pages/public/CatalogPage';
 import MediaDetailPage from './pages/media/MediaDetailPage';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import AdminUsersPage from './pages/admin/AdminUsersPage';
+import AdminUserDetailPage from './pages/admin/AdminUserDetailPage';
+import AdminMediaPage from './pages/admin/AdminMediaPage';
+import AdminBorrowsPage from './pages/admin/AdminBorrowsPage';
+import AdminCategoriesPage from './pages/admin/AdminCategoriesPage';
 
 // Configuration React Query
 const queryClient = new QueryClient({
@@ -38,7 +44,7 @@ function App() {
                 <Route path="login" element={<LoginPage />} />
                 <Route path="register" element={<RegisterPage />} />
                 
-                {/* Routes protégées */}
+                {/* Routes protégées utilisateur */}
                 <Route path="dashboard" element={
                   <ProtectedRoute>
                     <DashboardPage />
@@ -54,7 +60,6 @@ function App() {
                     <MyBorrowsPage />
                   </ProtectedRoute>
                 } />
-                {/* ✅ VRAIE PAGE SETTINGS */}
                 <Route path="settings" element={
                   <ProtectedRoute>
                     <SettingsPage />
@@ -64,7 +69,32 @@ function App() {
                 {/* Routes admin */}
                 <Route path="admin" element={
                   <ProtectedRoute requireAdmin={true}>
-                    <div className="page-container py-16 text-center"><h1>Admin Dashboard (à venir)</h1></div>
+                    <AdminDashboardPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="admin/users" element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <AdminUsersPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="admin/users/:userId" element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <AdminUserDetailPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="admin/media" element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <AdminMediaPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="admin/borrows" element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <AdminBorrowsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="admin/categories" element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <AdminCategoriesPage />
                   </ProtectedRoute>
                 } />
                 

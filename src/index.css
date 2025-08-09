@@ -5,6 +5,14 @@
 @tailwind utilities;
 
 @layer base {
+  html, body, #root {
+    @apply w-full max-w-full overflow-x-hidden;
+  }
+  /* Empêche les enfants flex/grid de forcer la largeur et créer un scroll horizontal */
+  .flex > *,
+  .grid > * {
+    min-width: 0;
+  }
   body {
     @apply bg-gray-50 text-gray-900;
     font-family: 'Inter', system-ui, sans-serif;
@@ -54,7 +62,7 @@
   }
   
   .page-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-x-hidden;
   }
   
   .page-header {
