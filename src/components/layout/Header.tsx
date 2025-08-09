@@ -1,5 +1,5 @@
 // src/components/layout/Header.tsx
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Transition, Dialog } from '@headlessui/react';
 import { 
@@ -23,6 +23,8 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const { user, isAuthenticated, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
 
   const handleLogout = () => {
     logout();
@@ -30,7 +32,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   };
 
   return (
-    <header className="bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-200 sticky top-0 z-50 overflow-visible">
       <div className="page-container">
         <div className="flex justify-between items-center h-16">
           {/* Logo et menu mobile */}
@@ -110,7 +112,22 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <Menu as="div" className="relative">
-                <Menu.Button className="flex items-center space-x-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 p-1 hover:bg-gray-50 transition-colors">
+                <Menu.Button
+                  ref={menuButtonRef}
+                  className="flex items-center space-x-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 p-1 hover:bg-gray-50 transition-colors"
+                  onClick={() => {
+                    const rect = menuButtonRef.current?.getBoundingClientRect();
+                    if (rect) {
+                      const menuWidth = 224; // w-56
+                      const margin = 8;
+                      let left = rect.right - menuWidth;
+                      left = Math.min(left, window.innerWidth - menuWidth - margin);
+                      left = Math.max(left, margin);
+                      const top = rect.bottom + margin;
+                      setMenuPosition({ top, left });
+                    }
+                  }}
+                >
                   <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-sm">
                     <span className="text-sm font-medium text-white">
                       {user?.name?.charAt(0)?.toUpperCase() || 'U'}
@@ -130,7 +147,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                   leaveFrom="transform opacity-100 scale-100"
                   leaveTo="transform opacity-0 scale-95"
                 >
-                  <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none border border-gray-100">
+                  <Menu.Items
+                    className="w-56 origin-top-right bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none border border-gray-100 z-[60] max-h-[60vh] overflow-y-auto"
+                    style={{ position: 'fixed', top: menuPosition?.top ?? 64, left: menuPosition?.left ?? (window.innerWidth - 224 - 8) }}
+                  >
                     <div className="p-2">
                       <div className="px-3 py-2 border-b border-gray-100 mb-1">
                         <p className="text-sm font-medium text-gray-900">{user?.name}</p>

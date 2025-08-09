@@ -39,7 +39,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ stats, loading }) => {
 
   if (loading) {
     return (
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="h-5 bg-gray-200 rounded w-32 animate-pulse"></div>
@@ -78,7 +78,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ stats, loading }) => {
   }
 
   return (
-    <div className="grid lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Emprunts récents */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
@@ -116,13 +116,13 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ stats, loading }) => {
                         </span>
                       </div>
                       
-                      <div className="flex items-center text-sm text-gray-600 mt-1">
-                        <UserIcon className="h-4 w-4 mr-1" />
-                        <span className="truncate">{borrow.user.name}</span>
-                        <span className="mx-2">•</span>
-                        <CalendarIcon className="h-4 w-4 mr-1" />
-                        <span>{formatDate.short(borrow.borrowDate)}</span>
-                      </div>
+                        <div className="flex items-center text-sm text-gray-600 mt-1 min-w-0">
+                          <UserIcon className="h-4 w-4 mr-1 flex-shrink-0" />
+                          <span className="truncate">{borrow.user.name}</span>
+                          <span className="mx-2 flex-shrink-0">•</span>
+                          <CalendarIcon className="h-4 w-4 mr-1 flex-shrink-0" />
+                          <span className="truncate">{formatDate.short(borrow.borrowDate)}</span>
+                        </div>
                     </div>
                   </div>
                 </div>
@@ -171,7 +171,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ stats, loading }) => {
                         <p className="text-sm font-medium text-gray-900 truncate">
                           {media.title}
                         </p>
-                        <div className="flex items-center text-sm text-gray-600">
+                          <div className="flex items-center text-sm text-gray-600">
                           <span className={cn(
                             'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium mr-2',
                             getTypeColor(media.type)

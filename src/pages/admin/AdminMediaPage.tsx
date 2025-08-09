@@ -24,6 +24,7 @@ import type { Media } from '../../types';
 import type { MediaFilters } from '../../services/adminMediaService';
 import { formatters, cn } from '../../utils';
 import toast from 'react-hot-toast';
+import ConfirmDialog from '../../components/modals/ConfirmDialog';
 
 const AdminMediaPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -35,6 +36,7 @@ const AdminMediaPage: React.FC = () => {
   });
   const [searchInput, setSearchInput] = useState('');
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
+  const [confirmMedia, setConfirmMedia] = useState<Media | null>(null);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -132,9 +134,7 @@ const AdminMediaPage: React.FC = () => {
   };
 
   const handleDeleteMedia = (media: Media) => {
-    if (confirm(`Êtes-vous sûr de vouloir supprimer "${media.title}" ?`)) {
-      deleteMediaMutation.mutate(media._id);
-    }
+    setConfirmMedia(media);
   };
 
   const clearFilters = () => {
@@ -188,11 +188,11 @@ const AdminMediaPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 min-h-screen overflow-x-hidden">
       <div className="page-container py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
                 Gestion des médias
@@ -218,7 +218,7 @@ const AdminMediaPage: React.FC = () => {
 
         {/* Statistiques rapides */}
         {mediaStats && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
             <div className="bg-white rounded-xl border border-gray-200 p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -472,16 +472,16 @@ const AdminMediaPage: React.FC = () => {
                                 </div>
                               )}
                             </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900 line-clamp-1">
-                                {media.title}
-                              </div>
-                              {media.category && (
-                                <div className="text-sm text-gray-500">
-                                  {media.category.name}
-                                </div>
-                              )}
-                            </div>
+                           <div className="ml-4 min-w-0">
+                             <div className="text-sm font-medium text-gray-900 truncate">
+                               {media.title}
+                             </div>
+                             {media.category && (
+                               <div className="text-sm text-gray-500 truncate">
+                                 {media.category.name}
+                               </div>
+                             )}
+                           </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -527,6 +527,7 @@ const AdminMediaPage: React.FC = () => {
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end space-x-2">
                             <button
+                              type="button"
                               onClick={() => handleEditMedia(media)}
                               className="text-primary-600 hover:text-primary-900 p-2 hover:bg-primary-50 rounded-lg transition-colors"
                               title="Modifier le média"
@@ -543,6 +544,7 @@ const AdminMediaPage: React.FC = () => {
                             </Link>
                             
                             <button
+                              type="button"
                               onClick={() => handleDeleteMedia(media)}
                               disabled={deleteMediaMutation.isPending}
                               className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded-lg transition-colors"
@@ -561,25 +563,25 @@ const AdminMediaPage: React.FC = () => {
               {/* Cards mobile */}
               <div className="lg:hidden divide-y divide-gray-200">
                 {mediaData?.data?.map((media) => (
-                  <div key={media._id} className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0 w-16 h-20">
+                  <div key={media._id} className="p-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+                      <div className="w-full h-40 sm:w-16 sm:h-20">
                         {media.imageUrl ? (
                           <img
                             src={media.imageUrl}
                             alt={media.title}
-                            className="w-16 h-20 rounded-lg object-cover"
+                            className="w-full h-full rounded-lg object-cover"
                           />
                         ) : (
-                          <div className="w-16 h-20 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <div className="w-full h-full rounded-lg bg-gray-100 flex items-center justify-center">
                             {getTypeIcon(media.type)}
                           </div>
                         )}
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between">
-                          <div>
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                          <div className="min-w-0">
                             <h3 className="font-medium text-gray-900 line-clamp-2">{media.title}</h3>
                             <p className="text-sm text-gray-600 mt-1">{media.author} • {media.year}</p>
                             
@@ -616,7 +618,7 @@ const AdminMediaPage: React.FC = () => {
                             )}
                           </div>
                           
-                          <div className="flex items-center space-x-1 ml-2">
+                          <div className="flex flex-wrap gap-2 mt-2 sm:mt-0 sm:ml-auto">
                             <button
                               onClick={() => handleEditMedia(media)}
                               className="text-primary-600 hover:text-primary-900 p-2 hover:bg-primary-50 rounded-lg transition-colors"
@@ -723,6 +725,21 @@ const AdminMediaPage: React.FC = () => {
         media={selectedMedia}
         categories={categories}
         tags={tags}
+      />
+
+      {/* Confirmation suppression média */}
+      <ConfirmDialog
+        isOpen={!!confirmMedia}
+        title="Confirmer la suppression"
+        description={confirmMedia ? `Média : ${confirmMedia.title}` : ''}
+        confirmText="Supprimer"
+        confirmVariant="danger"
+        onClose={() => setConfirmMedia(null)}
+        onConfirm={() => {
+          if (confirmMedia) {
+            deleteMediaMutation.mutate(confirmMedia._id);
+          }
+        }}
       />
     </div>
   );

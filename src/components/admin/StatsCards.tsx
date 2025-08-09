@@ -6,8 +6,7 @@ import {
   ClockIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  ArrowTrendingUpIcon,
-  ArrowTrendingDownIcon
+  ArrowTrendingUpIcon
 } from '@heroicons/react/24/outline';
 import type { DashboardStats } from '../../types';
 import { cn } from '../../utils';
@@ -20,7 +19,7 @@ interface StatsCardsProps {
 const StatsCards: React.FC<StatsCardsProps> = ({ stats, loading }) => {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {Array.from({ length: 8 }).map((_, index) => (
           <div key={index} className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
             <div className="flex items-center justify-between">
@@ -104,17 +103,17 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats, loading }) => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {statsData.map((stat, index) => (
         <div
           key={index}
           className={cn(
-            'bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-all duration-200',
+            'bg-white rounded-xl border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-all duration-200',
             stat.alert && 'border-red-200 bg-red-50'
           )}
         >
           <div className="flex items-center justify-between">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <p className={cn(
                 'text-sm font-medium mb-2',
                 stat.alert ? 'text-red-800' : 'text-gray-600'
@@ -130,7 +129,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats, loading }) => {
               
               {stat.subtitle && (
                 <p className={cn(
-                  'text-xs',
+                  'text-xs break-words',
                   stat.alert ? 'text-red-600' : 'text-gray-500'
                 )}>
                   {stat.subtitle}

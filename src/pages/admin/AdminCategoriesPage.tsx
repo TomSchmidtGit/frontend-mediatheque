@@ -20,6 +20,7 @@ import adminMediaService from '../../services/adminMediaService';
 import type { Category, Tag } from '../../types';
 import { cn } from '../../utils';
 import toast from 'react-hot-toast';
+import ConfirmDialog from '../../components/modals/ConfirmDialog';
 
 // Schémas de validation
 const categorySchema = z.object({
@@ -186,6 +187,7 @@ const AdminCategoriesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Category | Tag | null>(null);
+  const [confirmItem, setConfirmItem] = useState<Category | Tag | null>(null);
 
   // Queries
   const {
@@ -246,15 +248,7 @@ const AdminCategoriesPage: React.FC = () => {
   };
 
   const handleDelete = (item: Category | Tag) => {
-    const itemType = activeTab === 'categories' ? 'catégorie' : 'tag';
-    
-    if (confirm(`Êtes-vous sûr de vouloir supprimer ${itemType === 'catégorie' ? 'la' : 'le'} ${itemType} "${item.name}" ?`)) {
-      if (activeTab === 'categories') {
-        deleteCategoryMutation.mutate(item._id);
-      } else {
-        deleteTagMutation.mutate(item._id);
-      }
-    }
+    setConfirmItem(item);
   };
 
   const getFilteredItems = () => {
@@ -410,7 +404,7 @@ const AdminCategoriesPage: React.FC = () => {
               <div className="divide-y divide-gray-200">
                 {filteredItems.map((item) => (
                   <div key={item._id} className="p-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-center space-x-3">
                         <div className={cn(
                           'w-10 h-10 rounded-lg flex items-center justify-center',
@@ -425,13 +419,13 @@ const AdminCategoriesPage: React.FC = () => {
                           )}
                         </div>
                         
-                        <div>
+                        <div className="min-w-0">
                           <h3 className="font-medium text-gray-900">{item.name}</h3>
                           <p className="text-sm text-gray-500">Slug: {item.slug}</p>
                         </div>
                       </div>
                       
-                      <div className="flex items-center space-x-2">
+                      <div className="flex flex-wrap gap-2 sm:ml-auto">
                         <button
                           onClick={() => handleEdit(item)}
                           className="text-primary-600 hover:text-primary-900 p-2 hover:bg-primary-50 rounded-lg transition-colors"
@@ -535,6 +529,24 @@ const AdminCategoriesPage: React.FC = () => {
         title={`${selectedItem ? 'Modifier' : 'Créer'} ${activeTab === 'categories' ? 'une catégorie' : 'un tag'}`}
         item={selectedItem}
         type={activeTab === 'categories' ? 'category' : 'tag'}
+      />
+
+      {/* Confirmation suppression catégorie/tag */}
+      <ConfirmDialog
+        isOpen={!!confirmItem}
+        title={`Supprimer ${activeTab === 'categories' ? 'cette catégorie' : 'ce tag'} ?`}
+        description={confirmItem ? `${activeTab === 'categories' ? 'Catégorie' : 'Tag'}: ${confirmItem.name}` : ''}
+        confirmText="Supprimer"
+        confirmVariant="danger"
+        onClose={() => setConfirmItem(null)}
+        onConfirm={() => {
+          if (!confirmItem) return;
+          if (activeTab === 'categories') {
+            deleteCategoryMutation.mutate((confirmItem as Category)._id);
+          } else {
+            deleteTagMutation.mutate((confirmItem as Tag)._id);
+          }
+        }}
       />
     </div>
   );

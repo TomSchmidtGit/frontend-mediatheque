@@ -24,6 +24,7 @@ import { adminBorrowService } from '../../services';
 import type { Borrow } from '../../types';
 import { formatDate, dateUtils, formatters, cn } from '../../utils';
 import toast from 'react-hot-toast';
+import ConfirmDialog from '../../components/modals/ConfirmDialog';
 
 interface BorrowFilters {
   page?: number;
@@ -51,6 +52,7 @@ const AdminBorrowsPage: React.FC = () => {
   const [searchInput, setSearchInput] = useState(filters.search || '');
   const [showFilters, setShowFilters] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [confirmBorrow, setConfirmBorrow] = useState<{ id: string; title: string } | null>(null);
 
   // Query pour récupérer les emprunts
   const {
@@ -116,9 +118,7 @@ const AdminBorrowsPage: React.FC = () => {
   };
 
   const handleReturnBorrow = (borrowId: string, mediaTitle: string) => {
-    if (confirm(`Confirmer le retour de "${mediaTitle}" ?`)) {
-      returnBorrowMutation.mutate(borrowId);
-    }
+    setConfirmBorrow({ id: borrowId, title: mediaTitle });
   };
 
   const clearFilters = () => {
@@ -294,11 +294,11 @@ const AdminBorrowsPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 min-h-screen overflow-x-hidden">
       <div className="page-container py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
                 Gestion des emprunts
@@ -522,10 +522,10 @@ const AdminBorrowsPage: React.FC = () => {
                 const StatusIcon = statusInfo.icon;
 
                 return (
-                  <div key={borrow._id} className="p-6 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-start space-x-4">
+                  <div key={borrow._id} className="p-4 hover:bg-gray-50 transition-colors">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
                       {/* Image du média */}
-                      <div className="flex-shrink-0 w-16 h-20 bg-gray-100 rounded-lg overflow-hidden">
+                      <div className="w-full h-40 sm:w-16 sm:h-20 bg-gray-100 rounded-lg overflow-hidden">
                         {borrow.media.imageUrl ? (
                           <img
                             src={borrow.media.imageUrl}
@@ -540,7 +540,7 @@ const AdminBorrowsPage: React.FC = () => {
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-2">
                               <span className={cn(
@@ -560,17 +560,17 @@ const AdminBorrowsPage: React.FC = () => {
                               </span>
                             </div>
 
-                            <h3 className="font-semibold text-gray-900 mb-1">
+                            <h3 className="font-semibold text-gray-900 mb-1 break-words">
                               {borrow.media.title}
                             </h3>
                             
-                            <div className="flex items-center text-sm text-gray-600 mb-2">
-                              <UserIcon className="h-4 w-4 mr-1" />
-                              <span className="font-medium">{borrow.user.name}</span>
-                              <span className="mx-2">•</span>
-                              <span>{borrow.media.author}</span>
-                              <span className="mx-2">•</span>
-                              <span>{borrow.media.year}</span>
+                            <div className="flex items-center text-sm text-gray-600 mb-2 min-w-0">
+                              <UserIcon className="h-4 w-4 mr-1 flex-shrink-0" />
+                              <span className="font-medium truncate">{borrow.user.name}</span>
+                              <span className="mx-2 flex-shrink-0">•</span>
+                              <span className="truncate">{borrow.media.author}</span>
+                              <span className="mx-2 flex-shrink-0">•</span>
+                              <span className="flex-shrink-0">{borrow.media.year}</span>
                             </div>
 
                             <div className="grid sm:grid-cols-3 gap-4 text-sm">
@@ -597,7 +597,8 @@ const AdminBorrowsPage: React.FC = () => {
                             </div>
                           </div>
 
-                          <div className="flex flex-col items-end space-y-2 ml-4">
+                          {/* Actions */}
+                          <div className="flex flex-wrap gap-2 mt-2 sm:mt-0 sm:flex-col sm:items-end sm:space-y-2 sm:gap-0 sm:ml-auto sm:pl-2">
                             <Link
                               to={`/media/${borrow.media._id}`}
                               className="flex items-center px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
@@ -616,6 +617,7 @@ const AdminBorrowsPage: React.FC = () => {
 
                             {borrow.status !== 'returned' && (
                               <button
+                                type="button"
                                 onClick={() => handleReturnBorrow(borrow._id, borrow.media.title)}
                                 disabled={returnBorrowMutation.isPending}
                                 className="flex items-center px-3 py-1 text-sm text-green-600 hover:text-green-700 border border-green-300 rounded-md hover:bg-green-50 transition-colors disabled:opacity-50"
@@ -694,6 +696,20 @@ const AdminBorrowsPage: React.FC = () => {
       <CreateBorrowModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
+      />
+
+      {/* Confirmation retour emprunt */}
+      <ConfirmDialog
+        isOpen={!!confirmBorrow}
+        title="Confirmer le retour"
+        description={confirmBorrow ? `Média : ${confirmBorrow.title}` : ''}
+        confirmText="Marquer comme retourné"
+        onClose={() => setConfirmBorrow(null)}
+        onConfirm={() => {
+          if (confirmBorrow) {
+            returnBorrowMutation.mutate(confirmBorrow.id);
+          }
+        }}
       />
     </div>
   );

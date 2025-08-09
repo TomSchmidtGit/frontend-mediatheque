@@ -20,12 +20,14 @@ import adminUserService from '../../services/adminUserService';
 import { formatDate, formatters, cn } from '../../utils';
 import type { User } from '../../types';
 import toast from 'react-hot-toast';
+import ConfirmDialog from '../../components/modals/ConfirmDialog';
 
 const AdminUserDetailPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [confirmToggle, setConfirmToggle] = useState(false);
 
   // Query pour récupérer l'utilisateur
   const {
@@ -64,12 +66,7 @@ const AdminUserDetailPage: React.FC = () => {
 
   const handleToggleStatus = () => {
     if (!user) return;
-    
-    if (confirm(
-      `Êtes-vous sûr de vouloir ${user.actif ? 'désactiver' : 'activer'} l'utilisateur ${user.name} ?`
-    )) {
-      toggleStatusMutation.mutate();
-    }
+    setConfirmToggle(true);
   };
 
   const getRoleInfo = (role: string) => {
@@ -515,6 +512,17 @@ const AdminUserDetailPage: React.FC = () => {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         user={user}
+      />
+
+      {/* Confirmation activation/désactivation */}
+      <ConfirmDialog
+        isOpen={confirmToggle}
+        title={user.actif ? 'Confirmer la désactivation' : 'Confirmer l\'activation'}
+        description={`Utilisateur : ${user.name}`}
+        confirmText={user.actif ? 'Désactiver' : 'Activer'}
+        confirmVariant={user.actif ? 'danger' : 'primary'}
+        onClose={() => setConfirmToggle(false)}
+        onConfirm={() => toggleStatusMutation.mutate()}
       />
     </div>
   );

@@ -65,7 +65,7 @@ const AlertsPanel: React.FC<AlertsPanelProps> = ({ stats, loading }) => {
 
   if (loading) {
     return (
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="h-5 bg-gray-200 rounded w-24 mb-4 animate-pulse"></div>
           <div className="space-y-3">
@@ -100,7 +100,7 @@ const AlertsPanel: React.FC<AlertsPanelProps> = ({ stats, loading }) => {
   }
 
   return (
-    <div className="grid lg:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Alertes système */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">

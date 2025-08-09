@@ -16,6 +16,7 @@ import {
 import { Link } from 'react-router-dom';
 import Pagination from '../../components/common/Pagination';
 import UserEditModal from '../../components/admin/UserEditModal';
+import ConfirmDialog from '../../components/modals/ConfirmDialog';
 import adminUserService from '../../services/adminUserService';
 import type { User } from '../../types';
 import type { UserFilters } from '../../services/adminUserService';
@@ -33,6 +34,7 @@ const AdminUsersPage: React.FC = () => {
   const [searchInput, setSearchInput] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [confirmUser, setConfirmUser] = useState<User | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
   // Query pour récupérer les utilisateurs
@@ -114,11 +116,7 @@ const AdminUsersPage: React.FC = () => {
   };
 
   const handleToggleStatus = (user: User) => {
-    if (confirm(
-      `Êtes-vous sûr de vouloir ${user.actif ? 'désactiver' : 'activer'} l'utilisateur ${user.name} ?`
-    )) {
-      toggleStatusMutation.mutate({ userId: user._id, currentStatus: user.actif });
-    }
+    setConfirmUser(user);
   };
 
   const clearFilters = () => {
@@ -166,11 +164,11 @@ const AdminUsersPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 min-h-screen overflow-x-hidden">
       <div className="page-container py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
               <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
                 Gestion des utilisateurs
@@ -433,6 +431,7 @@ const AdminUsersPage: React.FC = () => {
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end space-x-2">
                               <button
+                                type="button"
                                 onClick={() => handleEditUser(user)}
                                 className="text-primary-600 hover:text-primary-900 p-2 hover:bg-primary-50 rounded-lg transition-colors"
                                 title="Modifier l'utilisateur"
@@ -449,6 +448,7 @@ const AdminUsersPage: React.FC = () => {
                               </Link>
                               
                               <button
+                                type="button"
                                 onClick={() => handleToggleStatus(user)}
                                 disabled={toggleStatusMutation.isPending}
                                 className={cn(
@@ -480,8 +480,8 @@ const AdminUsersPage: React.FC = () => {
                   const roleInfo = getRoleInfo(user.role);
                   
                   return (
-                    <div key={user._id} className="p-6">
-                      <div className="flex items-start justify-between">
+                    <div key={user._id} className="p-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
                         <div className="flex items-start space-x-3">
                           <div className="flex-shrink-0 h-10 w-10">
                             <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
@@ -490,9 +490,9 @@ const AdminUsersPage: React.FC = () => {
                               </span>
                             </div>
                           </div>
-                          <div className="flex-1">
-                            <div className="font-medium text-gray-900">{user.name}</div>
-                            <div className="text-sm text-gray-600">{user.email}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-gray-900 truncate">{user.name}</div>
+                            <div className="text-sm text-gray-600 truncate">{user.email}</div>
                             
                             <div className="flex items-center space-x-2 mt-2">
                               <span className={cn(
@@ -519,7 +519,7 @@ const AdminUsersPage: React.FC = () => {
                           </div>
                         </div>
                         
-                        <div className="flex items-center space-x-1">
+                        <div className="flex flex-wrap gap-2 mt-2 sm:mt-0 sm:ml-auto">
                           <button
                             onClick={() => handleEditUser(user)}
                             className="text-primary-600 hover:text-primary-900 p-2 hover:bg-primary-50 rounded-lg transition-colors"
@@ -622,6 +622,21 @@ const AdminUsersPage: React.FC = () => {
           setSelectedUser(null);
         }}
         user={selectedUser}
+      />
+
+      {/* Confirmation désactivation/activation */}
+      <ConfirmDialog
+        isOpen={!!confirmUser}
+        title={confirmUser?.actif ? 'Confirmer la désactivation' : 'Confirmer l\'activation'}
+        description={confirmUser ? `Utilisateur : ${confirmUser.name}` : ''}
+        confirmText={confirmUser?.actif ? 'Désactiver' : 'Activer'}
+        confirmVariant={confirmUser?.actif ? 'danger' : 'primary'}
+        onClose={() => setConfirmUser(null)}
+        onConfirm={() => {
+          if (confirmUser) {
+            toggleStatusMutation.mutate({ userId: confirmUser._id, currentStatus: confirmUser.actif });
+          }
+        }}
       />
     </div>
   );
