@@ -1,33 +1,91 @@
 // src/pages/user/DashboardPage.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { 
   BookOpenIcon, 
   HeartIcon, 
   ClockIcon,
   ChartBarIcon,
   UserCircleIcon,
-  SparklesIcon
+  SparklesIcon,
+  FilmIcon,
+  MusicalNoteIcon,
+  ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
-import { formatters } from '../../utils';
+import borrowService from '../../services/borrowService';
+import mediaService from '../../services/mediaService';
+import { formatters, formatDate, dateUtils, cn } from '../../utils';
 
 const DashboardPage: React.FC = () => {
   const { user, isAdmin } = useAuth();
 
-  // Données factices à remplacer par des appels API
-  const userStats = {
-    activeLoans: 3,
-    favoriteCount: 12,
-    totalLoans: 47,
-    overdueLoans: 0
-  };
+  // Récupérer les emprunts de l'utilisateur
+  const {
+    data: borrowsData,
+    isLoading: borrowsLoading
+  } = useQuery({
+    queryKey: ['my-borrows-dashboard'],
+    queryFn: () => borrowService.getMyBorrows(1, 20), // Récupérer plus d'emprunts pour les stats
+    enabled: !!user,
+    staleTime: 2 * 60 * 1000,
+  });
 
-  const recentActivity = [
-    { id: 1, action: 'Emprunté', title: 'Le Seigneur des Anneaux', date: '2025-08-05', type: 'book' },
-    { id: 2, action: 'Retourné', title: 'Inception', date: '2025-08-04', type: 'movie' },
-    { id: 3, action: 'Ajouté aux favoris', title: 'Daft Punk - Random Access Memories', date: '2025-08-03', type: 'music' }
-  ];
+  // Récupérer les favoris de l'utilisateur
+  const {
+    data: favoritesData,
+    isLoading: favoritesLoading
+  } = useQuery({
+    queryKey: ['favorites-dashboard'],
+    queryFn: () => mediaService.getFavorites(1, 5), // Récupérer les 5 premiers favoris
+    enabled: !!user,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Calculer les statistiques réelles
+  const userStats = React.useMemo(() => {
+    if (!borrowsData?.data) {
+      return {
+        activeLoans: 0,
+        favoriteCount: Array.isArray(user?.favorites) ? user.favorites.length : 0,
+        totalLoans: 0,
+        overdueLoans: 0
+      };
+    }
+
+    const activeLoans = borrowsData.data.filter(b => b.status === 'borrowed').length;
+    const overdueLoans = borrowsData.data.filter(b => 
+      dateUtils.isOverdue(b.dueDate) && b.status !== 'returned'
+    ).length;
+
+    return {
+      activeLoans,
+      favoriteCount: Array.isArray(user?.favorites) ? user.favorites.length : 0,
+      totalLoans: borrowsData.data.length,
+      overdueLoans
+    };
+  }, [borrowsData?.data, user?.favorites]);
+
+  // Générer l'activité récente à partir des vraies données
+  const recentActivity = React.useMemo(() => {
+    if (!borrowsData?.data) return [];
+
+    // Trier par date de création (les plus récents en premier)
+    const sortedBorrows = [...borrowsData.data]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 5); // Prendre les 5 plus récents
+
+    return sortedBorrows.map(borrow => ({
+      id: borrow._id,
+      action: borrow.status === 'returned' ? 'Retourné' : 'Emprunté',
+      title: borrow.media.title,
+      date: borrow.status === 'returned' && borrow.returnDate 
+        ? borrow.returnDate 
+        : borrow.borrowDate,
+      type: borrow.media.type
+    }));
+  }, [borrowsData?.data]);
 
   const quickActions = [
     {
@@ -39,19 +97,37 @@ const DashboardPage: React.FC = () => {
     },
     {
       title: 'Mes favoris',
-      description: `${userStats.favoriteCount} médias sauvegardés`,
+      description: `${userStats.favoriteCount} média${userStats.favoriteCount > 1 ? 's' : ''} sauvegardé${userStats.favoriteCount > 1 ? 's' : ''}`,
       icon: HeartIcon,
       href: '/favorites',
       color: 'bg-red-500 hover:bg-red-600'
     },
     {
       title: 'Mes emprunts',
-      description: `${userStats.activeLoans} emprunts en cours`,
+      description: `${userStats.activeLoans} emprunt${userStats.activeLoans > 1 ? 's' : ''} en cours`,
       icon: ClockIcon,
       href: '/my-borrows',
       color: 'bg-green-500 hover:bg-green-600'
     }
   ];
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'book': return <BookOpenIcon className="h-5 w-5" />;
+      case 'movie': return <FilmIcon className="h-5 w-5" />;
+      case 'music': return <MusicalNoteIcon className="h-5 w-5" />;
+      default: return <BookOpenIcon className="h-5 w-5" />;
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'book': return 'bg-blue-100 text-blue-800';
+      case 'movie': return 'bg-purple-100 text-purple-800';
+      case 'music': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   return (
     <div className="page-container py-8">
@@ -100,7 +176,9 @@ const DashboardPage: React.FC = () => {
               <div className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-gray-900">{userStats.activeLoans}</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {borrowsLoading ? '...' : userStats.activeLoans}
+                    </p>
                     <p className="text-sm text-gray-600">Emprunts en cours</p>
                   </div>
                   <ClockIcon className="h-8 w-8 text-blue-500" />
@@ -110,7 +188,9 @@ const DashboardPage: React.FC = () => {
               <div className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-gray-900">{userStats.favoriteCount}</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {favoritesLoading ? '...' : userStats.favoriteCount}
+                    </p>
                     <p className="text-sm text-gray-600">Favoris</p>
                   </div>
                   <HeartIcon className="h-8 w-8 text-red-500" />
@@ -120,7 +200,9 @@ const DashboardPage: React.FC = () => {
               <div className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-gray-900">{userStats.totalLoans}</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {borrowsLoading ? '...' : userStats.totalLoans}
+                    </p>
                     <p className="text-sm text-gray-600">Total emprunts</p>
                   </div>
                   <BookOpenIcon className="h-8 w-8 text-green-500" />
@@ -130,17 +212,19 @@ const DashboardPage: React.FC = () => {
               <div className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-2xl font-bold text-gray-900">{userStats.overdueLoans}</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {borrowsLoading ? '...' : userStats.overdueLoans}
+                    </p>
                     <p className="text-sm text-gray-600">En retard</p>
                   </div>
                   <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
                     userStats.overdueLoans > 0 ? 'bg-red-100' : 'bg-green-100'
                   }`}>
-                    <span className={`text-sm font-bold ${
-                      userStats.overdueLoans > 0 ? 'text-red-600' : 'text-green-600'
-                    }`}>
-                      {userStats.overdueLoans > 0 ? '⚠️' : '✓'}
-                    </span>
+                    {userStats.overdueLoans > 0 ? (
+                      <ExclamationTriangleIcon className="h-5 w-5 text-red-600" />
+                    ) : (
+                      <span className="text-sm font-bold text-green-600">✓</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -151,31 +235,34 @@ const DashboardPage: React.FC = () => {
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Activité récente</h2>
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              {recentActivity.length > 0 ? (
+              {borrowsLoading ? (
+                <div className="p-8 text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Chargement de votre activité...</p>
+                </div>
+              ) : recentActivity.length > 0 ? (
                 <div className="divide-y divide-gray-100">
                   {recentActivity.map((activity) => (
                     <div key={activity.id} className="p-4 hover:bg-gray-50 transition-colors">
                       <div className="flex items-center space-x-3">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          activity.type === 'book' ? 'bg-blue-100' :
-                          activity.type === 'movie' ? 'bg-purple-100' : 'bg-green-100'
-                        }`}>
-                          <BookOpenIcon className={`w-5 h-5 ${
-                            activity.type === 'book' ? 'text-blue-600' :
-                            activity.type === 'movie' ? 'text-purple-600' : 'text-green-600'
-                          }`} />
+                        <div className={cn(
+                          'w-10 h-10 rounded-full flex items-center justify-center',
+                          getTypeColor(activity.type)
+                        )}>
+                          {getTypeIcon(activity.type)}
                         </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
                             {activity.action} : {activity.title}
                           </p>
-                          <p className="text-xs text-gray-500">{activity.date}</p>
+                          <p className="text-xs text-gray-500">
+                            {formatDate.timeAgo(activity.date)}
+                          </p>
                         </div>
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          activity.type === 'book' ? 'bg-blue-100 text-blue-800' :
-                          activity.type === 'movie' ? 'bg-purple-100 text-purple-800' : 
-                          'bg-green-100 text-green-800'
-                        }`}>
+                        <span className={cn(
+                          'px-2 py-1 text-xs font-medium rounded-full flex-shrink-0',
+                          getTypeColor(activity.type)
+                        )}>
                           {formatters.mediaType(activity.type)}
                         </span>
                       </div>
@@ -185,11 +272,69 @@ const DashboardPage: React.FC = () => {
               ) : (
                 <div className="p-8 text-center">
                   <SparklesIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500">Aucune activité récente</p>
+                  <p className="text-gray-500 mb-2">Aucune activité récente</p>
+                  <p className="text-sm text-gray-400">
+                    Commencez à emprunter des médias pour voir votre activité ici
+                  </p>
+                  <Link to="/catalog" className="btn-primary mt-4 inline-flex items-center">
+                    <BookOpenIcon className="h-4 w-4 mr-2" />
+                    Explorer le catalogue
+                  </Link>
                 </div>
               )}
             </div>
           </div>
+
+          {/* Favoris récents */}
+          {favoritesData && favoritesData.data.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">Mes favoris récents</h2>
+                <Link to="/favorites" className="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                  Voir tous ({userStats.favoriteCount})
+                </Link>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-200 p-4">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {favoritesData.data.slice(0, 3).map((media) => (
+                    <Link
+                      key={media._id}
+                      to={`/media/${media._id}`}
+                      className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="w-12 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                        {media.imageUrl ? (
+                          <img
+                            src={media.imageUrl}
+                            alt={media.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            {getTypeIcon(media.type)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-medium text-gray-900 truncate">
+                          {media.title}
+                        </h3>
+                        <p className="text-xs text-gray-600 truncate">
+                          {media.author}
+                        </p>
+                        <span className={cn(
+                          'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium mt-1',
+                          getTypeColor(media.type)
+                        )}>
+                          {formatters.mediaType(media.type)}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Sidebar - Actions rapides */}
@@ -234,6 +379,12 @@ const DashboardPage: React.FC = () => {
                 <span className="text-gray-600">Statut :</span>
                 <span className="ml-2 font-medium">{formatters.userRole(user?.role || 'user')}</span>
               </div>
+              {user?.createdAt && (
+                <div>
+                  <span className="text-gray-600">Membre depuis :</span>
+                  <span className="ml-2 font-medium">{formatDate.short(user.createdAt)}</span>
+                </div>
+              )}
             </div>
             <Link
               to="/settings"
@@ -242,6 +393,30 @@ const DashboardPage: React.FC = () => {
               Modifier mon profil →
             </Link>
           </div>
+
+          {/* Alertes pour emprunts en retard */}
+          {userStats.overdueLoans > 0 && (
+            <div className="mt-6 bg-red-50 border border-red-200 rounded-xl p-4">
+              <div className="flex items-start">
+                <ExclamationTriangleIcon className="h-5 w-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h3 className="font-medium text-red-900 mb-1">
+                    Emprunts en retard
+                  </h3>
+                  <p className="text-sm text-red-700 mb-3">
+                    Vous avez {userStats.overdueLoans} emprunt{userStats.overdueLoans > 1 ? 's' : ''} en retard. 
+                    Pensez à les retourner rapidement.
+                  </p>
+                  <Link
+                    to="/my-borrows?status=overdue"
+                    className="text-sm text-red-600 hover:text-red-700 font-medium"
+                  >
+                    Voir les emprunts en retard →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
