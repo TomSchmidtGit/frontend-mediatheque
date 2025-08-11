@@ -28,9 +28,9 @@ class MediaService {
     params.append('page', page.toString());
     params.append('limit', limit.toString());
     
-    console.log('📡 Récupération des favoris - page:', page, 'limit:', limit);
+
     const response = await api.get<PaginatedResponse<Media>>(`/users/favorites?${params}`);
-    console.log('✅ Favoris reçus:', response.data);
+    
     return response.data;
   }
 
@@ -53,14 +53,14 @@ class MediaService {
    * ✅ Toggle favori
    */
   async toggleFavorite(mediaId: string): Promise<{ message: string }> {
-    console.log('💖 Toggle favori pour média:', mediaId);
+
     
     try {
       const response = await api.post<{ message: string }>('/users/favorites/toggle', {
         mediaId
       });
       
-      console.log('✅ Réponse toggle favori:', response.data);
+
       return response.data;
     } catch (error) {
       console.error('❌ Erreur toggle favori:', error);
@@ -73,9 +73,9 @@ class MediaService {
    */
   async getFavoriteIds(): Promise<string[]> {
     try {
-      console.log('📡 Récupération des IDs favoris...');
+  
       const response = await api.get<{ favoriteIds: string[] }>('/users/favorites/ids');
-      console.log('✅ IDs favoris reçus:', response.data.favoriteIds);
+      
       return response.data.favoriteIds || [];
     } catch (error) {
       console.error('❌ Erreur récupération IDs favoris:', error);

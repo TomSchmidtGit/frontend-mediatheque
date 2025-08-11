@@ -23,9 +23,9 @@ class BorrowService {
     if (filters.status && filters.status !== 'all') params.append('status', filters.status);
     if (filters.mediaType) params.append('mediaType', filters.mediaType);
     
-    console.log('📡 Récupération des emprunts avec filtres:', filters);
+
     const response = await api.get<PaginatedResponse<Borrow>>(`/borrow/mine?${params}`);
-    console.log('✅ Emprunts reçus:', response.data);
+    
     return response.data;
   }
 
