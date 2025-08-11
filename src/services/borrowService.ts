@@ -2,16 +2,28 @@
 import api from './api';
 import type { Borrow, PaginatedResponse } from '../types';
 
+interface BorrowFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: 'all' | 'borrowed' | 'returned' | 'overdue';
+  mediaType?: 'book' | 'movie' | 'music';
+}
+
 class BorrowService {
   /**
-   * Récupérer les emprunts de l'utilisateur connecté
+   * Récupérer les emprunts de l'utilisateur connecté avec filtres
    */
-  async getMyBorrows(page: number = 1, limit: number = 12): Promise<PaginatedResponse<Borrow>> {
+  async getMyBorrows(filters: BorrowFilters = {}): Promise<PaginatedResponse<Borrow>> {
     const params = new URLSearchParams();
-    params.append('page', page.toString());
-    params.append('limit', limit.toString());
     
-    console.log('📡 Récupération des emprunts - page:', page, 'limit:', limit);
+    if (filters.page) params.append('page', filters.page.toString());
+    if (filters.limit) params.append('limit', filters.limit.toString());
+    if (filters.search) params.append('search', filters.search);
+    if (filters.status && filters.status !== 'all') params.append('status', filters.status);
+    if (filters.mediaType) params.append('mediaType', filters.mediaType);
+    
+    console.log('📡 Récupération des emprunts avec filtres:', filters);
     const response = await api.get<PaginatedResponse<Borrow>>(`/borrow/mine?${params}`);
     console.log('✅ Emprunts reçus:', response.data);
     return response.data;
