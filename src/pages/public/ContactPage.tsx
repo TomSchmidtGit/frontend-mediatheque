@@ -1,4 +1,4 @@
-// src/pages/public/ContactPage.tsx
+// src/pages/public/ContactPage.tsx - VERSION AVEC LIENS INTERACTIFS
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -87,7 +87,12 @@ const ContactPage: React.FC = () => {
         '79 Rue des Jardiniers',
         '69400 Villefranche-sur-Saône',
         'France'
-      ]
+      ],
+      action: {
+        type: 'maps',
+        href: 'https://www.google.com/maps/search/?api=1&query=79+Rue+des+Jardiniers,+69400+Villefranche-sur-Saône',
+        label: 'Voir sur Google Maps'
+      }
     },
     {
       icon: PhoneIcon,
@@ -95,7 +100,12 @@ const ContactPage: React.FC = () => {
       details: [
         '04 74 60 00 00',
         'Du mardi au samedi'
-      ]
+      ],
+      action: {
+        type: 'phone',
+        href: 'tel:0474600000',
+        label: 'Appeler maintenant'
+      }
     },
     {
       icon: EnvelopeIcon,
@@ -103,7 +113,12 @@ const ContactPage: React.FC = () => {
       details: [
         'contact@mediatheque.fr',
         'Réponse sous 24h'
-      ]
+      ],
+      action: {
+        type: 'email',
+        href: 'mailto:contact@mediatheque.fr?subject=Contact depuis le site web',
+        label: 'Envoyer un email'
+      }
     },
     {
       icon: ClockIcon,
@@ -205,17 +220,32 @@ const ContactPage: React.FC = () => {
                       <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
                         <Icon className="w-6 h-6 text-primary-600" />
                       </div>
-                      <div className="ml-4">
+                      <div className="ml-4 flex-1">
                         <h3 className="font-semibold text-gray-900 mb-2">
                           {info.title}
                         </h3>
-                        <div className="space-y-1">
+                        <div className="space-y-1 mb-3">
                           {info.details.map((detail, detailIndex) => (
                             <p key={detailIndex} className="text-gray-600 text-sm">
                               {detail}
                             </p>
                           ))}
                         </div>
+                        
+                        {/* Action interactive */}
+                        {info.action && (
+                          <a
+                            href={info.action.href}
+                            target={info.action.type === 'maps' ? '_blank' : undefined}
+                            rel={info.action.type === 'maps' ? 'noopener noreferrer' : undefined}
+                            className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors group"
+                          >
+                            {info.action.type === 'maps' && <MapPinIcon className="w-4 h-4 mr-1 group-hover:scale-110 transition-transform" />}
+                            {info.action.type === 'phone' && <PhoneIcon className="w-4 h-4 mr-1 group-hover:scale-110 transition-transform" />}
+                            {info.action.type === 'email' && <EnvelopeIcon className="w-4 h-4 mr-1 group-hover:scale-110 transition-transform" />}
+                            {info.action.label}
+                          </a>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -413,16 +443,16 @@ const ContactPage: React.FC = () => {
                   href="https://www.google.com/maps/search/?api=1&query=79+Rue+des+Jardiniers,+69400+Villefranche-sur-Saône"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 inline-flex items-center justify-center px-4 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors"
+                  className="flex-1 inline-flex items-center justify-center px-4 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors group"
                 >
-                  <MapPinIcon className="w-5 h-5 mr-2" />
+                  <MapPinIcon className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
                   Voir sur Google Maps
                 </a>
                 <a
                   href="tel:0474600000"
-                  className="flex-1 inline-flex items-center justify-center px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                  className="flex-1 inline-flex items-center justify-center px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors group"
                 >
-                  <PhoneIcon className="w-5 h-5 mr-2" />
+                  <PhoneIcon className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
                   04 74 60 00 00
                 </a>
               </div>
@@ -458,14 +488,27 @@ const ContactPage: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <a
                 href="tel:0474600000"
-                className="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors"
+                className="inline-flex items-center px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors group"
               >
-                <PhoneIcon className="w-5 h-5 mr-2" />
+                <PhoneIcon className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
                 04 74 60 00 00
               </a>
               <span className="text-primary-700">
                 Mar-Sam : 10h-18h • Jeu : 16h-20h
               </span>
+            </div>
+            
+            <div className="mt-6 pt-6 border-t border-primary-200">
+              <p className="text-primary-800 mb-4">
+                Ou envoyez-nous un email pour une réponse détaillée :
+              </p>
+              <a
+                href="mailto:contact@mediatheque.fr?subject=Contact depuis le site web"
+                className="inline-flex items-center px-6 py-3 border-2 border-primary-600 text-primary-700 rounded-lg font-semibold hover:bg-primary-600 hover:text-white transition-colors group"
+              >
+                <EnvelopeIcon className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                contact@mediatheque.fr
+              </a>
             </div>
           </div>
         </div>
