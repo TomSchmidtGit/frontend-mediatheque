@@ -8,6 +8,8 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 import HomePage from './pages/public/HomePage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import DashboardPage from './pages/user/DashboardPage';
 import FavoritesPage from './pages/user/FavoritesPages';
 import MyBorrowsPage from './pages/user/MyBorrowsPage';
@@ -46,6 +48,8 @@ function App() {
                 <Route index element={<HomePage />} />
                 <Route path="login" element={<LoginPage />} />
                 <Route path="register" element={<RegisterPage />} />
+                <Route path="forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="reset-password" element={<ResetPasswordPage />} />
                 
                 {/* Routes protégées utilisateur */}
                 <Route path="dashboard" element={

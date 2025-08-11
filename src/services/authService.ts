@@ -48,6 +48,39 @@ class AuthService {
     }
   }
 
+  /**
+   * Demande de réinitialisation de mot de passe
+   */
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const response = await api.post<{ message: string }>('/auth/forgot-password', {
+      email
+    });
+    return response.data;
+  }
+
+  /**
+   * Réinitialisation du mot de passe avec token
+   */
+  async resetPassword(token: string, email: string, newPassword: string): Promise<{ message: string }> {
+    const response = await api.post<{ message: string }>('/auth/reset-password', {
+      token,
+      email,
+      newPassword
+    });
+    return response.data;
+  }
+
+  /**
+   * Changement de mot de passe (utilisateur connecté)
+   */
+  async changePassword(currentPassword: string, newPassword: string): Promise<{ message: string }> {
+    const response = await api.post<{ message: string }>('/auth/change-password', {
+      currentPassword,
+      newPassword
+    });
+    return response.data;
+  }
+
 }
 
 export default new AuthService();
