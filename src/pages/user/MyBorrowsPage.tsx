@@ -1,5 +1,5 @@
 // src/pages/user/MyBorrowsPage.tsx
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
@@ -14,7 +14,9 @@ import {
   Squares2X2Icon,
   ListBulletIcon,
   UserIcon,
-  EyeIcon
+  EyeIcon,
+  FunnelIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import Pagination from '../../components/common/Pagination';
@@ -23,13 +25,30 @@ import { formatDate, dateUtils, formatters, cn } from '../../utils';
 import toast from 'react-hot-toast';
 import type { Borrow } from '../../types';
 
+interface BorrowFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: 'all' | 'borrowed' | 'returned' | 'overdue';
+  mediaType?: 'book' | 'movie' | 'music';
+}
+
 const MyBorrowsPage: React.FC = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [showFilters, setShowFilters] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const limit = 12;
+  
+  const [filters, setFilters] = useState<BorrowFilters>(() => ({
+    page: 1,
+    limit: 12,
+    search: '',
+    status: 'all',
+    mediaType: undefined
+  }));
 
   const {
     data: borrowsData,
@@ -37,111 +56,64 @@ const MyBorrowsPage: React.FC = () => {
     error,
     refetch
   } = useQuery({
-    queryKey: ['my-borrows', currentPage, statusFilter],
-    queryFn: () => borrowService.getMyBorrows(currentPage, limit),
+    queryKey: ['my-borrows', filters],
+    queryFn: () => borrowService.getMyBorrows(filters),
     enabled: !!user,
     staleTime: 30 * 1000, // Cache 30 secondes
   });
 
-  // Mutation pour retourner un livre - DÉSACTIVÉE (géré en présentiel)
-  // const returnBorrowMutation = useMutation({
-  //   mutationFn: (borrowId: string) => borrowService.returnBorrow(borrowId),
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ['my-borrows'] });
-  //     toast.success('Média retourné avec succès');
-  //   },
-  //   onError: (error: any) => {
-  //     console.error('Erreur lors du retour:', error);
-  //     toast.error('Erreur lors du retour du média');
-  //   }
-  // });
-
-  // Mutation pour prolonger un emprunt - DÉSACTIVÉE (géré en présentiel)
-  // const extendBorrowMutation = useMutation({
-  //   mutationFn: (borrowId: string) => borrowService.extendBorrow(borrowId),
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ['my-borrows'] });
-  //     toast.success('Emprunt prolongé avec succès');
-  //   },
-  //   onError: (error: any) => {
-  //     console.error('Erreur lors de la prolongation:', error);
-  //     toast.error('Erreur lors de la prolongation');
-  //   }
-  // });
-
-  // Générer des données factices pour la démo
-  const generateMockData = () => {
-    const mockBorrows: Borrow[] = Array.from({ length: 8 }, (_, index) => ({
-      _id: `borrow-${index + 1}`,
-      user: {
-        _id: user?._id || 'user1',
-        name: user?.name || 'Utilisateur',
-        email: user?.email || 'user@example.com',
-        role: 'user' as const,
-        favorites: [],
-        actif: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      media: {
-        _id: `media-${index + 1}`,
-        title: [
-          'Le Seigneur des Anneaux - La Communauté',
-          'Inception',
-          'Daft Punk - Random Access Memories',
-          'Harry Potter à l\'école des sorciers',
-          'The Dark Knight',
-          'Pink Floyd - The Wall',
-          'Naruto - Tome 1',
-          'Interstellar'
-        ][index] || `Média ${index + 1}`,
-        type: ['book', 'movie', 'music'][index % 3] as any,
-        author: [
-          'J.R.R. Tolkien',
-          'Christopher Nolan',
-          'Daft Punk',
-          'J.K. Rowling',
-          'Christopher Nolan',
-          'Pink Floyd',
-          'Masashi Kishimoto',
-          'Christopher Nolan'
-        ][index] || `Auteur ${index + 1}`,
-        year: 2000 + (index % 24),
-        available: index >= 3, // Les 3 premiers sont empruntés
-        description: `Description du média ${index + 1}`,
-        imageUrl: `https://picsum.photos/300/400?random=${index + 100}`,
-        reviews: [],
-        averageRating: Math.random() * 5,
-        tags: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      borrowDate: new Date(Date.now() - (index * 3 + 1) * 24 * 60 * 60 * 1000).toISOString(),
-      dueDate: new Date(Date.now() + (14 - index * 2) * 24 * 60 * 60 * 1000).toISOString(),
-      returnDate: index >= 3 ? new Date(Date.now() - index * 24 * 60 * 60 * 1000).toISOString() : undefined,
-      status: index >= 3 ? 'returned' : (index === 0 ? 'overdue' : 'borrowed') as any,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }));
-
-    // Filtrer par statut si nécessaire
-    let filteredBorrows = mockBorrows;
-    if (statusFilter !== 'all') {
-      filteredBorrows = mockBorrows.filter(borrow => borrow.status === statusFilter);
+  // Gestion de la recherche avec debounce
+  const handleSearchInputChange = useCallback((value: string) => {
+    setSearchInput(value);
+    
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
     }
+    
+    searchTimeoutRef.current = setTimeout(() => {
+      setFilters(prev => ({
+        ...prev,
+        search: value || undefined,
+        page: 1
+      }));
+    }, 500);
+  }, []);
 
-    const startIndex = (currentPage - 1) * limit;
-    const endIndex = startIndex + limit;
-
-    return {
-      data: filteredBorrows.slice(startIndex, endIndex),
-      currentPage,
-      totalPages: Math.ceil(filteredBorrows.length / limit),
-      totalItems: filteredBorrows.length
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
     };
+  }, []);
+
+  const handleFilterChange = (key: keyof BorrowFilters, value: any) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value === undefined || value === '' ? undefined : value,
+      page: 1
+    }));
   };
 
-  const displayData = borrowsData || generateMockData();
+  const handlePageChange = (page: number) => {
+    setFilters(prev => ({ ...prev, page }));
+  };
+
+  const clearFilters = () => {
+    setFilters({ page: 1, limit: 12, search: '', status: 'all', mediaType: undefined });
+    setSearchInput('');
+    setShowFilters(false);
+  };
+
+  const hasActiveFilters = !!(filters.search || filters.status !== 'all' || filters.mediaType);
+
+  // Utiliser les vraies données du serveur
+  const displayData = borrowsData || {
+    data: [],
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0
+  };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -199,26 +171,6 @@ const MyBorrowsPage: React.FC = () => {
       icon: ClockIcon
     };
   };
-
-  // Actions désactivées - gestion en présentiel uniquement
-  // const handleReturn = (borrowId: string) => {
-  //   if (confirm('Êtes-vous sûr de vouloir retourner ce média ?')) {
-  //     returnBorrowMutation.mutate(borrowId);
-  //   }
-  // };
-
-  // const handleExtend = (borrowId: string) => {
-  //   if (confirm('Voulez-vous prolonger cet emprunt de 14 jours ?')) {
-  //     extendBorrowMutation.mutate(borrowId);
-  //   }
-  // };
-
-  const statusOptions = [
-    { value: 'all', label: 'Tous les emprunts' },
-    { value: 'borrowed', label: 'En cours' },
-    { value: 'overdue', label: 'En retard' },
-    { value: 'returned', label: 'Retournés' }
-  ];
 
   if (error) {
     return (
@@ -316,20 +268,33 @@ const MyBorrowsPage: React.FC = () => {
         <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between space-y-4 lg:space-y-0">
             <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-              <select
-                value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="input text-base"
-              >
-                {statusOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              {/* Actions et filtres */}
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={cn(
+                    'btn-secondary flex items-center',
+                    hasActiveFilters && 'bg-primary-50 text-primary-700 border-primary-200'
+                  )}
+                >
+                  <FunnelIcon className="h-4 w-4 mr-2" />
+                  Filtres
+                  {hasActiveFilters && (
+                    <span className="ml-2 bg-primary-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {[filters.search, filters.status !== 'all', filters.mediaType].filter(Boolean).length}
+                    </span>
+                  )}
+                </button>
+
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearFilters}
+                    className="text-sm text-gray-600 hover:text-gray-900"
+                  >
+                    Effacer les filtres
+                  </button>
+                )}
+              </div>
               
               <p className="text-sm text-gray-600">
                 {isLoading ? (
@@ -338,6 +303,11 @@ const MyBorrowsPage: React.FC = () => {
                   <>
                     <span className="font-medium">{displayData.totalItems}</span>
                     {' '}emprunt{displayData.totalItems > 1 ? 's' : ''} trouvé{displayData.totalItems > 1 ? 's' : ''}
+                    {hasActiveFilters && (
+                      <span className="text-primary-600 ml-2">
+                        (filtré)
+                      </span>
+                    )}
                   </>
                 )}
               </p>
@@ -371,6 +341,58 @@ const MyBorrowsPage: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Filtres expandables */}
+          {showFilters && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <div className="grid md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Recherche
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Titre ou auteur du média..."
+                    value={searchInput}
+                    onChange={(e) => handleSearchInputChange(e.target.value)}
+                    className="input w-full"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Statut
+                  </label>
+                  <select
+                    value={filters.status || 'all'}
+                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                    className="input w-full"
+                  >
+                    <option value="all">Tous les statuts</option>
+                    <option value="borrowed">En cours</option>
+                    <option value="overdue">En retard</option>
+                    <option value="returned">Retournés</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Type de média
+                  </label>
+                  <select
+                    value={filters.mediaType || ''}
+                    onChange={(e) => handleFilterChange('mediaType', e.target.value)}
+                    className="input w-full"
+                  >
+                    <option value="">Tous les types</option>
+                    <option value="book">Livre</option>
+                    <option value="movie">Film</option>
+                    <option value="music">Musique</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Liste des emprunts */}
@@ -469,8 +491,8 @@ const MyBorrowsPage: React.FC = () => {
 
                                 {/* Info sur la gestion en présentiel */}
                                 {borrow.status !== 'returned' && (
-                                  <div className="text-xs text-gray-500 italic max-w-32">
-                                    Retour en présentiel uniquement
+                                  <div className="text-xs text-gray-500 italic text-center px-2">
+                                    Retour et prolongation en présentiel uniquement
                                   </div>
                                 )}
                               </div>
@@ -483,14 +505,15 @@ const MyBorrowsPage: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
                 {displayData.data.map((borrow) => {
                   const statusInfo = getStatusInfo(borrow);
                   const StatusIcon = statusInfo.icon;
 
                   return (
-                    <div key={borrow._id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                      <div className="aspect-[3/4] bg-gray-100 relative">
+                    <div key={borrow._id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
+                      {/* Image du média */}
+                      <div className="aspect-[3/4] bg-gray-100 overflow-hidden">
                         {borrow.media.imageUrl ? (
                           <img
                             src={borrow.media.imageUrl}
@@ -502,8 +525,11 @@ const MyBorrowsPage: React.FC = () => {
                             {getTypeIcon(borrow.media.type)}
                           </div>
                         )}
+                      </div>
 
-                        <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
+                      <div className="p-4">
+                        {/* Badges */}
+                        <div className="flex items-center space-x-2 mb-3">
                           <span className={cn(
                             'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
                             getTypeColor(borrow.media.type)
@@ -511,7 +537,7 @@ const MyBorrowsPage: React.FC = () => {
                             {getTypeIcon(borrow.media.type)}
                             <span className="ml-1">{formatters.mediaType(borrow.media.type)}</span>
                           </span>
-
+                          
                           <span className={cn(
                             'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
                             statusInfo.color
@@ -520,10 +546,9 @@ const MyBorrowsPage: React.FC = () => {
                             {statusInfo.label}
                           </span>
                         </div>
-                      </div>
 
-                      <div className="p-4">
-                        <h3 className="font-semibold text-gray-900 line-clamp-2 mb-2">
+                        {/* Titre et auteur */}
+                        <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
                           {borrow.media.title}
                         </h3>
                         
@@ -532,6 +557,7 @@ const MyBorrowsPage: React.FC = () => {
                           <span className="truncate">{borrow.media.author}</span>
                         </div>
 
+                        {/* Dates */}
                         <div className="space-y-2 text-sm mb-4">
                           <div>
                             <span className="text-gray-500">Emprunté :</span>
@@ -585,7 +611,7 @@ const MyBorrowsPage: React.FC = () => {
                 totalPages={displayData.totalPages}
                 totalItems={displayData.totalItems}
                 itemsPerPage={limit}
-                onPageChange={setCurrentPage}
+                onPageChange={handlePageChange}
                 loading={false}
               />
             )}
@@ -594,24 +620,24 @@ const MyBorrowsPage: React.FC = () => {
           <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
             <ClockIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-medium text-gray-900 mb-2">
-              {statusFilter === 'all' ? 'Aucun emprunt' : `Aucun emprunt ${statusOptions.find(opt => opt.value === statusFilter)?.label.toLowerCase()}`}
+              {!hasActiveFilters ? 'Aucun emprunt' : 'Aucun emprunt trouvé'}
             </h3>
             <p className="text-gray-600 mb-6">
-              {statusFilter === 'all' 
+              {!hasActiveFilters 
                 ? "Vous n'avez encore effectué aucun emprunt. Commencez à explorer notre catalogue !"
-                : "Aucun emprunt ne correspond à ce filtre."
+                : "Aucun emprunt ne correspond aux filtres appliqués."
               }
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/catalog" className="btn-primary">
                 Explorer le catalogue
               </Link>
-              {statusFilter !== 'all' && (
+              {hasActiveFilters && (
                 <button
-                  onClick={() => setStatusFilter('all')}
+                  onClick={clearFilters}
                   className="btn-secondary"
                 >
-                  Voir tous les emprunts
+                  Effacer les filtres
                 </button>
               )}
             </div>
