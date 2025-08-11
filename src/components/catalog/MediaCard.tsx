@@ -39,20 +39,10 @@ const MediaCard: React.FC<MediaCardProps> = ({
   const [isFavorite, setIsFavorite] = useState(computeIsFavorite());
   const [isToggling, setIsToggling] = useState(false);
 
-  // ✅ Synchroniser l'état
+  // Synchroniser l'état
   useEffect(() => {
     setIsFavorite(computeIsFavorite());
   }, [user?.favorites, media._id, isInFavoritesPage]);
-
-  // ✅ Debug
-  console.log('MediaCard:', {
-    mediaId: media._id,
-    mediaTitle: media.title,
-    isInFavoritesPage,
-    userFavorites: user?.favorites,
-    isFavorite,
-    isAuthenticated
-  });
 
   const getTypeIcon = (type: string) => {
     switch (type) {

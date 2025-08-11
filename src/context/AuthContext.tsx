@@ -37,7 +37,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const favoritesData = await mediaService.getFavorites(1, 1000); // Récupérer tous les favoris
       const favoriteIds = favoritesData.data.map(media => media._id);
       
-      console.log('✅ Favoris récupérés:', favoriteIds);
+  
       
       return {
         ...baseUser,
@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const fetchUserProfile = async (): Promise<User | null> => {
     try {
       const userProfile = await userService.getProfile();
-      console.log('✅ Profil utilisateur récupéré:', userProfile.name, 'Rôle:', userProfile.role);
+      
       return userProfile;
     } catch (error) {
       console.error('❌ Erreur lors de la récupération du profil:', error);
@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         if (token && storedUser) {
           const userData = JSON.parse(storedUser);
-          console.log('🔄 Restauration utilisateur depuis localStorage:', userData.name);
+  
           
           // Récupérer les informations complètes depuis l'API
           const freshUserProfile = await fetchUserProfile();
@@ -83,13 +83,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setUser(enrichedUser);
             localStorage.setItem('user', JSON.stringify(enrichedUser));
             
-            console.log('✅ Utilisateur restauré avec profil complet:', enrichedUser.name, 'Rôle:', enrichedUser.role, enrichedUser.favorites?.length, 'favoris');
+    
           } else {
-            console.log('❌ Impossible de récupérer le profil utilisateur, déconnexion');
+    
             logout();
           }
         } else {
-          console.log('❌ Pas de token ou d\'utilisateur en localStorage');
+  
         }
       } catch (error) {
         console.error('Erreur lors de l\'initialisation de l\'auth:', error);
@@ -122,7 +122,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(enrichedUser));
       
       toast.success(`Bienvenue, ${enrichedUser.name} !`);
-      console.log('✅ Connexion réussie:', enrichedUser.name, 'Rôle:', enrichedUser.role, enrichedUser.favorites?.length, 'favoris');
+      
     } catch (error: any) {
       const message = error.response?.data?.message || 'Erreur lors de la connexion';
       toast.error(message);
@@ -151,7 +151,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(userProfile));
       
       toast.success(`Bienvenue, ${response.name} ! Votre compte a été créé avec succès.`);
-      console.log('✅ Inscription réussie:', userProfile.name, 'Rôle:', userProfile.role);
+      
     } catch (error: any) {
       const message = error.response?.data?.message || 'Erreur lors de l\'inscription';
       toast.error(message);
@@ -177,7 +177,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const updatedUser = { ...user, ...userData };
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
-      console.log('🔄 Utilisateur mis à jour:', updatedUser.name, updatedUser.favorites?.length, 'favoris');
+      
     }
   };
 
@@ -189,7 +189,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const enrichedUser = await enrichUserWithFavorites(freshUserProfile);
           setUser(enrichedUser);
           localStorage.setItem('user', JSON.stringify(enrichedUser));
-          console.log('🔄 Données utilisateur rafraîchies:', enrichedUser.favorites?.length, 'favoris');
+  
         }
       } catch (error) {
         console.error('Erreur lors du rafraîchissement des données:', error);
