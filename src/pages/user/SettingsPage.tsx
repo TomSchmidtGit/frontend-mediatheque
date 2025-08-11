@@ -13,6 +13,7 @@ import { useAuth } from '../../context/AuthContext';
 import FormField from '../../components/forms/FormField';
 import DeleteAccountModal from '../../components/modals/DeleteAccountModal';
 import userService from '../../services/userService';
+import authService from '../../services/authService';
 import { profileSchema, passwordSchema } from '../../utils/validation';
 import type { ProfileFormData, PasswordFormData } from '../../utils/validation';
 import { cn } from '../../utils';
@@ -67,10 +68,14 @@ const SettingsPage: React.FC = () => {
 
   // Mutation pour changer le mot de passe
   const changePasswordMutation = useMutation({
-    mutationFn: (data: PasswordFormData) => userService.changePassword(data),
+    mutationFn: (data: PasswordFormData) => authService.changePassword(data.currentPassword, data.newPassword),
     onSuccess: () => {
       resetPassword();
-      toast.success('Mot de passe modifié avec succès');
+      toast.success('Mot de passe modifié avec succès. Vous allez être déconnecté pour des raisons de sécurité.');
+      // Déconnexion forcée après changement de mot de passe
+      setTimeout(() => {
+        logout();
+      }, 2000);
     },
     onError: (error: any) => {
       const message = error.response?.data?.message || 'Erreur lors du changement de mot de passe';

@@ -19,20 +19,7 @@ class UserService {
     return response.data;
   }
 
-  /**
-   * Changer le mot de passe
-   */
-  async changePassword(passwordData: {
-    currentPassword: string;
-    newPassword: string;
-    confirmPassword: string;
-  }): Promise<{ message: string }> {
-    const response = await api.put<{ message: string }>('/users/me/password', {
-      currentPassword: passwordData.currentPassword,
-      newPassword: passwordData.newPassword
-    });
-    return response.data;
-  }
+
 
   /**
    * Récupérer les favoris de l'utilisateur avec pagination

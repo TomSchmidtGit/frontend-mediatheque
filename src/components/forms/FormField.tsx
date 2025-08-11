@@ -9,6 +9,8 @@ interface FormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   showPasswordToggle?: boolean;
   isPasswordVisible?: boolean;
   onTogglePassword?: () => void;
+  register?: any; // Support pour react-hook-form
+  rightElement?: React.ReactNode; // Support pour les éléments à droite (icônes, etc.)
 }
 
 const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
@@ -20,6 +22,8 @@ const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
     isPasswordVisible = false,
     onTogglePassword,
     type,
+    register,
+    rightElement,
     ...props 
   }, ref) => {
     return (
@@ -32,14 +36,20 @@ const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
             ref={ref}
             type={showPasswordToggle ? (isPasswordVisible ? 'text' : 'password') : type}
             className={cn(
-              'input w-full',
+              'block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm',
               error && 'border-red-300 focus:ring-red-500 focus:border-red-500',
-              showPasswordToggle && 'pr-10',
+              (showPasswordToggle || rightElement) && 'pr-10',
               className
             )}
+            {...(register && props.name ? register(props.name) : {})}
             {...props}
           />
-          {showPasswordToggle && (
+          {rightElement && (
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+              {rightElement}
+            </div>
+          )}
+          {showPasswordToggle && !rightElement && (
             <button
               type="button"
               className="absolute inset-y-0 right-0 pr-3 flex items-center"
