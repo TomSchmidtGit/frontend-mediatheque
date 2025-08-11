@@ -11,7 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import FormField from '../../components/forms/FormField';
-import DeleteAccountModal from '../../components/modals/DeleteAccountModal';
+import DeactivateAccountModal from '../../components/modals/DeleteAccountModal';
 import userService from '../../services/userService';
 import authService from '../../services/authService';
 import { profileSchema, passwordSchema } from '../../utils/validation';
@@ -92,7 +92,7 @@ const SettingsPage: React.FC = () => {
   };
 
   const handleDeleteSuccess = () => {
-    toast.success('Compte supprimé avec succès');
+    toast.success('Compte désactivé avec succès');
     logout();
   };
 
@@ -374,31 +374,19 @@ const SettingsPage: React.FC = () => {
                     <h2 className="text-lg font-semibold text-gray-900">Actions du compte</h2>
                   </div>
                   <div className="p-6 space-y-4">
-                    <div className="flex items-center justify-between py-4 border-b border-gray-100">
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-900">Exporter mes données</h3>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Télécharger une copie de toutes vos données
-                        </p>
-                      </div>
-                      <button className="btn-secondary text-sm">
-                        Exporter
-                      </button>
-                    </div>
-
                     <div className="flex items-center justify-between py-4">
                       <div>
-                        <h3 className="text-sm font-medium text-red-900">Supprimer le compte</h3>
-                        <p className="text-xs text-red-600 mt-1">
-                          Supprimer définitivement votre compte et toutes vos données
+                        <h3 className="text-sm font-medium text-orange-900">Désactiver le compte</h3>
+                        <p className="text-xs text-orange-600 mt-1">
+                          Désactiver temporairement votre compte (réversible par un administrateur)
                         </p>
                       </div>
                       <button 
                         onClick={() => setShowDeleteModal(true)}
-                        className="px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors"
+                        className="px-4 py-2 text-sm font-medium text-orange-700 bg-orange-50 border border-orange-200 rounded-md hover:bg-orange-100 transition-colors"
                       >
                         <ExclamationTriangleIcon className="h-4 w-4 mr-1 inline" />
-                        Supprimer
+                        Désactiver
                       </button>
                     </div>
                   </div>
@@ -408,8 +396,8 @@ const SettingsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Modal de suppression de compte */}
-        <DeleteAccountModal
+        {/* Modal de désactivation de compte */}
+        <DeactivateAccountModal
           isOpen={showDeleteModal}
           onClose={() => setShowDeleteModal(false)}
           onSuccess={handleDeleteSuccess}
