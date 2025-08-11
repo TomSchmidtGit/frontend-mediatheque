@@ -74,16 +74,16 @@ export const passwordSchema = z.object({
   path: ['confirmPassword'],
 });
 
-// Schéma pour la suppression de compte
+// Schéma pour la désactivation de compte
 export const deleteAccountSchema = z.object({
   password: z
     .string()
-    .min(1, 'Le mot de passe est requis pour supprimer le compte'),
+    .min(1, 'Le mot de passe est requis pour désactiver le compte'),
   confirmation: z
     .string()
-    .min(1, 'Vous devez taper "SUPPRIMER" pour confirmer'),
-}).refine((data) => data.confirmation === 'SUPPRIMER', {
-  message: 'Vous devez taper "SUPPRIMER" pour confirmer la suppression',
+    .min(1, 'Vous devez taper "DESACTIVER" pour confirmer'),
+}).refine((data) => data.confirmation === 'DESACTIVER', {
+  message: 'Vous devez taper "DESACTIVER" pour confirmer la désactivation',
   path: ['confirmation'],
 });
 

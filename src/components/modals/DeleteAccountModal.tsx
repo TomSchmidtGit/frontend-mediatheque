@@ -1,4 +1,4 @@
-// src/components/modals/DeleteAccountModal.tsx
+// src/components/modals/DeactivateAccountModal.tsx
 import React, { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { useForm } from 'react-hook-form';
@@ -12,13 +12,13 @@ import type { DeleteAccountFormData } from '../../utils/validation';
 import { cn } from '../../utils';
 import toast from 'react-hot-toast';
 
-interface DeleteAccountModalProps {
+interface DeactivateAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
 }
 
-const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
+const DeactivateAccountModal: React.FC<DeactivateAccountModalProps> = ({
   isOpen,
   onClose,
   onSuccess
@@ -34,15 +34,15 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
     resolver: zodResolver(deleteAccountSchema)
   });
 
-  const deleteAccountMutation = useMutation({
-    mutationFn: (data: DeleteAccountFormData) => userService.deleteAccount(data.password),
+  const deactivateAccountMutation = useMutation({
+    mutationFn: (data: DeleteAccountFormData) => userService.deactivateAccount(data.password),
     onSuccess: () => {
-      toast.success('Compte supprimé avec succès');
+      toast.success('Compte désactivé avec succès');
       onSuccess?.();
       handleClose();
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || 'Erreur lors de la suppression du compte';
+      const message = error.response?.data?.message || 'Erreur lors de la désactivation du compte';
       toast.error(message);
     }
   });
@@ -53,7 +53,7 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
   };
 
   const onSubmit = (data: DeleteAccountFormData) => {
-    deleteAccountMutation.mutate(data);
+    deactivateAccountMutation.mutate(data);
   };
 
   return (
@@ -76,10 +76,10 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
               </div>
               <div className="ml-3">
                 <Dialog.Title className="text-lg font-medium text-gray-900">
-                  Supprimer le compte
+                  Désactiver le compte
                 </Dialog.Title>
                 <p className="text-sm text-gray-500">
-                  Cette action est irréversible
+                  Votre compte sera désactivé temporairement
                 </p>
               </div>
             </div>
@@ -94,18 +94,18 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
           {/* Content */}
           <form onSubmit={handleSubmit(onSubmit)} className="p-6">
             <div className="mb-6">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
                 <div className="flex items-start">
-                  <ExclamationTriangleIcon className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" />
+                  <ExclamationTriangleIcon className="w-5 h-5 text-orange-600 mt-0.5 mr-3 flex-shrink-0" />
                   <div className="text-sm">
-                    <h4 className="font-medium text-red-900 mb-2">
-                      Attention : cette action est définitive !
+                    <h4 className="font-medium text-orange-900 mb-2">
+                      Attention : votre compte sera désactivé !
                     </h4>
-                    <ul className="text-red-800 space-y-1 list-disc list-inside">
-                      <li>Votre compte sera définitivement supprimé</li>
-                      <li>Tous vos favoris seront perdus</li>
-                      <li>Votre historique d'emprunts sera supprimé</li>
-                      <li>Cette action ne peut pas être annulée</li>
+                    <ul className="text-orange-800 space-y-1 list-disc list-inside">
+                      <li>Votre compte sera temporairement désactivé</li>
+                      <li>Vous ne pourrez plus vous connecter</li>
+                      <li>Vos données seront conservées</li>
+                      <li>Un administrateur peut réactiver votre compte</li>
                     </ul>
                   </div>
                 </div>
@@ -126,13 +126,13 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
                 <div>
                   <FormField
                     {...register('confirmation')}
-                    label='Tapez "SUPPRIMER" pour confirmer'
-                    placeholder="SUPPRIMER"
+                    label='Tapez "DESACTIVER" pour confirmer'
+                    placeholder="DESACTIVER"
                     error={errors.confirmation?.message}
                     disabled={isSubmitting}
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Vous devez taper exactement "SUPPRIMER" (en majuscules) pour confirmer.
+                    Vous devez taper exactement "DESACTIVER" (en majuscules) pour confirmer.
                   </p>
                 </div>
               </div>
@@ -160,10 +160,10 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
                 {isSubmitting ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                    Suppression...
+                    Désactivation...
                   </>
                 ) : (
-                  'Supprimer définitivement'
+                  'Désactiver le compte'
                 )}
               </button>
             </div>
@@ -174,4 +174,4 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({
   );
 };
 
-export default DeleteAccountModal;
+export default DeactivateAccountModal;

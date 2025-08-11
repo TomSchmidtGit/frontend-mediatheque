@@ -50,11 +50,11 @@ class UserService {
   }
 
   /**
-   * Supprimer définitivement le compte
+   * Désactiver son propre compte
    */
-  async deleteAccount(password: string): Promise<{ message: string }> {
-    const response = await api.delete<{ message: string }>('/users/me', {
-      data: { password }
+  async deactivateAccount(password: string): Promise<{ message: string }> {
+    const response = await api.patch<{ message: string }>('/users/me/deactivate', {
+      password
     });
     return response.data;
   }
