@@ -357,6 +357,94 @@ const ContactPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Section localisation avec carte */}
+        <div className="mt-16 bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+          <div className="px-8 py-6 border-b border-gray-200">
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              📍 Notre localisation
+            </h3>
+            <p className="text-gray-600">
+              Venez nous rendre visite dans nos locaux situés au cœur de Villefranche-sur-Saône
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2">
+            {/* Informations de localisation */}
+            <div className="p-8 space-y-6">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+                  <MapPinIcon className="w-6 h-6 text-primary-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Adresse</h4>
+                  <address className="text-gray-600 not-italic leading-relaxed">
+                    Médiathèque<br />
+                    79 Rue des Jardiniers<br />
+                    69400 Villefranche-sur-Saône
+                  </address>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0 w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <ClockIcon className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Horaires d'ouverture</h4>
+                  <div className="text-gray-600 space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span>Mardi, Mercredi, Vendredi, Samedi</span>
+                      <span className="font-medium">10h00 - 18h00</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Jeudi</span>
+                      <span className="font-medium">16h00 - 20h00</span>
+                    </div>
+                    <div className="flex justify-between text-red-600">
+                      <span>Lundi et Dimanche</span>
+                      <span className="font-medium">Fermé</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a
+                  href="https://www.google.com/maps/search/?api=1&query=79+Rue+des+Jardiniers,+69400+Villefranche-sur-Saône"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 inline-flex items-center justify-center px-4 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors"
+                >
+                  <MapPinIcon className="w-5 h-5 mr-2" />
+                  Voir sur Google Maps
+                </a>
+                <a
+                  href="tel:0474600000"
+                  className="flex-1 inline-flex items-center justify-center px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                >
+                  <PhoneIcon className="w-5 h-5 mr-2" />
+                  04 74 60 00 00
+                </a>
+              </div>
+            </div>
+
+            {/* Carte interactive */}
+            <div className="relative h-96 lg:h-full min-h-96 bg-gray-100">
+              <iframe
+                src="https://www.openstreetmap.org/export/embed.html?bbox=4.712486267089845%2C45.98685663589249%2C4.730691909790039%2C45.995128329306606&layer=mapnik&marker=45.99099243258677%2C4.721589088439942"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Localisation de la Médiathèque CRM"
+                className="rounded-none lg:rounded-r-xl"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+
         {/* Section d'aide rapide */}
         <div className="mt-16 bg-gradient-to-r from-primary-50 to-blue-50 border border-primary-200 rounded-xl p-8">
           <div className="text-center max-w-3xl mx-auto">
