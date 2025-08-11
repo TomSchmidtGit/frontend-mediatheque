@@ -1,4 +1,4 @@
-// src/pages/public/ContactPage.tsx - VERSION AVEC LIENS INTERACTIFS
+// src/pages/public/ContactPage.tsx
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
