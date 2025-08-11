@@ -1,5 +1,4 @@
 // src/App.tsx
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
@@ -23,6 +22,7 @@ import AdminBorrowsPage from './pages/admin/AdminBorrowsPage';
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage';
 import ScrollToTop from './components/common/ScrollToTop';
 import AboutPage from './pages/public/AboutPage';
+import ContactPage from './pages/public/ContactPage';
 
 // Configuration React Query
 const queryClient = new QueryClient({
@@ -105,7 +105,7 @@ function App() {
                 <Route path="catalog" element={<CatalogPage />} />
                 <Route path="media/:id" element={<MediaDetailPage />} />
                 <Route path="about" element={<AboutPage />} />
-                <Route path="contact" element={<div className="page-container py-16 text-center"><h1>Contact (à venir)</h1></div>} />
+                <Route path="contact" element={<ContactPage />} />
                 
                 {/* Route 404 */}
                 <Route path="*" element={<div className="page-container py-16 text-center"><h1>Page non trouvée</h1></div>} />

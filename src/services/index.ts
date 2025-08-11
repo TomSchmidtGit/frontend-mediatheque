@@ -8,3 +8,4 @@ export { default as dashboardService } from './dashboardService';
 export { default as adminUserService } from './adminUserService';
 export { default as adminMediaService } from './adminMediaService';
 export { default as adminBorrowService } from './adminBorrowService';
+export { default as contactService } from './contactService';
