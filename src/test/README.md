@@ -2,12 +2,12 @@
 
 ## 🎯 État actuel des tests
 
-### ✅ Tests qui passent (30 fichiers, 596 tests)
+### ✅ Tests qui passent (31 fichiers, 617 tests)
 - **Composants communs** : `Button.test.jsx`, `FormField.test.jsx`, `Header.test.jsx`, `Navigation.test.jsx`, `Pagination.test.jsx`, `ProtectedRoute.test.jsx`
 - **Composants de layout** : `MainLayout.test.jsx`, `ScrollToTop.test.jsx`
 - **Composants de catalogue** : `MediaCard.test.jsx`, `CatalogFilters.test.jsx`
 - **Composants d'authentification** : `LoginForm.test.jsx`
-- **Composants admin** : `StatsCards.test.jsx`, `UserEditModal.test.jsx`, `MediaFormModal.test.jsx`, `CreateBorrowModal.test.jsx` ⬆️ **NOUVEAU**
+- **Composants admin** : `StatsCards.test.jsx`, `UserEditModal.test.jsx`, `MediaFormModal.test.jsx`, `CreateBorrowModal.test.jsx`, `AlertsPanel.test.jsx` ⬆️ **NOUVEAU**
 - **Pages d'authentification** : `LoginPage.test.jsx`, `RegisterPage.test.jsx`, `ForgotPasswordPage.test.jsx`, `ResetPasswordPage.test.jsx`
 - **Pages utilisateur** : `DashboardPage.test.jsx`, `SettingsPage.test.jsx`, `MyBorrowsPage.test.jsx`, `FavoritesPages.test.jsx`
 - **Pages publiques** : `HomePage.test.jsx`, `AboutPage.test.jsx`, `ContactPage.test.jsx`, `CatalogPage.test.jsx`
@@ -17,11 +17,11 @@
 - **Application** : `App.test.jsx`
 
 ### 📊 Statistiques actuelles
-- **Total des tests** : 596
-- **Tests qui passent** : 596 (100%)
+- **Total des tests** : 617
+- **Tests qui passent** : 617 (100%)
 - **Tests qui échouent** : 0 (0%)
-- **Fichiers de test** : 30
-- **Couverture des composants** : 64% (16/25) ⬆️ **AMÉLIORATION SIGNIFICATIVE**
+- **Fichiers de test** : 31
+- **Couverture des composants** : 68% (17/25) ⬆️ **AMÉLIORATION SIGNIFICATIVE**
 - **Couverture des pages** : 78% (14/18)
 - **Couverture des utilitaires** : 100% (2/2)
 
@@ -44,7 +44,8 @@ src/test/
 │   ├── StatsCards.test.jsx       # Statistiques admin ⬆️ **NOUVEAU**
 │   ├── UserEditModal.test.jsx    # Modal édition utilisateur ⬆️ **NOUVEAU**
 │   ├── MediaFormModal.test.jsx   # Modal création/édition média ⬆️ **NOUVEAU**
-│   ├── CreateBorrowModal.test.jsx # Modal création emprunt ⬆️ **NOUVEAU**
+│   ├── CreateBorrowModal.test.jsx # Modal création emprunt
+│   ├── AlertsPanel.test.jsx      # Panel d'alertes admin ⬆️ **NOUVEAU**
 │   └── App.test.jsx              # Composant principal
 ├── pages/              # Tests des pages
 │   ├── auth/           # Pages d'authentification
@@ -77,14 +78,14 @@ src/test/
 
 ## 🎭 Structure du projet testé
 
-### Composants testés (15/25)
+### Composants testés (17/25)
 ```
 src/components/
 ├── common/             # ✅ ProtectedRoute, ScrollToTop
 ├── forms/              # ✅ FormField
 ├── layout/             # ✅ Header, MainLayout
 ├── catalog/            # ✅ MediaCard, CatalogFilters
-├── admin/              # ✅ StatsCards, UserEditModal, MediaFormModal, CreateBorrowModal | ❌ AlertsPanel, RecentActivity
+├── admin/              # ✅ StatsCards, UserEditModal, MediaFormModal, CreateBorrowModal, AlertsPanel | ❌ RecentActivity
 ├── dashboard/          # ❌ BorrowStats
 └── modals/             # ❌ ConfirmDialog, DeleteAccountModal
 ```
@@ -208,8 +209,8 @@ src/context/            # ❌ AuthContext
 - `AdminUserDetailPage` - Détail d'un utilisateur
 
 ### Priorité 2 - Composants de gestion des emprunts (En cours)
-- `CreateBorrowModal` - Création d'emprunt
-- `AlertsPanel` - Gestion des alertes et notifications
+- `CreateBorrowModal` - Création d'emprunt ✅ **TERMINÉ**
+- `AlertsPanel` - Gestion des alertes et notifications ✅ **TERMINÉ**
 
 ### Priorité 3 - Composants modaux
 - `ConfirmDialog` - Dialogues de confirmation
@@ -284,6 +285,19 @@ npm test -- SettingsPage.test.jsx
 - **Context** : 100% (1/1)
 - **Couverture globale** : 90-95%
 
+## 🆕 **NOUVEAUTÉS - Tests ajoutés récemment**
+
+### **AlertsPanel.test.jsx** ✅ (21 tests)
+- **Objectif** : Tests du composant de gestion des alertes et notifications système
+- **Couverture** : Rendu du composant, affichage des alertes système, gestion des emprunts en retard, états de chargement, cas d'absence de données, gestion des priorités et types, limitation du nombre d'éléments, accessibilité et UX
+- **Points clés** : 
+  - Tests des deux sections principales (Alertes système + Emprunts en retard)
+  - Gestion des différents types d'alertes (warning, info, error) et priorités (high, medium, low)
+  - Tests des états de chargement avec skeleton loader
+  - Tests des cas d'absence de données avec messages appropriés
+  - Vérification de la limitation à 5 éléments maximum par section
+  - Tests d'accessibilité et de structure sémantique
+
 ## 🆕 Tests récemment ajoutés
 
 ### **Composants Admin (PRIORITÉ 1 - TERMINÉ)**
@@ -321,6 +335,17 @@ npm test -- SettingsPage.test.jsx
   - Réinitialisation du formulaire à la fermeture
   - Tests d'accessibilité et d'UX
 
+### **AlertsPanel.test.jsx** ✅ (21 tests)
+- **Objectif** : Tests du composant de gestion des alertes et notifications système
+- **Couverture** : Rendu du composant, affichage des alertes système, gestion des emprunts en retard, états de chargement, cas d'absence de données, gestion des priorités et types, limitation du nombre d'éléments, accessibilité et UX
+- **Points clés** : 
+  - Tests des deux sections principales (Alertes système + Emprunts en retard)
+  - Gestion des différents types d'alertes (warning, info, error) et priorités (high, medium, low)
+  - Tests des états de chargement avec skeleton loader
+  - Tests des cas d'absence de données avec messages appropriés
+  - Vérification de la limitation à 5 éléments maximum par section
+  - Tests d'accessibilité et de structure sémantique
+
 ## 🤝 Contribution
 
 ### Ajouter un nouveau test
@@ -346,5 +371,5 @@ npm test -- SettingsPage.test.jsx
 
 *Dernière mise à jour : Décembre 2024*
 *Tests créés et maintenus par l'équipe de développement*
-*État : Tous les tests passent (596/596) ✅*
-*Amélioration : +310 tests depuis la dernière mise à jour (+108%)*
+*État : Tous les tests passent (617/617) ✅*
+*Amélioration : +331 tests depuis la dernière mise à jour (+116%)*
