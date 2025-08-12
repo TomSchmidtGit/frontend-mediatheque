@@ -114,11 +114,11 @@ const ForgotPasswordPage: React.FC = () => {
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <FormField
-              label="Adresse email"
+              {...register('email')}
               name="email"
+              label="Adresse email"
               type="email"
-              register={register}
-              error={errors.email}
+              error={errors.email?.message}
               placeholder="votre@email.com"
               required
             />
