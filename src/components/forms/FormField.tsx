@@ -65,7 +65,7 @@ const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
         </div>
         {error && (
           <p className="text-sm text-red-600 flex items-center mt-1">
-            <span className="inline-block w-1 h-1 bg-red-600 rounded-full mr-2"></span>
+            <span className="inline-block w-1 h-1 bg-red-600 rounded-full mr-2" data-testid="error-dot"></span>
             {error}
           </p>
         )}
