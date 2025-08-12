@@ -2,12 +2,12 @@
 
 ## 🎯 État actuel des tests
 
-### ✅ Tests qui passent (29 fichiers, 570 tests)
+### ✅ Tests qui passent (30 fichiers, 596 tests)
 - **Composants communs** : `Button.test.jsx`, `FormField.test.jsx`, `Header.test.jsx`, `Navigation.test.jsx`, `Pagination.test.jsx`, `ProtectedRoute.test.jsx`
 - **Composants de layout** : `MainLayout.test.jsx`, `ScrollToTop.test.jsx`
 - **Composants de catalogue** : `MediaCard.test.jsx`, `CatalogFilters.test.jsx`
 - **Composants d'authentification** : `LoginForm.test.jsx`
-- **Composants admin** : `StatsCards.test.jsx`, `UserEditModal.test.jsx`, `MediaFormModal.test.jsx` ⬆️ **NOUVEAU**
+- **Composants admin** : `StatsCards.test.jsx`, `UserEditModal.test.jsx`, `MediaFormModal.test.jsx`, `CreateBorrowModal.test.jsx` ⬆️ **NOUVEAU**
 - **Pages d'authentification** : `LoginPage.test.jsx`, `RegisterPage.test.jsx`, `ForgotPasswordPage.test.jsx`, `ResetPasswordPage.test.jsx`
 - **Pages utilisateur** : `DashboardPage.test.jsx`, `SettingsPage.test.jsx`, `MyBorrowsPage.test.jsx`, `FavoritesPages.test.jsx`
 - **Pages publiques** : `HomePage.test.jsx`, `AboutPage.test.jsx`, `ContactPage.test.jsx`, `CatalogPage.test.jsx`
@@ -17,11 +17,11 @@
 - **Application** : `App.test.jsx`
 
 ### 📊 Statistiques actuelles
-- **Total des tests** : 570
-- **Tests qui passent** : 570 (100%)
+- **Total des tests** : 596
+- **Tests qui passent** : 596 (100%)
 - **Tests qui échouent** : 0 (0%)
-- **Fichiers de test** : 29
-- **Couverture des composants** : 60% (15/25) ⬆️ **AMÉLIORATION SIGNIFICATIVE**
+- **Fichiers de test** : 30
+- **Couverture des composants** : 64% (16/25) ⬆️ **AMÉLIORATION SIGNIFICATIVE**
 - **Couverture des pages** : 78% (14/18)
 - **Couverture des utilitaires** : 100% (2/2)
 
@@ -44,6 +44,7 @@ src/test/
 │   ├── StatsCards.test.jsx       # Statistiques admin ⬆️ **NOUVEAU**
 │   ├── UserEditModal.test.jsx    # Modal édition utilisateur ⬆️ **NOUVEAU**
 │   ├── MediaFormModal.test.jsx   # Modal création/édition média ⬆️ **NOUVEAU**
+│   ├── CreateBorrowModal.test.jsx # Modal création emprunt ⬆️ **NOUVEAU**
 │   └── App.test.jsx              # Composant principal
 ├── pages/              # Tests des pages
 │   ├── auth/           # Pages d'authentification
@@ -83,7 +84,7 @@ src/components/
 ├── forms/              # ✅ FormField
 ├── layout/             # ✅ Header, MainLayout
 ├── catalog/            # ✅ MediaCard, CatalogFilters
-├── admin/              # ✅ StatsCards, UserEditModal, MediaFormModal | ❌ AlertsPanel, CreateBorrowModal, RecentActivity
+├── admin/              # ✅ StatsCards, UserEditModal, MediaFormModal, CreateBorrowModal | ❌ AlertsPanel, RecentActivity
 ├── dashboard/          # ❌ BorrowStats
 └── modals/             # ❌ ConfirmDialog, DeleteAccountModal
 ```
@@ -303,9 +304,22 @@ npm test -- SettingsPage.test.jsx
 - **Points clés** : Mode création vs édition, gestion des types de média, validation des champs
 
 ### **Prochaines étapes**
-- **PRIORITÉ 2** : Composants de gestion des emprunts (`CreateBorrowModal`, `AlertsPanel`)
+- **PRIORITÉ 2** : Composants de gestion des emprunts (`AlertsPanel`)
 - **PRIORITÉ 3** : Composants modaux restants
 - **PRIORITÉ 4** : Services et Context
+
+## 🆕 **NOUVEAUTÉS - Tests ajoutés récemment**
+
+### **CreateBorrowModal.test.jsx** ✅ (26 tests)
+- **Objectif** : Tests du modal de création d'emprunt administrateur
+- **Couverture** : Rendu du modal, recherche d'utilisateurs et médias, sélection, soumission du formulaire, gestion des erreurs, fermeture et réinitialisation
+- **Points clés** : 
+  - Tests de recherche avec React Query
+  - Gestion des états de sélection
+  - Validation du formulaire et soumission
+  - Gestion des erreurs et états de chargement
+  - Réinitialisation du formulaire à la fermeture
+  - Tests d'accessibilité et d'UX
 
 ## 🤝 Contribution
 
@@ -332,5 +346,5 @@ npm test -- SettingsPage.test.jsx
 
 *Dernière mise à jour : Décembre 2024*
 *Tests créés et maintenus par l'équipe de développement*
-*État : Tous les tests passent (511/511) ✅*
-*Amélioration : +284 tests depuis la dernière mise à jour (+125%)*
+*État : Tous les tests passent (596/596) ✅*
+*Amélioration : +310 tests depuis la dernière mise à jour (+108%)*
