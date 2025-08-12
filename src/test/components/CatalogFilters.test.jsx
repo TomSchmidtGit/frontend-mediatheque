@@ -155,8 +155,8 @@ describe('CatalogFilters', () => {
       />
     );
 
-    const fictionCategory = screen.getByText('Fiction');
-    fireEvent.click(fictionCategory);
+    const categorySelect = screen.getByRole('combobox');
+    fireEvent.change(categorySelect, { target: { value: 'fiction' } });
 
     expect(mockOnFiltersChange).toHaveBeenCalledWith({
       ...mockFilters,

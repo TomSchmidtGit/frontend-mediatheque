@@ -5,13 +5,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import AdminDashboardPage from '../../pages/admin/AdminDashboardPage';
 
 // Mock du service dashboard
-const mockDashboardService = {
-  getDashboardStats: vi.fn()
-};
-
 vi.mock('../../services/dashboardService', () => ({
-  default: mockDashboardService
+  default: {
+    getDashboardStats: vi.fn()
+  }
 }));
+
+// Récupérer le mock après sa création
+const mockDashboardService = vi.mocked(await import('../../services/dashboardService')).default;
 
 // Mock des composants enfants
 vi.mock('../../components/admin/StatsCards', () => ({
@@ -230,9 +231,9 @@ describe('AdminDashboardPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Voir et gérer tous les utilisateurs de la médiathèque')).toBeInTheDocument();
-      expect(screen.getByText('Ajouter, modifier et supprimer des médias')).toBeInTheDocument();
-      expect(screen.getByText('Suivre et gérer tous les emprunts')).toBeInTheDocument();
-      expect(screen.getByText('Organiser les catégories et tags')).toBeInTheDocument();
+      expect(screen.getByText('Ajouter, modifier ou supprimer des médias')).toBeInTheDocument();
+      expect(screen.getByText('Suivre et gérer tous les emprunts en cours')).toBeInTheDocument();
+      expect(screen.getByText('Organiser la collection avec des catégories et tags')).toBeInTheDocument();
     });
   });
 

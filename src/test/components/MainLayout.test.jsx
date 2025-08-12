@@ -4,11 +4,12 @@ import { describe, it, expect, vi } from 'vitest';
 import MainLayout from '../../components/layout/MainLayout';
 
 // Mock du contexte d'authentification
-const mockUseAuth = vi.fn();
-
 vi.mock('../../context/AuthContext', () => ({
-  useAuth: mockUseAuth
+  useAuth: vi.fn()
 }));
+
+// Récupérer le mock après sa création
+const mockUseAuth = vi.mocked(await import('../../context/AuthContext')).useAuth;
 
 // Mock du composant Header
 vi.mock('../../components/layout/Header', () => ({

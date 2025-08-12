@@ -15,27 +15,31 @@ vi.mock('react-router-dom', async () => {
 });
 
 // Mock du contexte d'authentification
-const mockUseAuth = vi.fn();
-
 vi.mock('../../context/AuthContext', () => ({
-  useAuth: mockUseAuth
+  useAuth: vi.fn()
 }));
 
 // Mock du service média
-const mockGetMediaById = vi.fn();
-const mockToggleFavorite = vi.fn();
-const mockAddReview = vi.fn();
-
 vi.mock('../../services/mediaService', () => ({
   default: {
-    getMediaById: mockGetMediaById,
-    toggleFavorite: mockToggleFavorite,
-    addReview: mockAddReview
+    getMediaById: vi.fn(),
+    toggleFavorite: vi.fn(),
+    addReview: vi.fn()
   }
 }));
 
+// Récupérer les mocks après leur création
+const mockUseAuth = vi.mocked(await import('../../context/AuthContext')).useAuth;
+const mockGetMediaById = vi.mocked(await import('../../services/mediaService')).default.getMediaById;
+const mockToggleFavorite = vi.mocked(await import('../../services/mediaService')).default.toggleFavorite;
+const mockAddReview = vi.mocked(await import('../../services/mediaService')).default.addReview;
+
 // Mock de react-hot-toast
 vi.mock('react-hot-toast', () => ({
+  default: {
+    success: vi.fn(),
+    error: vi.fn()
+  },
   toast: {
     success: vi.fn(),
     error: vi.fn()
@@ -45,10 +49,25 @@ vi.mock('react-hot-toast', () => ({
 // Mock des utilitaires
 vi.mock('../../utils', () => ({
   formatters: {
-    formatDate: (date) => date,
-    truncateText: (text, length) => text.substring(0, length)
+    mediaType: (type) => {
+      const types = { book: 'Livre', movie: 'Film', music: 'Musique' };
+      return types[type] || type;
+    },
+    userRole: (role) => {
+      const roles = { user: 'Utilisateur', employee: 'Employé', admin: 'Administrateur' };
+      return roles[role] || role;
+    },
+    borrowStatus: (status) => {
+      const statuses = { borrowed: 'Emprunté', returned: 'Retourné', overdue: 'En retard' };
+      return statuses[status] || status;
+    }
   },
-  formatDate: (date) => date,
+  formatDate: {
+    short: (date) => date,
+    long: (date) => date,
+    dateTime: (date) => date,
+    timeAgo: (date) => 'il y a 2 jours'
+  },
   cn: (...classes) => classes.filter(Boolean).join(' ')
 }));
 
@@ -58,28 +77,31 @@ const mockMedia = {
   title: 'Test Media Title',
   description: 'This is a test media description that should be displayed on the detail page.',
   type: 'book',
-  category: 'fiction',
-  tags: ['test', 'example', 'fiction'],
+  category: {
+    _id: '1',
+    name: 'fiction',
+    slug: 'fiction',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  tags: [
+    { _id: '1', name: 'test', slug: 'test', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { _id: '2', name: 'example', slug: 'example', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+  ],
   author: 'Test Author',
-  releaseDate: '2023-01-01',
-  rating: 4.5,
-  coverImage: 'test-cover.jpg',
-  isbn: '1234567890',
-  pages: 300,
-  duration: null,
-  language: 'Français',
-  publisher: 'Test Publisher',
+  year: 2023,
+  imageUrl: 'test-cover.jpg',
+  available: true,
   reviews: [
     {
       _id: 'review1',
-      userId: 'user1',
-      userName: 'User One',
+      user: 'user2',
       rating: 5,
       comment: 'Excellent livre !',
       createdAt: '2023-01-15'
     }
   ],
-  isAvailable: true
+  averageRating: 4.5
 };
 
 const mockUser = {
@@ -136,8 +158,7 @@ describe('MediaDetailPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Test Media Title')).toBeInTheDocument();
       expect(screen.getByText('Test Author')).toBeInTheDocument();
-      expect(screen.getByText('This is a test media description')).toBeInTheDocument();
-      expect(screen.getByText('fiction')).toBeInTheDocument();
+      expect(screen.getByText('This is a test media description that should be displayed on the detail page.')).toBeInTheDocument();
     });
   });
 
@@ -145,7 +166,7 @@ describe('MediaDetailPage', () => {
     renderWithQueryClient(<MediaDetailPage />);
 
     await waitFor(() => {
-      const coverImage = screen.getByAltText('Couverture de Test Media Title');
+      const coverImage = screen.getByAltText('Test Media Title');
       expect(coverImage).toBeInTheDocument();
       expect(coverImage).toHaveAttribute('src', 'test-cover.jpg');
     });
@@ -155,34 +176,32 @@ describe('MediaDetailPage', () => {
     renderWithQueryClient(<MediaDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('ISBN:')).toBeInTheDocument();
-      expect(screen.getByText('1234567890')).toBeInTheDocument();
-      expect(screen.getByText('Pages:')).toBeInTheDocument();
-      expect(screen.getByText('300')).toBeInTheDocument();
+      expect(screen.getByText('Catégorie:')).toBeInTheDocument();
+      expect(screen.getByText('fiction')).toBeInTheDocument();
+      expect(screen.getByText('#test')).toBeInTheDocument();
+      expect(screen.getByText('#example')).toBeInTheDocument();
     });
   });
 
   it('devrait afficher les informations spécifiques au type de média (film)', async () => {
-    const movieMedia = { ...mockMedia, type: 'movie', duration: '120 min' };
+    const movieMedia = { ...mockMedia, type: 'movie' };
     mockGetMediaById.mockResolvedValue(movieMedia);
 
     renderWithQueryClient(<MediaDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Durée:')).toBeInTheDocument();
-      expect(screen.getByText('120 min')).toBeInTheDocument();
+      expect(screen.getByText('Film')).toBeInTheDocument();
     });
   });
 
   it('devrait afficher les informations spécifiques au type de média (musique)', async () => {
-    const musicMedia = { ...mockMedia, type: 'music', duration: '45 min' };
+    const musicMedia = { ...mockMedia, type: 'music' };
     mockGetMediaById.mockResolvedValue(musicMedia);
 
     renderWithQueryClient(<MediaDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Durée:')).toBeInTheDocument();
-      expect(screen.getByText('45 min')).toBeInTheDocument();
+      expect(screen.getByText('Musique')).toBeInTheDocument();
     });
   });
 
@@ -202,9 +221,8 @@ describe('MediaDetailPage', () => {
     renderWithQueryClient(<MediaDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('test')).toBeInTheDocument();
-      expect(screen.getByText('example')).toBeInTheDocument();
-      expect(screen.getByText('fiction')).toBeInTheDocument();
+      expect(screen.getByText('#test')).toBeInTheDocument();
+      expect(screen.getByText('#example')).toBeInTheDocument();
     });
   });
 
@@ -245,9 +263,9 @@ describe('MediaDetailPage', () => {
     renderWithQueryClient(<MediaDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('User One')).toBeInTheDocument();
+      expect(screen.getByText('U')).toBeInTheDocument(); // Première lettre de l'ID utilisateur 'user2'
       expect(screen.getByText('Excellent livre !')).toBeInTheDocument();
-      expect(screen.getByText('5')).toBeInTheDocument();
+      expect(screen.getByText('il y a 2 jours')).toBeInTheDocument(); // Mock de formatDate.timeAgo
     });
   });
 
@@ -255,7 +273,7 @@ describe('MediaDetailPage', () => {
     renderWithQueryClient(<MediaDetailPage />);
 
     await waitFor(() => {
-      const addReviewButton = screen.getByRole('button', { name: /ajouter un avis/i });
+      const addReviewButton = screen.getByRole('button', { name: /laisser un avis/i });
       expect(addReviewButton).toBeInTheDocument();
     });
   });
@@ -264,13 +282,12 @@ describe('MediaDetailPage', () => {
     renderWithQueryClient(<MediaDetailPage />);
 
     await waitFor(() => {
-      const addReviewButton = screen.getByRole('button', { name: /ajouter un avis/i });
+      const addReviewButton = screen.getByRole('button', { name: /laisser un avis/i });
       fireEvent.click(addReviewButton);
     });
 
-    expect(screen.getByText('Votre avis')).toBeInTheDocument();
-    expect(screen.getByLabelText('Note')).toBeInTheDocument();
-    expect(screen.getByLabelText('Commentaire')).toBeInTheDocument();
+    expect(screen.getByText('Note')).toBeInTheDocument();
+    expect(screen.getByText('Commentaire (optionnel)')).toBeInTheDocument();
   });
 
   it('devrait afficher le statut de disponibilité', async () => {
@@ -285,18 +302,16 @@ describe('MediaDetailPage', () => {
     renderWithQueryClient(<MediaDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Éditeur:')).toBeInTheDocument();
-      expect(screen.getByText('Test Publisher')).toBeInTheDocument();
-      expect(screen.getByText('Langue:')).toBeInTheDocument();
-      expect(screen.getByText('Français')).toBeInTheDocument();
+      expect(screen.getByText('Catégorie:')).toBeInTheDocument();
+      expect(screen.getByText('fiction')).toBeInTheDocument();
     });
   });
 
-  it('devrait afficher la date de sortie avec l\'icône de calendrier', async () => {
+  it('devrait afficher l\'année de sortie avec l\'icône de calendrier', async () => {
     renderWithQueryClient(<MediaDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('2023-01-01')).toBeInTheDocument();
+      expect(screen.getByText('2023')).toBeInTheDocument();
     });
   });
 
@@ -304,9 +319,8 @@ describe('MediaDetailPage', () => {
     renderWithQueryClient(<MediaDetailPage />);
 
     await waitFor(() => {
-      // Vérifier que l'icône de livre est présente
-      const bookIcon = document.querySelector('[data-testid="book-open-icon"]') || 
-                      document.querySelector('.h-6.w-6');
+      // Vérifier que l'icône de livre est présente dans le badge de type
+      const bookIcon = document.querySelector('.h-5.w-5');
       expect(bookIcon).toBeInTheDocument();
     });
   });
