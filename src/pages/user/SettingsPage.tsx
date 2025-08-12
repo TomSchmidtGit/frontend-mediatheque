@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   UserCircleIcon,
   KeyIcon,
@@ -13,6 +13,7 @@ import { useAuth } from '../../context/AuthContext';
 import FormField from '../../components/forms/FormField';
 import DeactivateAccountModal from '../../components/modals/DeleteAccountModal';
 import userService from '../../services/userService';
+import borrowService from '../../services/borrowService';
 import authService from '../../services/authService';
 import { profileSchema, passwordSchema } from '../../utils/validation';
 import type { ProfileFormData, PasswordFormData } from '../../utils/validation';
@@ -27,6 +28,41 @@ const SettingsPage: React.FC = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  // Récupérer les emprunts de l'utilisateur pour les statistiques
+  const {
+    data: borrowsData,
+    isLoading: borrowsLoading
+  } = useQuery({
+    queryKey: ['my-borrows-settings'],
+    queryFn: () => borrowService.getMyBorrows({ page: 1, limit: 100 }), // Récupérer plus d'emprunts pour les stats
+    enabled: !!user,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  // Calculer les statistiques réelles
+  const userStats = React.useMemo(() => {
+    if (!borrowsData?.data) {
+      return {
+        activeLoans: 0,
+        favoriteCount: Array.isArray(user?.favorites) ? user.favorites.length : 0,
+        totalLoans: 0,
+        overdueLoans: 0
+      };
+    }
+
+    const activeLoans = borrowsData.data.filter(b => b.status === 'borrowed').length;
+    const overdueLoans = borrowsData.data.filter(b => 
+      new Date(b.dueDate) < new Date() && b.status !== 'returned'
+    ).length;
+
+    return {
+      activeLoans,
+      favoriteCount: Array.isArray(user?.favorites) ? user.favorites.length : 0,
+      totalLoans: borrowsData.data.length,
+      overdueLoans
+    };
+  }, [borrowsData?.data, user?.favorites]);
 
   // Formulaire de profil
   const {
@@ -349,22 +385,39 @@ const SettingsPage: React.FC = () => {
                     </h2>
                   </div>
                   <div className="p-6">
-                    <div className="grid md:grid-cols-3 gap-6">
-                      <div className="text-center p-4 bg-blue-50 rounded-lg">
-                        <div className="text-2xl font-bold text-gray-900">
-                          {Array.isArray(user?.favorites) ? user.favorites.length : 0}
+                    {borrowsLoading ? (
+                      <div className="grid md:grid-cols-3 gap-6">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="text-center p-4 bg-gray-50 rounded-lg">
+                            <div className="animate-pulse">
+                              <div className="h-8 bg-gray-200 rounded mb-2"></div>
+                              <div className="h-4 bg-gray-200 rounded"></div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="grid md:grid-cols-3 gap-6">
+                        <div className="text-center p-4 bg-blue-50 rounded-lg">
+                          <div className="text-2xl font-bold text-gray-900">
+                            {userStats.favoriteCount}
+                          </div>
+                          <div className="text-sm text-gray-600">Favoris</div>
                         </div>
-                        <div className="text-sm text-gray-600">Favoris</div>
+                        <div className="text-center p-4 bg-green-50 rounded-lg">
+                          <div className="text-2xl font-bold text-green-600">
+                            {userStats.activeLoans}
+                          </div>
+                          <div className="text-sm text-gray-600">Emprunts en cours</div>
+                        </div>
+                        <div className="text-center p-4 bg-purple-50 rounded-lg">
+                          <div className="text-2xl font-bold text-purple-600">
+                            {userStats.totalLoans}
+                          </div>
+                          <div className="text-sm text-gray-600">Total emprunts</div>
+                        </div>
                       </div>
-                      <div className="text-center p-4 bg-green-50 rounded-lg">
-                        <div className="text-2xl font-bold text-green-600">3</div>
-                        <div className="text-sm text-gray-600">Emprunts en cours</div>
-                      </div>
-                      <div className="text-center p-4 bg-purple-50 rounded-lg">
-                        <div className="text-2xl font-bold text-purple-600">47</div>
-                        <div className="text-sm text-gray-600">Total emprunts</div>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
 
