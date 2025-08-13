@@ -19,7 +19,13 @@ class ContactService {
    * Envoyer un message de contact
    */
   async sendMessage(data: ContactFormData): Promise<ContactResponse> {
-    const response = await api.post<ContactResponse>('/contact', data);
+    // Nettoyer le numéro de téléphone avant l'envoi
+    const cleanedData = {
+      ...data,
+      phone: data.phone ? data.phone.replace(/[\s\-\(\)]/g, '') : undefined,
+    };
+
+    const response = await api.post<ContactResponse>('/contact', cleanedData);
     return response.data;
   }
 }
