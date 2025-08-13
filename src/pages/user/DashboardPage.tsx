@@ -181,7 +181,7 @@ const DashboardPage: React.FC = () => {
                     </p>
                     <p className="text-sm text-gray-600">Emprunts en cours</p>
                   </div>
-                  <ClockIcon className="h-8 w-8 text-blue-500" />
+                  <ClockIcon className="h-8 w-8 text-blue-500" data-testid="clock-icon" />
                 </div>
               </div>
               
@@ -193,7 +193,7 @@ const DashboardPage: React.FC = () => {
                     </p>
                     <p className="text-sm text-gray-600">Favoris</p>
                   </div>
-                  <HeartIcon className="h-8 w-8 text-red-500" />
+                  <HeartIcon className="h-8 w-8 text-red-500" data-testid="heart-icon" />
                 </div>
               </div>
               
@@ -205,7 +205,7 @@ const DashboardPage: React.FC = () => {
                     </p>
                     <p className="text-sm text-gray-600">Total emprunts</p>
                   </div>
-                  <BookOpenIcon className="h-8 w-8 text-green-500" />
+                  <BookOpenIcon className="h-8 w-8 text-green-500" data-testid="book-icon" />
                 </div>
               </div>
               
@@ -271,13 +271,13 @@ const DashboardPage: React.FC = () => {
                 </div>
               ) : (
                 <div className="p-8 text-center">
-                  <SparklesIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <SparklesIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" data-testid="sparkles-icon" />
                   <p className="text-gray-500 mb-2">Aucune activité récente</p>
                   <p className="text-sm text-gray-400">
                     Commencez à emprunter des médias pour voir votre activité ici
                   </p>
                   <Link to="/catalog" className="btn-primary mt-4 inline-flex items-center">
-                    <BookOpenIcon className="h-4 w-4 mr-2" />
+                    <BookOpenIcon className="h-4 w-4 mr-2" data-testid="book-icon" />
                     Explorer le catalogue
                   </Link>
                 </div>
@@ -363,7 +363,7 @@ const DashboardPage: React.FC = () => {
           {/* Profil utilisateur */}
           <div className="mt-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200 p-4">
             <h3 className="font-medium text-gray-900 mb-3 flex items-center">
-              <UserCircleIcon className="w-5 h-5 mr-2" />
+              <UserCircleIcon className="w-5 h-5 mr-2" data-testid="user-icon" />
               Mon profil
             </h3>
             <div className="space-y-2 text-sm">

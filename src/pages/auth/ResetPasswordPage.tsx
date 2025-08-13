@@ -148,11 +148,11 @@ const ResetPasswordPage: React.FC = () => {
             </div>
 
             <FormField
-              label="Nouveau mot de passe"
+              {...register('newPassword')}
               name="newPassword"
+              label="Nouveau mot de passe"
               type={showPassword ? "text" : "password"}
-              register={register}
-              error={errors.newPassword}
+              error={errors.newPassword?.message}
               placeholder="Nouveau mot de passe"
               required
               rightElement={
@@ -176,11 +176,11 @@ const ResetPasswordPage: React.FC = () => {
             />
 
             <FormField
-              label="Confirmer le mot de passe"
+              {...register('confirmPassword')}
               name="confirmPassword"
+              label="Confirmer le mot de passe"
               type={showConfirmPassword ? "text" : "password"}
-              register={register}
-              error={errors.confirmPassword}
+              error={errors.confirmPassword?.message}
               placeholder="Confirmer le mot de passe"
               required
               rightElement={

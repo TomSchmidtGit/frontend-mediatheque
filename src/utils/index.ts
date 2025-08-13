@@ -88,7 +88,15 @@ export const formatters = {
  * Validation d'email
  */
 export const isValidEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Regex plus stricte qui exige un domaine d'au moins 2 caractères après le point
+  // et rejette les domaines commençant par un point
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  
+  // Vérifications supplémentaires
+  if (email.includes('@.')) return false; // Rejette @.com
+  if (email.includes('..')) return false; // Rejette user..name@example.com
+  if (email.startsWith('.') || email.endsWith('.')) return false; // Rejette .user@example.com ou user@example.com.
+  
   return emailRegex.test(email);
 };
 
