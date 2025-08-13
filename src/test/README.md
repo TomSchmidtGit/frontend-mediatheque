@@ -99,7 +99,7 @@ src/pages/
 │   ├── ✅ AdminBorrowsPage
 │   ├── ✅ AdminCategoriesPage
 │   ├── ✅ AdminMediaPage
-│   └── ❌ AdminUserDetailPage
+│   └── ✅ AdminUserDetailPage
 ├── media/              # ✅ MediaDetailPage
 └── public/             # ✅ HomePage, AboutPage, ContactPage, CatalogPage
 ```
