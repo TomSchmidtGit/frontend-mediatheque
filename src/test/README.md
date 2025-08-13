@@ -87,7 +87,7 @@ src/components/
 ├── catalog/            # ✅ MediaCard, CatalogFilters
 ├── admin/              # ✅ StatsCards, UserEditModal, MediaFormModal, CreateBorrowModal, AlertsPanel, RecentActivity
 ├── dashboard/          # ✅ BorrowStats
-└── modals/             # ❌ ConfirmDialog, DeleteAccountModal
+└── modals/             # ✅ ConfirmDialog, ✅ DeleteAccountModal
 ```
 
 ### Pages testées (14/18) ⬆️ **AMÉLIORATION SIGNIFICATIVE**
