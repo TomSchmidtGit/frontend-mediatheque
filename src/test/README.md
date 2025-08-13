@@ -17,11 +17,11 @@
 - **Application** : `App.test.jsx`
 
 ### 📊 Statistiques actuelles
-- **Total des tests** : 640
-- **Tests qui passent** : 640 (100%)
+- **Total des tests** : 656
+- **Tests qui passent** : 656 (100%)
 - **Tests qui échouent** : 0 (0%)
-- **Fichiers de test** : 32
-- **Couverture des composants** : 72% (18/25) ⬆️ **AMÉLIORATION SIGNIFICATIVE**
+- **Fichiers de test** : 33
+- **Couverture des composants** : 76% (19/25) ⬆️ **AMÉLIORATION SIGNIFICATIVE**
 - **Couverture des pages** : 78% (14/18)
 - **Couverture des utilitaires** : 100% (2/2)
 
@@ -41,11 +41,11 @@ src/test/
 │   ├── CatalogFilters.test.jsx   # Filtres du catalogue
 │   ├── MediaCard.test.jsx        # Carte média
 │   ├── LoginForm.test.jsx        # Formulaire de connexion
-│   ├── StatsCards.test.jsx       # Statistiques admin ⬆️ **NOUVEAU**
-│   ├── UserEditModal.test.jsx    # Modal édition utilisateur ⬆️ **NOUVEAU**
-│   ├── MediaFormModal.test.jsx   # Modal création/édition média ⬆️ **NOUVEAU**
+│   ├── StatsCards.test.jsx       # Statistiques admin
+│   ├── UserEditModal.test.jsx    # Modal édition utilisateur
+│   ├── MediaFormModal.test.jsx   # Modal création/édition média
 │   ├── CreateBorrowModal.test.jsx # Modal création emprunt
-│   ├── AlertsPanel.test.jsx      # Panel d'alertes admin ⬆️ **NOUVEAU**
+│   ├── AlertsPanel.test.jsx      # Panel d'alertes admin
 │   └── App.test.jsx              # Composant principal
 ├── pages/              # Tests des pages
 │   ├── auth/           # Pages d'authentification
@@ -78,7 +78,7 @@ src/test/
 
 ## 🎭 Structure du projet testé
 
-### Composants testés (18/25)
+### Composants testés (19/25)
 ```
 src/components/
 ├── common/             # ✅ ProtectedRoute, ScrollToTop
@@ -86,7 +86,7 @@ src/components/
 ├── layout/             # ✅ Header, MainLayout
 ├── catalog/            # ✅ MediaCard, CatalogFilters
 ├── admin/              # ✅ StatsCards, UserEditModal, MediaFormModal, CreateBorrowModal, AlertsPanel, RecentActivity
-├── dashboard/          # ❌ BorrowStats
+├── dashboard/          # ✅ BorrowStats
 └── modals/             # ❌ ConfirmDialog, DeleteAccountModal
 ```
 
@@ -124,6 +124,17 @@ src/context/            # ❌ AuthContext
 ```
 
 ## 🆕 **NOUVEAUTÉS - Tests ajoutés récemment**
+
+### **BorrowStats.test.jsx** ✅ (16 tests)
+- **Objectif** : Tests du composant de statistiques des emprunts utilisateur
+- **Couverture** : Rendu du composant, calcul des statistiques, navigation et liens, styles CSS, accessibilité et UX, gestion des données complexes
+- **Points clés** : 
+  - Tests des 4 cartes de statistiques (En cours, En retard, Retournés, Total)
+  - Calculs automatiques basés sur les statuts des emprunts
+  - Navigation vers les pages appropriées avec filtres
+  - Gestion des cas d'absence de données
+  - Tests des styles et classes CSS
+  - Structure sémantique et accessibilité
 
 ### **SettingsPage.test.jsx**
 - **13 tests** couvrant tous les aspects de la page
@@ -268,7 +279,7 @@ npm test -- SettingsPage.test.jsx
 ## 📈 Objectifs de couverture
 
 ### Objectif à court terme (1-2 semaines)
-- **Composants** : 72% (18/25) ✅ **ATTEINT**
+- **Composants** : 76% (19/25) ✅ **ATTEINT**
 - **Pages** : 85% (15/18)
 - **Utilitaires** : 100% (2/2) ✅
 
@@ -321,7 +332,7 @@ npm test -- SettingsPage.test.jsx
 - **PRIORITÉ 1** : Composants admin (TERMINÉ) ✅
   - `StatsCards`, `UserEditModal`, `MediaFormModal`, `CreateBorrowModal`, `AlertsPanel`, `RecentActivity`
 - **PRIORITÉ 2** : Composants de gestion des emprunts (TERMINÉ) ✅
-  - `CreateBorrowModal`, `AlertsPanel`
+  - `CreateBorrowModal`, `AlertsPanel`, `BorrowStats`
 - **PRIORITÉ 3** : Composants modaux restants
   - `ConfirmDialog`, `DeleteAccountModal`
 - **PRIORITÉ 4** : Services et Context
@@ -387,5 +398,5 @@ npm test -- SettingsPage.test.jsx
 
 *Dernière mise à jour : Décembre 2024*
 *Tests créés et maintenus par l'équipe de développement*
-*État : Tous les tests passent (640/640) ✅*
-*Amélioration : +354 tests depuis la dernière mise à jour (+124%)*
+*État : Tous les tests passent (656/656) ✅*
+*Amélioration : +370 tests depuis la dernière mise à jour (+129%)*
