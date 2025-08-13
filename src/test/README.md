@@ -57,7 +57,8 @@ src/test/
 │   │   └── FavoritesPages.test.jsx      
 │   ├── admin/          # Pages administrateur
 │   │   ├── AdminDashboardPage.test.jsx
-│   │   └── AdminBorrowsPage.test.jsx
+│   │   ├── AdminBorrowsPage.test.jsx
+│   │   └── AdminCategoriesPage.test.jsx
 │   ├── media/          # Pages média
 │   │   └── MediaDetailPage.test.jsx
 │   └── public/         # Pages publiques
@@ -96,7 +97,7 @@ src/pages/
 ├── admin/              # ✅ AdminDashboardPage
 │   ├── ✅ AdminUsersPage
 │   ├── ✅ AdminBorrowsPage
-│   ├── ❌ AdminCategoriesPage
+│   ├── ✅ AdminCategoriesPage
 │   ├── ❌ AdminMediaPage
 │   └── ❌ AdminUserDetailPage
 ├── media/              # ✅ MediaDetailPage
