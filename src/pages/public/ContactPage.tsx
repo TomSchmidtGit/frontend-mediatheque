@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { 
-  EnvelopeIcon, 
+import {
+  EnvelopeIcon,
   PhoneIcon,
   MapPinIcon,
   ClockIcon,
@@ -41,8 +41,21 @@ const contactSchema = z.object({
   phone: z
     .string()
     .optional()
-    .refine((val) => !val || /^[\d\s\+\-\(\)]{10,}$/.test(val), {
-      message: 'Format de téléphone invalide'
+    .refine((val) => {
+      if (!val) return true; // Téléphone optionnel
+
+      // Nettoyer le numéro (supprimer espaces, tirets, parenthèses)
+      const cleanPhone = val.replace(/[\s\-\(\)]/g, '');
+
+      // Vérifier qu'il ne contient que des chiffres et commence par +
+      if (cleanPhone.startsWith('+')) {
+        return /^\+\d{10,15}$/.test(cleanPhone);
+      }
+
+      // Vérifier qu'il ne contient que des chiffres et fait 10-15 caractères
+      return /^\d{10,15}$/.test(cleanPhone);
+    }, {
+      message: 'Format de téléphone invalide. Utilisez 10-15 chiffres (ex: 0474600000 ou +33474600000)'
     })
 });
 
@@ -149,16 +162,16 @@ const ContactPage: React.FC = () => {
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <CheckCircleIcon className="w-10 h-10 text-green-600" />
               </div>
-              
+
               <h1 className="text-3xl font-bold text-gray-900 mb-4">
                 Message envoyé avec succès !
               </h1>
-              
+
               <p className="text-lg text-gray-600 mb-8">
-                Merci pour votre message. Notre équipe vous répondra dans les plus brefs délais, 
+                Merci pour votre message. Notre équipe vous répondra dans les plus brefs délais,
                 généralement sous 24 heures.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
                   onClick={() => setIsSubmitted(false)}
@@ -189,14 +202,14 @@ const ContactPage: React.FC = () => {
           <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full"></div>
           <div className="absolute bottom-20 left-20 w-24 h-24 bg-white/5 rounded-full"></div>
         </div>
-        
+
         <div className="relative page-container py-20">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="text-4xl lg:text-5xl font-bold mb-6">
               Contactez-nous
             </h1>
             <p className="text-xl text-primary-100 leading-relaxed">
-              Une question, une suggestion ou besoin d'aide ? Notre équipe est là pour vous accompagner. 
+              Une question, une suggestion ou besoin d'aide ? Notre équipe est là pour vous accompagner.
               N'hésitez pas à nous contacter !
             </p>
           </div>
@@ -210,7 +223,7 @@ const ContactPage: React.FC = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-8">
               Nos coordonnées
             </h2>
-            
+
             <div className="space-y-6">
               {contactInfo.map((info, index) => {
                 const Icon = info.icon;
@@ -231,7 +244,7 @@ const ContactPage: React.FC = () => {
                             </p>
                           ))}
                         </div>
-                        
+
                         {/* Action interactive */}
                         {info.action && (
                           <a
@@ -352,7 +365,7 @@ const ContactPage: React.FC = () => {
                         Protection des données
                       </h4>
                       <p className="text-blue-800">
-                        Vos données personnelles sont utilisées uniquement pour traiter votre demande 
+                        Vos données personnelles sont utilisées uniquement pour traiter votre demande
                         et vous contacter. Elles ne sont jamais partagées avec des tiers.
                       </p>
                     </div>
@@ -377,7 +390,7 @@ const ContactPage: React.FC = () => {
                       </>
                     )}
                   </button>
-                  
+
                   <p className="text-sm text-gray-500">
                     * Champs obligatoires
                   </p>
@@ -482,7 +495,7 @@ const ContactPage: React.FC = () => {
               Besoin d'une réponse rapide ?
             </h3>
             <p className="text-primary-800 mb-6">
-              Pour les questions urgentes ou les problèmes techniques, 
+              Pour les questions urgentes ou les problèmes techniques,
               n'hésitez pas à nous appeler directement pendant nos heures d'ouverture.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -497,7 +510,7 @@ const ContactPage: React.FC = () => {
                 Mar-Sam : 10h-18h • Jeu : 16h-20h
               </span>
             </div>
-            
+
             <div className="mt-6 pt-6 border-t border-primary-200">
               <p className="text-primary-800 mb-4">
                 Ou envoyez-nous un email pour une réponse détaillée :
