@@ -98,7 +98,7 @@ src/pages/
 │   ├── ✅ AdminUsersPage
 │   ├── ✅ AdminBorrowsPage
 │   ├── ✅ AdminCategoriesPage
-│   ├── ❌ AdminMediaPage
+│   ├── ✅ AdminMediaPage
 │   └── ❌ AdminUserDetailPage
 ├── media/              # ✅ MediaDetailPage
 └── public/             # ✅ HomePage, AboutPage, ContactPage, CatalogPage
