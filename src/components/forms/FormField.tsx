@@ -14,27 +14,36 @@ interface FormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
-  ({ 
-    label, 
-    error, 
-    className,
-    showPasswordToggle = false,
-    isPasswordVisible = false,
-    onTogglePassword,
-    type,
-    register,
-    rightElement,
-    ...props 
-  }, ref) => {
+  (
+    {
+      label,
+      error,
+      className,
+      showPasswordToggle = false,
+      isPasswordVisible = false,
+      onTogglePassword,
+      type,
+      register,
+      rightElement,
+      ...props
+    },
+    ref
+  ) => {
     return (
-      <div className="space-y-1">
-        <label className="block text-sm font-medium text-gray-700">
+      <div className='space-y-1'>
+        <label className='block text-sm font-medium text-gray-700'>
           {label}
         </label>
-        <div className="relative">
+        <div className='relative'>
           <input
             ref={ref}
-            type={showPasswordToggle ? (isPasswordVisible ? 'text' : 'password') : type}
+            type={
+              showPasswordToggle
+                ? isPasswordVisible
+                  ? 'text'
+                  : 'password'
+                : type
+            }
             className={cn(
               'block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm',
               error && 'border-red-300 focus:ring-red-500 focus:border-red-500',
@@ -45,27 +54,30 @@ const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
             {...props}
           />
           {rightElement && (
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+            <div className='absolute inset-y-0 right-0 pr-3 flex items-center'>
               {rightElement}
             </div>
           )}
           {showPasswordToggle && !rightElement && (
             <button
-              type="button"
-              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              type='button'
+              className='absolute inset-y-0 right-0 pr-3 flex items-center'
               onClick={onTogglePassword}
             >
               {isPasswordVisible ? (
-                <EyeSlashIcon className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                <EyeSlashIcon className='h-4 w-4 text-gray-400 hover:text-gray-600' />
               ) : (
-                <EyeIcon className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                <EyeIcon className='h-4 w-4 text-gray-400 hover:text-gray-600' />
               )}
             </button>
           )}
         </div>
         {error && (
-          <p className="text-sm text-red-600 flex items-center mt-1">
-            <span className="inline-block w-1 h-1 bg-red-600 rounded-full mr-2" data-testid="error-dot"></span>
+          <p className='text-sm text-red-600 flex items-center mt-1'>
+            <span
+              className='inline-block w-1 h-1 bg-red-600 rounded-full mr-2'
+              data-testid='error-dot'
+            ></span>
             {error}
           </p>
         )}

@@ -18,7 +18,7 @@ const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
   totalItems,
   itemsPerPage,
-  loading = false
+  loading = false,
 }) => {
   // Ne pas afficher la pagination s'il n'y a qu'une seule page
   if (totalPages <= 1) return null;
@@ -27,7 +27,7 @@ const Pagination: React.FC<PaginationProps> = ({
   const getPageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;
-    
+
     if (totalPages <= maxVisiblePages) {
       // Afficher toutes les pages si elles tiennent
       for (let i = 1; i <= totalPages; i++) {
@@ -60,31 +60,27 @@ const Pagination: React.FC<PaginationProps> = ({
         pages.push(totalPages);
       }
     }
-    
+
     return pages;
   };
 
   const pageNumbers = getPageNumbers();
-  
+
   // Calculer les éléments affichés
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+    <div className='flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0'>
       {/* Informations sur les résultats */}
-      <div className="text-sm text-gray-700">
-        Affichage de{' '}
-        <span className="font-medium">{startItem}</span>
-        {' '}à{' '}
-        <span className="font-medium">{endItem}</span>
-        {' '}sur{' '}
-        <span className="font-medium">{totalItems}</span>
-        {' '}résultats
+      <div className='text-sm text-gray-700'>
+        Affichage de <span className='font-medium'>{startItem}</span> à{' '}
+        <span className='font-medium'>{endItem}</span> sur{' '}
+        <span className='font-medium'>{totalItems}</span> résultats
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center space-x-2">
+      <div className='flex items-center space-x-2'>
         {/* Bouton précédent */}
         <button
           onClick={() => onPageChange(currentPage - 1)}
@@ -97,18 +93,18 @@ const Pagination: React.FC<PaginationProps> = ({
               : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
           )}
         >
-          <ChevronLeftIcon className="h-4 w-4 mr-1" />
+          <ChevronLeftIcon className='h-4 w-4 mr-1' />
           Précédent
         </button>
 
         {/* Numéros de pages */}
-        <div className="flex items-center space-x-1">
+        <div className='flex items-center space-x-1'>
           {pageNumbers.map((page, index) => {
             if (page === 'ellipsis') {
               return (
                 <span
                   key={`ellipsis-${index}`}
-                  className="px-3 py-2 text-gray-500"
+                  className='px-3 py-2 text-gray-500'
                 >
                   ...
                 </span>
@@ -129,8 +125,8 @@ const Pagination: React.FC<PaginationProps> = ({
                   isCurrentPage
                     ? 'bg-primary-600 text-white shadow-sm'
                     : loading
-                    ? 'text-gray-400 cursor-not-allowed'
-                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
                 )}
               >
                 {pageNumber}
@@ -152,7 +148,7 @@ const Pagination: React.FC<PaginationProps> = ({
           )}
         >
           Suivant
-          <ChevronRightIcon className="h-4 w-4 ml-1" />
+          <ChevronRightIcon className='h-4 w-4 ml-1' />
         </button>
       </div>
     </div>

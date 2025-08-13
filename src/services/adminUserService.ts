@@ -22,7 +22,7 @@ class AdminUserService {
    */
   async getUsers(filters: UserFilters = {}): Promise<PaginatedResponse<User>> {
     const params = new URLSearchParams();
-    
+
     if (filters.page) params.append('page', filters.page.toString());
     if (filters.limit) params.append('limit', filters.limit.toString());
     if (filters.search) params.append('search', filters.search);
@@ -52,9 +52,14 @@ class AdminUserService {
   /**
    * Désactiver/Réactiver un utilisateur
    */
-  async toggleUserStatus(userId: string, currentStatus: boolean): Promise<{ message: string }> {
+  async toggleUserStatus(
+    userId: string,
+    currentStatus: boolean
+  ): Promise<{ message: string }> {
     const endpoint = currentStatus ? 'deactivate' : 'reactivate';
-    const response = await api.patch<{ message: string }>(`/users/${userId}/${endpoint}`);
+    const response = await api.patch<{ message: string }>(
+      `/users/${userId}/${endpoint}`
+    );
     return response.data;
   }
 
@@ -62,7 +67,9 @@ class AdminUserService {
    * Récupérer les emprunts d'un utilisateur spécifique
    */
   async getUserBorrows(userId: string, page: number = 1, limit: number = 10) {
-    const response = await api.get(`/borrow/user/${userId}?page=${page}&limit=${limit}`);
+    const response = await api.get(
+      `/borrow/user/${userId}?page=${page}&limit=${limit}`
+    );
     return response.data;
   }
 
@@ -82,7 +89,7 @@ class AdminUserService {
     // Cette fonction peut être étendue si vous ajoutez un endpoint dédié
     // Pour l'instant, on récupère tous les users et on calcule
     const allUsers = await this.getUsers({ limit: 1000 });
-    
+
     const stats = {
       total: allUsers.totalItems,
       active: allUsers.data.filter(u => u.actif).length,
@@ -91,9 +98,9 @@ class AdminUserService {
         user: allUsers.data.filter(u => u.role === 'user').length,
         employee: allUsers.data.filter(u => u.role === 'employee').length,
         admin: allUsers.data.filter(u => u.role === 'admin').length,
-      }
+      },
     };
-    
+
     return stats;
   }
 }

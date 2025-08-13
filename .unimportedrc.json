@@ -1,0 +1,11 @@
+{
+  "ignoreUnresolved": [],
+  "ignoreUnused": ["lucide-react", "react-dropzone"],
+  "ignoreUnimported": [
+    "src/components/dashboard/BorrowStats.tsx",
+    "src/test/setup.js",
+    "src/test/setup.jsx",
+    "src/test/utils/testUtils.js",
+    "src/test/utils/testUtils.jsx"
+  ]
+}

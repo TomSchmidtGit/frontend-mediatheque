@@ -32,8 +32,12 @@ class DashboardService {
   /**
    * Récupérer les statistiques d'emprunts par période
    */
-  async getBorrowStatsByPeriod(period: 'week' | 'month' | 'year' = 'month'): Promise<BorrowStatsData> {
-    const response = await api.get<BorrowStatsData>(`/dashboard/borrows/stats?period=${period}`);
+  async getBorrowStatsByPeriod(
+    period: 'week' | 'month' | 'year' = 'month'
+  ): Promise<BorrowStatsData> {
+    const response = await api.get<BorrowStatsData>(
+      `/dashboard/borrows/stats?period=${period}`
+    );
     return response.data;
   }
 
@@ -41,7 +45,9 @@ class DashboardService {
    * Récupérer les statistiques des médias par catégorie
    */
   async getMediaStatsByCategory(): Promise<MediaCategoryStats[]> {
-    const response = await api.get<MediaCategoryStats[]>('/dashboard/media/categories');
+    const response = await api.get<MediaCategoryStats[]>(
+      '/dashboard/media/categories'
+    );
     return response.data;
   }
 }

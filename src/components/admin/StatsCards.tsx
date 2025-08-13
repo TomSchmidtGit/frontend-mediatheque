@@ -6,7 +6,7 @@ import {
   ClockIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  ArrowTrendingUpIcon
+  ArrowTrendingUpIcon,
 } from '@heroicons/react/24/outline';
 import type { DashboardStats } from '../../types';
 import { cn } from '../../utils';
@@ -19,15 +19,18 @@ interface StatsCardsProps {
 const StatsCards: React.FC<StatsCardsProps> = ({ stats, loading }) => {
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
         {Array.from({ length: 8 }).map((_, index) => (
-          <div key={index} className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
-                <div className="h-8 bg-gray-200 rounded w-12"></div>
+          <div
+            key={index}
+            className='bg-white rounded-xl border border-gray-200 p-6 animate-pulse'
+          >
+            <div className='flex items-center justify-between'>
+              <div className='flex-1'>
+                <div className='h-4 bg-gray-200 rounded w-20 mb-2'></div>
+                <div className='h-8 bg-gray-200 rounded w-12'></div>
               </div>
-              <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+              <div className='w-12 h-12 bg-gray-200 rounded-lg'></div>
             </div>
           </div>
         ))}
@@ -43,7 +46,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats, loading }) => {
       color: 'text-blue-600',
       bgColor: 'bg-blue-100',
       change: stats.users.newThisMonth,
-      changeLabel: 'nouveaux ce mois'
+      changeLabel: 'nouveaux ce mois',
     },
     {
       title: 'Utilisateurs actifs',
@@ -51,7 +54,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats, loading }) => {
       icon: UsersIcon,
       color: 'text-green-600',
       bgColor: 'bg-green-100',
-      subtitle: `${stats.users.inactive} inactifs`
+      subtitle: `${stats.users.inactive} inactifs`,
     },
     {
       title: 'Médias totaux',
@@ -59,7 +62,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats, loading }) => {
       icon: BookOpenIcon,
       color: 'text-purple-600',
       bgColor: 'bg-purple-100',
-      subtitle: `${stats.media.byType.book} livres, ${stats.media.byType.movie} films, ${stats.media.byType.music} musiques`
+      subtitle: `${stats.media.byType.book} livres, ${stats.media.byType.movie} films, ${stats.media.byType.music} musiques`,
     },
     {
       title: 'Emprunts actifs',
@@ -67,7 +70,7 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats, loading }) => {
       icon: ClockIcon,
       color: 'text-blue-600',
       bgColor: 'bg-blue-100',
-      subtitle: `${stats.borrows.total} au total`
+      subtitle: `${stats.borrows.total} au total`,
     },
     {
       title: 'Emprunts en retard',
@@ -75,22 +78,24 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats, loading }) => {
       icon: ExclamationTriangleIcon,
       color: 'text-red-600',
       bgColor: 'bg-red-100',
-      alert: stats.borrows.overdue > 0
+      alert: stats.borrows.overdue > 0,
     },
     {
       title: 'Emprunts retournés',
       value: stats.borrows.returned,
       icon: CheckCircleIcon,
       color: 'text-green-600',
-      bgColor: 'bg-green-100'
+      bgColor: 'bg-green-100',
     },
     {
       title: 'Taux de retour',
-      value: `${Math.round((stats.borrows.returned / stats.borrows.total) * 100)}%`,
+      value: `${Math.round(
+        (stats.borrows.returned / stats.borrows.total) * 100
+      )}%`,
       icon: ArrowTrendingUpIcon,
       color: 'text-green-600',
       bgColor: 'bg-green-100',
-      isPercentage: true
+      isPercentage: true,
     },
     {
       title: 'Alertes actives',
@@ -98,12 +103,12 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats, loading }) => {
       icon: ExclamationTriangleIcon,
       color: 'text-orange-600',
       bgColor: 'bg-orange-100',
-      subtitle: `${stats.alerts.length} au total`
-    }
+      subtitle: `${stats.alerts.length} au total`,
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'>
       {statsData.map((stat, index) => (
         <div
           key={index}
@@ -112,43 +117,58 @@ const StatsCards: React.FC<StatsCardsProps> = ({ stats, loading }) => {
             stat.alert && 'border-red-200 bg-red-50'
           )}
         >
-          <div className="flex items-center justify-between">
-            <div className="flex-1 min-w-0">
-              <p className={cn(
-                'text-sm font-medium mb-2',
-                stat.alert ? 'text-red-800' : 'text-gray-600'
-              )}>
+          <div className='flex items-center justify-between'>
+            <div className='flex-1 min-w-0'>
+              <p
+                className={cn(
+                  'text-sm font-medium mb-2',
+                  stat.alert ? 'text-red-800' : 'text-gray-600'
+                )}
+              >
                 {stat.title}
               </p>
-              <p className={cn(
-                'text-2xl font-bold mb-1',
-                stat.alert ? 'text-red-900' : 'text-gray-900'
-              )}>
-                {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
+              <p
+                className={cn(
+                  'text-2xl font-bold mb-1',
+                  stat.alert ? 'text-red-900' : 'text-gray-900'
+                )}
+              >
+                {typeof stat.value === 'number'
+                  ? stat.value.toLocaleString()
+                  : stat.value}
               </p>
-              
+
               {stat.subtitle && (
-                <p className={cn(
-                  'text-xs break-words',
-                  stat.alert ? 'text-red-600' : 'text-gray-500'
-                )}>
+                <p
+                  className={cn(
+                    'text-xs break-words',
+                    stat.alert ? 'text-red-600' : 'text-gray-500'
+                  )}
+                >
                   {stat.subtitle}
                 </p>
               )}
-              
+
               {stat.change && (
-                <div className="flex items-center text-xs text-green-600 mt-1">
-                  <ArrowTrendingUpIcon className="h-3 w-3 mr-1" />
-                  +{stat.change} {stat.changeLabel}
+                <div className='flex items-center text-xs text-green-600 mt-1'>
+                  <ArrowTrendingUpIcon className='h-3 w-3 mr-1' />+{stat.change}{' '}
+                  {stat.changeLabel}
                 </div>
               )}
             </div>
-            
-            <div className={cn(
-              'w-12 h-12 rounded-lg flex items-center justify-center',
-              stat.alert ? 'bg-red-200' : stat.bgColor
-            )}>
-              <stat.icon className={cn('h-6 w-6', stat.alert ? 'text-red-700' : stat.color)} />
+
+            <div
+              className={cn(
+                'w-12 h-12 rounded-lg flex items-center justify-center',
+                stat.alert ? 'bg-red-200' : stat.bgColor
+              )}
+            >
+              <stat.icon
+                className={cn(
+                  'h-6 w-6',
+                  stat.alert ? 'text-red-700' : stat.color
+                )}
+              />
             </div>
           </div>
         </div>

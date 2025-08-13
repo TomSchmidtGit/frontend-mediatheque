@@ -31,19 +31,19 @@ const tokenManager = {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
-  }
+  },
 };
 
 // Intercepteur de requête pour ajouter le token
 api.interceptors.request.use(
-  (config) => {
+  config => {
     const token = tokenManager.getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  error => Promise.reject(error)
 );
 
 // Variable pour éviter les multiples tentatives de refresh
@@ -61,7 +61,7 @@ const processQueue = (error: any, token: string | null = null) => {
       resolve(token);
     }
   });
-  
+
   failedQueue = [];
 };
 
@@ -77,19 +77,21 @@ api.interceptors.response.use(
         // Si déjà en cours de refresh, mettre en queue
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        }).then(token => {
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return api(originalRequest);
-        }).catch(err => {
-          return Promise.reject(err);
-        });
+        })
+          .then(token => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch(err => {
+            return Promise.reject(err);
+          });
       }
 
       originalRequest._retry = true;
       isRefreshing = true;
 
       const refreshToken = tokenManager.getRefreshToken();
-      
+
       if (!refreshToken) {
         tokenManager.clearTokens();
         window.location.href = '/login';
@@ -98,14 +100,14 @@ api.interceptors.response.use(
 
       try {
         const response = await axios.post(`${API_URL}/auth/refresh`, {
-          refreshToken
+          refreshToken,
         });
 
         const { accessToken } = response.data;
         tokenManager.setTokens(accessToken);
-        
+
         processQueue(null, accessToken);
-        
+
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
@@ -120,7 +122,7 @@ api.interceptors.response.use(
 
     // Gestion des autres erreurs
     if (error.response?.status === 403) {
-      toast.error('Accès refusé. Vous n\'avez pas les permissions nécessaires.');
+      toast.error("Accès refusé. Vous n'avez pas les permissions nécessaires.");
     } else if (error.response?.status === 404) {
       toast.error('Ressource non trouvée.');
     } else if (error.response?.status && error.response.status >= 500) {

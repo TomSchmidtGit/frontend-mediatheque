@@ -1,6 +1,12 @@
 // src/utils/index.ts
 import { clsx, type ClassValue } from 'clsx';
-import { format, formatDistanceToNow, isAfter, isBefore, parseISO } from 'date-fns';
+import {
+  format,
+  formatDistanceToNow,
+  isAfter,
+  isBefore,
+  parseISO,
+} from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 /**
@@ -18,21 +24,21 @@ export const formatDate = {
     const dateObj = typeof date === 'string' ? parseISO(date) : date;
     return format(dateObj, 'dd/MM/yyyy', { locale: fr });
   },
-  
+
   long: (date: string | Date) => {
     const dateObj = typeof date === 'string' ? parseISO(date) : date;
     return format(dateObj, 'dd MMMM yyyy', { locale: fr });
   },
-  
+
   dateTime: (date: string | Date) => {
     const dateObj = typeof date === 'string' ? parseISO(date) : date;
     return format(dateObj, 'dd/MM/yyyy à HH:mm', { locale: fr });
   },
-  
+
   timeAgo: (date: string | Date) => {
     const dateObj = typeof date === 'string' ? parseISO(date) : date;
     return formatDistanceToNow(dateObj, { addSuffix: true, locale: fr });
-  }
+  },
 };
 
 /**
@@ -43,13 +49,13 @@ export const dateUtils = {
     const dateObj = typeof dueDate === 'string' ? parseISO(dueDate) : dueDate;
     return isBefore(dateObj, new Date());
   },
-  
+
   isDueSoon: (dueDate: string | Date, days: number = 2) => {
     const dateObj = typeof dueDate === 'string' ? parseISO(dueDate) : dueDate;
     const soonDate = new Date();
     soonDate.setDate(soonDate.getDate() + days);
     return isBefore(dateObj, soonDate) && isAfter(dateObj, new Date());
-  }
+  },
 };
 
 /**
@@ -60,28 +66,28 @@ export const formatters = {
     const types = {
       book: 'Livre',
       movie: 'Film',
-      music: 'Musique'
+      music: 'Musique',
     };
     return types[type as keyof typeof types] || type;
   },
-  
+
   userRole: (role: string) => {
     const roles = {
       user: 'Utilisateur',
       employee: 'Employé',
-      admin: 'Administrateur'
+      admin: 'Administrateur',
     };
     return roles[role as keyof typeof roles] || role;
   },
-  
+
   borrowStatus: (status: string) => {
     const statuses = {
       borrowed: 'Emprunté',
       returned: 'Retourné',
-      overdue: 'En retard'
+      overdue: 'En retard',
     };
     return statuses[status as keyof typeof statuses] || status;
-  }
+  },
 };
 
 /**
@@ -91,12 +97,12 @@ export const isValidEmail = (email: string): boolean => {
   // Regex plus stricte qui exige un domaine d'au moins 2 caractères après le point
   // et rejette les domaines commençant par un point
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-  
+
   // Vérifications supplémentaires
   if (email.includes('@.')) return false; // Rejette @.com
   if (email.includes('..')) return false; // Rejette user..name@example.com
   if (email.startsWith('.') || email.endsWith('.')) return false; // Rejette .user@example.com ou user@example.com.
-  
+
   return emailRegex.test(email);
 };
 
@@ -108,7 +114,7 @@ export const debounce = <T extends (...args: any[]) => any>(
   wait: number
 ): ((...args: Parameters<T>) => void) => {
   let timeout: NodeJS.Timeout;
-  
+
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
