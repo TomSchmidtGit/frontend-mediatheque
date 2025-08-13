@@ -24,7 +24,7 @@ const DashboardPage: React.FC = () => {
   // Récupérer les emprunts de l'utilisateur
   const { data: borrowsData, isLoading: borrowsLoading } = useQuery({
     queryKey: ['my-borrows-dashboard'],
-    queryFn: () => borrowService.getMyBorrows(1, 20), // Récupérer plus d'emprunts pour les stats
+    queryFn: () => borrowService.getMyBorrows({ page: 1, limit: 20 }), // Récupérer plus d'emprunts pour les stats
     enabled: !!user,
     staleTime: 2 * 60 * 1000,
   });
