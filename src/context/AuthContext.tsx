@@ -1,7 +1,7 @@
 // src/context/AuthContext.tsx - CORRECTION SANS ROUTE PROFILE
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import type { User, AuthResponse } from '../types';
+import type { User } from '../types';
 import { tokenManager } from '../services/api';
 import authService from '../services/authService';
 import userService from '../services/userService';
@@ -70,7 +70,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const storedUser = localStorage.getItem('user');
 
         if (token && storedUser) {
-          const userData = JSON.parse(storedUser);
+          // const userData = JSON.parse(storedUser);
 
           // Récupérer les informations complètes depuis l'API
           const freshUserProfile = await fetchUserProfile();

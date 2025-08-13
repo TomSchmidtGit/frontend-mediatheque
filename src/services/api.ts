@@ -12,10 +12,10 @@ const api = axios.create({
 });
 
 // Types pour la gestion des tokens
-interface TokenResponse {
-  accessToken: string;
-  refreshToken: string;
-}
+// interface TokenResponse {
+//   accessToken: string;
+//   refreshToken: string;
+// }
 
 // Gestion du token dans le localStorage
 const tokenManager = {

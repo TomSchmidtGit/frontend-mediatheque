@@ -1,9 +1,9 @@
 // src/pages/public/CatalogPage.tsx
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { 
-  Squares2X2Icon, 
-  ListBulletIcon, 
+import {
+  Squares2X2Icon,
+  ListBulletIcon,
   AdjustmentsHorizontalIcon,
   SparklesIcon
 } from '@heroicons/react/24/outline';
@@ -13,8 +13,8 @@ import CatalogFilters from '../../components/catalog/CatalogFilters';
 import Pagination from '../../components/common/Pagination';
 import type { MediaFilters } from '../../types';
 import mediaService from '../../services/mediaService';
-import { cn } from '../../utils'; 
-import { useAuth } from '../../context/AuthContext';
+import { cn } from '../../utils';
+// import { useAuth } from '../../context/AuthContext';
 
 interface PaginatedData {
   data: any[];
@@ -28,11 +28,11 @@ const CatalogPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  // const { user } = useAuth();
 
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
   const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-  
+
   // ✅ État des filtres SANS favorites
   const [appliedFilters, setAppliedFilters] = useState<MediaFilters>(() => ({
     page: parseInt(searchParams.get('page') || '1'),
@@ -46,11 +46,11 @@ const CatalogPage: React.FC = () => {
   // Fonction pour appliquer la recherche avec délai
   const handleSearchInputChange = useCallback((value: string) => {
     setSearchInput(value);
-    
+
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
-    
+
     searchTimeoutRef.current = setTimeout(() => {
       setAppliedFilters(prev => ({
         ...prev,
@@ -94,12 +94,12 @@ const CatalogPage: React.FC = () => {
   // Synchroniser les filtres avec l'URL (SANS favorites)
   useEffect(() => {
     const newSearchParams = new URLSearchParams();
-    
+
     Object.entries(appliedFilters).forEach(([key, value]) => {
       if (key === 'search' && searchTimeoutRef.current) {
         return;
       }
-      
+
       if (value && value !== '' && value !== 1) {
         newSearchParams.set(key, value.toString());
       }
@@ -122,7 +122,7 @@ const CatalogPage: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleToggleFavorite = async (mediaId: string, isFavorite: boolean) => {
+  const handleToggleFavorite = async (mediaId: string) => {
     try {
       await mediaService.toggleFavorite(mediaId);
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
@@ -175,7 +175,7 @@ const CatalogPage: React.FC = () => {
     // Appliquer la recherche textuelle
     if (appliedFilters.search) {
       const searchTerm = appliedFilters.search.toLowerCase();
-      filteredMedia = filteredMedia.filter(media => 
+      filteredMedia = filteredMedia.filter(media =>
         media.title.toLowerCase().includes(searchTerm) ||
         media.author.toLowerCase().includes(searchTerm)
       );
@@ -262,7 +262,7 @@ const CatalogPage: React.FC = () => {
                     <AdjustmentsHorizontalIcon className="h-4 w-4 mr-2" />
                     Filtres
                   </button>
-                  
+
                   <p className="text-sm text-gray-600">
                     {mediaLoading ? (
                       'Chargement...'

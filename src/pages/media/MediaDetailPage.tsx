@@ -23,7 +23,7 @@ import { useAuth } from '../../context/AuthContext';
 import mediaService from '../../services/mediaService';
 import { formatters, formatDate, cn } from '../../utils';
 import toast from 'react-hot-toast';
-import type { Media, Review } from '../../types';
+import type { Media } from '../../types';
 
 const MediaDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

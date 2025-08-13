@@ -17,7 +17,7 @@ const BorrowStats: React.FC = () => {
 
   const { data: borrowsData } = useQuery({
     queryKey: ['my-borrows-stats'],
-    queryFn: () => borrowService.getMyBorrows(1, 100), // Récupérer plus d'emprunts pour les stats
+    queryFn: () => borrowService.getMyBorrows({ page: 1, limit: 100 }), // Récupérer plus d'emprunts pour les stats
     enabled: !!user,
     staleTime: 2 * 60 * 1000, // Cache 2 minutes
   });

@@ -1,6 +1,6 @@
 // src/pages/admin/AdminUserDetailPage.tsx
 import React, { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeftIcon,
@@ -18,13 +18,13 @@ import {
 import UserEditModal from '../../components/admin/UserEditModal';
 import adminUserService from '../../services/adminUserService';
 import { formatDate, formatters, cn } from '../../utils';
-import type { User } from '../../types';
+// import type { User } from '../../types';
 import toast from 'react-hot-toast';
 import ConfirmDialog from '../../components/modals/ConfirmDialog';
 
 const AdminUserDetailPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [confirmToggle, setConfirmToggle] = useState(false);

@@ -1,14 +1,14 @@
 // src/pages/user/MyBorrowsPage.tsx
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
   ClockIcon,
   BookOpenIcon,
   FilmIcon,
   MusicalNoteIcon,
   CalendarIcon,
-  ArrowPathIcon,
+  // ArrowPathIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
   Squares2X2Icon,
@@ -16,13 +16,13 @@ import {
   UserIcon,
   EyeIcon,
   FunnelIcon,
-  XMarkIcon,
+  // XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import Pagination from '../../components/common/Pagination';
 import borrowService from '../../services/borrowService';
 import { formatDate, dateUtils, formatters, cn } from '../../utils';
-import toast from 'react-hot-toast';
+// import toast from 'react-hot-toast';
 import type { Borrow } from '../../types';
 
 interface BorrowFilters {
@@ -35,7 +35,7 @@ interface BorrowFilters {
 
 const MyBorrowsPage: React.FC = () => {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [showFilters, setShowFilters] = useState(false);
   const [searchInput, setSearchInput] = useState('');
