@@ -76,22 +76,22 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
             >
               Catalogue
             </Link>
-            {!isAuthenticated && (
-              <>
-                <Link
-                  to='/about'
-                  className='text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200'
-                >
-                  À propos
-                </Link>
-                <Link
-                  to='/contact'
-                  className='text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200'
-                >
-                  Contact
-                </Link>
-              </>
-            )}
+
+            {/* Liens toujours visibles */}
+            <Link
+              to='/about'
+              className='text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200'
+            >
+              À propos
+            </Link>
+            <Link
+              to='/contact'
+              className='text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200'
+            >
+              Contact
+            </Link>
+
+            {/* Liens pour utilisateurs connectés */}
             {isAuthenticated && (
               <Link
                 to='/dashboard'
@@ -301,24 +301,24 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                   Catalogue
                 </Link>
 
-                {!isAuthenticated ? (
-                  <>
-                    <Link
-                      to='/about'
-                      className='block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md'
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      À propos
-                    </Link>
-                    <Link
-                      to='/contact'
-                      className='block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md'
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Contact
-                    </Link>
-                  </>
-                ) : (
+                {/* Liens toujours visibles */}
+                <Link
+                  to='/about'
+                  className='block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md'
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  À propos
+                </Link>
+                <Link
+                  to='/contact'
+                  className='block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md'
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Contact
+                </Link>
+
+                {/* Liens pour utilisateurs connectés */}
+                {isAuthenticated && (
                   <>
                     <Link
                       to='/dashboard'
