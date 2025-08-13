@@ -10,18 +10,18 @@ const MainLayout: React.FC = () => {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className='min-h-screen bg-gray-50'>
       <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-      
-      <div className="flex">
+
+      <div className='flex'>
         {/* Sidebar temporairement commenté */}
         {/* {isAuthenticated && (
-          <Sidebar 
-            isOpen={sidebarOpen} 
-            onClose={() => setSidebarOpen(false)} 
+          <Sidebar
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
           />
         )} */}
-        
+
         <main className={`flex-1 ${isAuthenticated ? 'lg:ml-0' : ''}`}>
           <Outlet />
         </main>

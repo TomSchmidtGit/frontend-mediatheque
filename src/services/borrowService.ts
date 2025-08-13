@@ -14,18 +14,22 @@ class BorrowService {
   /**
    * Récupérer les emprunts de l'utilisateur connecté avec filtres
    */
-  async getMyBorrows(filters: BorrowFilters = {}): Promise<PaginatedResponse<Borrow>> {
+  async getMyBorrows(
+    filters: BorrowFilters = {}
+  ): Promise<PaginatedResponse<Borrow>> {
     const params = new URLSearchParams();
-    
+
     if (filters.page) params.append('page', filters.page.toString());
     if (filters.limit) params.append('limit', filters.limit.toString());
     if (filters.search) params.append('search', filters.search);
-    if (filters.status && filters.status !== 'all') params.append('status', filters.status);
+    if (filters.status && filters.status !== 'all')
+      params.append('status', filters.status);
     if (filters.mediaType) params.append('mediaType', filters.mediaType);
-    
 
-    const response = await api.get<PaginatedResponse<Borrow>>(`/borrow/mine?${params}`);
-    
+    const response = await api.get<PaginatedResponse<Borrow>>(
+      `/borrow/mine?${params}`
+    );
+
     return response.data;
   }
 

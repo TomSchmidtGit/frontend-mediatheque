@@ -21,39 +21,41 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   cancelText = 'Annuler',
   confirmVariant = 'primary',
   onClose,
-  onConfirm
+  onConfirm,
 }) => {
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+    <Dialog open={isOpen} onClose={onClose} className='relative z-50'>
+      <div className='fixed inset-0 bg-black/30' aria-hidden='true' />
 
-      <div className="fixed inset-0 overflow-y-auto">
-        <div className="flex min-h-full items-center justify-center p-4">
-          <Dialog.Panel className="w-full max-w-md bg-white rounded-xl shadow-xl">
-            <div className="p-6">
-              <Dialog.Title className="text-lg font-semibold text-gray-900">
+      <div className='fixed inset-0 overflow-y-auto'>
+        <div className='flex min-h-full items-center justify-center p-4'>
+          <Dialog.Panel className='w-full max-w-md bg-white rounded-xl shadow-xl'>
+            <div className='p-6'>
+              <Dialog.Title className='text-lg font-semibold text-gray-900'>
                 {title}
               </Dialog.Title>
               {description && (
-                <p className="mt-2 text-sm text-gray-600">{description}</p>
+                <p className='mt-2 text-sm text-gray-600'>{description}</p>
               )}
 
-              <div className="mt-6 flex gap-3">
+              <div className='mt-6 flex gap-3'>
                 <button
-                  type="button"
+                  type='button'
                   onClick={onClose}
-                  className="flex-1 btn-secondary"
+                  className='flex-1 btn-secondary'
                 >
                   {cancelText}
                 </button>
                 <button
-                  type="button"
+                  type='button'
                   onClick={() => {
                     onConfirm();
                     onClose();
                   }}
                   className={
-                    confirmVariant === 'danger' ? 'flex-1 btn bg-red-600 text-white hover:bg-red-700' : 'flex-1 btn-primary'
+                    confirmVariant === 'danger'
+                      ? 'flex-1 btn bg-red-600 text-white hover:bg-red-700'
+                      : 'flex-1 btn-primary'
                   }
                 >
                   {confirmText}
@@ -68,5 +70,3 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 };
 
 export default ConfirmDialog;
-
-

@@ -41,9 +41,11 @@ class AdminMediaService {
   /**
    * Récupérer tous les médias avec filtres admin
    */
-  async getMedia(filters: MediaFilters = {}): Promise<PaginatedResponse<Media>> {
+  async getMedia(
+    filters: MediaFilters = {}
+  ): Promise<PaginatedResponse<Media>> {
     const params = new URLSearchParams();
-    
+
     if (filters.page) params.append('page', filters.page.toString());
     if (filters.limit) params.append('limit', filters.limit.toString());
     if (filters.search) params.append('search', filters.search);
@@ -54,7 +56,9 @@ class AdminMediaService {
       params.append('available', filters.available.toString());
     }
 
-    const response = await api.get<PaginatedResponse<Media>>(`/media?${params}`);
+    const response = await api.get<PaginatedResponse<Media>>(
+      `/media?${params}`
+    );
     return response.data;
   }
 
@@ -71,26 +75,26 @@ class AdminMediaService {
    */
   async createMedia(mediaData: CreateMediaData): Promise<Media> {
     const formData = new FormData();
-    
+
     formData.append('title', mediaData.title);
     formData.append('type', mediaData.type);
     formData.append('author', mediaData.author);
     formData.append('year', mediaData.year.toString());
-    
+
     if (mediaData.description) {
       formData.append('description', mediaData.description);
     }
-    
+
     if (mediaData.category) {
       formData.append('category', mediaData.category);
     }
-    
+
     if (mediaData.tags && mediaData.tags.length > 0) {
       mediaData.tags.forEach(tag => {
         formData.append('tags', tag);
       });
     }
-    
+
     if (mediaData.image) {
       formData.append('image', mediaData.image);
     }
@@ -100,18 +104,21 @@ class AdminMediaService {
         'Content-Type': 'multipart/form-data',
       },
     });
-    
+
     return response.data;
   }
 
   /**
    * Mettre à jour un média
    */
-  async updateMedia(mediaId: string, mediaData: UpdateMediaData): Promise<Media> {
+  async updateMedia(
+    mediaId: string,
+    mediaData: UpdateMediaData
+  ): Promise<Media> {
     if (mediaData.image) {
       // Si on a une nouvelle image, utiliser FormData
       const formData = new FormData();
-      
+
       Object.entries(mediaData).forEach(([key, value]) => {
         if (value !== undefined && key !== 'image') {
           if (key === 'tags' && Array.isArray(value)) {
@@ -121,7 +128,7 @@ class AdminMediaService {
           }
         }
       });
-      
+
       if (mediaData.image) {
         formData.append('image', mediaData.image);
       }
@@ -131,7 +138,7 @@ class AdminMediaService {
           'Content-Type': 'multipart/form-data',
         },
       });
-      
+
       return response.data;
     } else {
       // Sinon, utiliser JSON classique
@@ -170,7 +177,9 @@ class AdminMediaService {
    * Mettre à jour une catégorie
    */
   async updateCategory(categoryId: string, name: string): Promise<Category> {
-    const response = await api.put<Category>(`/categories/${categoryId}`, { name });
+    const response = await api.put<Category>(`/categories/${categoryId}`, {
+      name,
+    });
     return response.data;
   }
 
@@ -178,7 +187,9 @@ class AdminMediaService {
    * Supprimer une catégorie
    */
   async deleteCategory(categoryId: string): Promise<{ message: string }> {
-    const response = await api.delete<{ message: string }>(`/categories/${categoryId}`);
+    const response = await api.delete<{ message: string }>(
+      `/categories/${categoryId}`
+    );
     return response.data;
   }
 
@@ -248,7 +259,7 @@ class AdminMediaService {
     };
   }> {
     const allMedia = await this.getMedia({ limit: 1000 });
-    
+
     const stats = {
       total: allMedia.totalItems,
       available: allMedia.data.filter(m => m.available).length,
@@ -257,9 +268,9 @@ class AdminMediaService {
         book: allMedia.data.filter(m => m.type === 'book').length,
         movie: allMedia.data.filter(m => m.type === 'movie').length,
         music: allMedia.data.filter(m => m.type === 'music').length,
-      }
+      },
     };
-    
+
     return stats;
   }
 
@@ -284,7 +295,7 @@ class AdminMediaService {
     const [categories, tags, allMedia] = await Promise.all([
       this.getCategories(),
       this.getTags(),
-      this.getMedia({ limit: 1000 })
+      this.getMedia({ limit: 1000 }),
     ]);
 
     // Compter les médias par catégorie
@@ -312,7 +323,7 @@ class AdminMediaService {
         return {
           _id: tagId,
           name: tag?.name || 'Tag inconnu',
-          count
+          count,
         };
       })
       .sort((a, b) => b.count - a.count)
@@ -322,12 +333,12 @@ class AdminMediaService {
       categories: {
         total: categories.length,
         withMedia: categoriesWithMedia.size,
-        withoutMedia: categories.length - categoriesWithMedia.size
+        withoutMedia: categories.length - categoriesWithMedia.size,
       },
       tags: {
         total: tags.length,
-        mostUsed: mostUsedTags
-      }
+        mostUsed: mostUsedTags,
+      },
     };
   }
 }

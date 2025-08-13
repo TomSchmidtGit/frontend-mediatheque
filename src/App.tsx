@@ -42,83 +42,123 @@ function App() {
       <Router>
         <AuthProvider>
           <ScrollToTop />
-          <div className="App">
+          <div className='App'>
             <Routes>
-              <Route path="/" element={<MainLayout />}>
+              <Route path='/' element={<MainLayout />}>
                 <Route index element={<HomePage />} />
-                <Route path="login" element={<LoginPage />} />
-                <Route path="register" element={<RegisterPage />} />
-                <Route path="forgot-password" element={<ForgotPasswordPage />} />
-                <Route path="reset-password" element={<ResetPasswordPage />} />
-                
+                <Route path='login' element={<LoginPage />} />
+                <Route path='register' element={<RegisterPage />} />
+                <Route
+                  path='forgot-password'
+                  element={<ForgotPasswordPage />}
+                />
+                <Route path='reset-password' element={<ResetPasswordPage />} />
+
                 {/* Routes protégées utilisateur */}
-                <Route path="dashboard" element={
-                  <ProtectedRoute>
-                    <DashboardPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="favorites" element={
-                  <ProtectedRoute>
-                    <FavoritesPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="my-borrows" element={
-                  <ProtectedRoute>
-                    <MyBorrowsPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="settings" element={
-                  <ProtectedRoute>
-                    <SettingsPage />
-                  </ProtectedRoute>
-                } />
-                
+                <Route
+                  path='dashboard'
+                  element={
+                    <ProtectedRoute>
+                      <DashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='favorites'
+                  element={
+                    <ProtectedRoute>
+                      <FavoritesPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='my-borrows'
+                  element={
+                    <ProtectedRoute>
+                      <MyBorrowsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='settings'
+                  element={
+                    <ProtectedRoute>
+                      <SettingsPage />
+                    </ProtectedRoute>
+                  }
+                />
+
                 {/* Routes admin */}
-                <Route path="admin" element={
-                  <ProtectedRoute requireAdmin={true}>
-                    <AdminDashboardPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="admin/users" element={
-                  <ProtectedRoute requireAdmin={true}>
-                    <AdminUsersPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="admin/users/:userId" element={
-                  <ProtectedRoute requireAdmin={true}>
-                    <AdminUserDetailPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="admin/media" element={
-                  <ProtectedRoute requireAdmin={true}>
-                    <AdminMediaPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="admin/borrows" element={
-                  <ProtectedRoute requireAdmin={true}>
-                    <AdminBorrowsPage />
-                  </ProtectedRoute>
-                } />
-                <Route path="admin/categories" element={
-                  <ProtectedRoute requireAdmin={true}>
-                    <AdminCategoriesPage />
-                  </ProtectedRoute>
-                } />
-                
+                <Route
+                  path='admin'
+                  element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <AdminDashboardPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='admin/users'
+                  element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <AdminUsersPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='admin/users/:userId'
+                  element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <AdminUserDetailPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='admin/media'
+                  element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <AdminMediaPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='admin/borrows'
+                  element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <AdminBorrowsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path='admin/categories'
+                  element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <AdminCategoriesPage />
+                    </ProtectedRoute>
+                  }
+                />
+
                 {/* Routes publiques */}
-                <Route path="catalog" element={<CatalogPage />} />
-                <Route path="media/:id" element={<MediaDetailPage />} />
-                <Route path="about" element={<AboutPage />} />
-                <Route path="contact" element={<ContactPage />} />
-                
+                <Route path='catalog' element={<CatalogPage />} />
+                <Route path='media/:id' element={<MediaDetailPage />} />
+                <Route path='about' element={<AboutPage />} />
+                <Route path='contact' element={<ContactPage />} />
+
                 {/* Route 404 */}
-                <Route path="*" element={<div className="page-container py-16 text-center"><h1>Page non trouvée</h1></div>} />
+                <Route
+                  path='*'
+                  element={
+                    <div className='page-container py-16 text-center'>
+                      <h1>Page non trouvée</h1>
+                    </div>
+                  }
+                />
               </Route>
             </Routes>
-            
+
             {/* Notifications toast */}
-            <Toaster 
-              position="top-right"
+            <Toaster
+              position='top-right'
               toastOptions={{
                 duration: 4000,
                 style: {
