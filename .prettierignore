@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Coverage
+coverage/
+
+# Package files
+package-lock.json
+
+# Environment files
+.env*
+
+# Generated files
+*.min.js
+*.bundle.js
+*.min.css
+*.bundle.css
+
+# Documentation
+docs/
+
+# Public assets
+public/
+
+# Test files
+test/
+tests/
+
+# Config files
+*.config.js
+*.config.ts
+vite.config.ts
+tailwind.config.js
+postcss.config.js
