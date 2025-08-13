@@ -113,7 +113,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Récupérer les informations complètes de l'utilisateur
       const userProfile = await fetchUserProfile();
       if (!userProfile) {
-        throw new Error('Impossible de récupérer les informations utilisateur');
+        console.error('Impossible de récupérer les informations utilisateur');
+        toast.error('Erreur lors de la récupération du profil utilisateur');
+        return;
       }
 
       // Enrichir avec les favoris
@@ -126,7 +128,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error: any) {
       const message = error.response?.data?.message || 'Erreur lors de la connexion';
       toast.error(message);
-      throw error;
+      console.error('Erreur de connexion:', error);
     } finally {
       setLoading(false);
     }
@@ -144,7 +146,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Récupérer les informations complètes de l'utilisateur
       const userProfile = await fetchUserProfile();
       if (!userProfile) {
-        throw new Error('Impossible de récupérer les informations utilisateur');
+        console.error('Impossible de récupérer les informations utilisateur');
+        toast.error('Erreur lors de la récupération du profil utilisateur');
+        return;
       }
 
       setUser(userProfile);
@@ -155,7 +159,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error: any) {
       const message = error.response?.data?.message || 'Erreur lors de l\'inscription';
       toast.error(message);
-      throw error;
+      console.error('Erreur d\'inscription:', error);
     } finally {
       setLoading(false);
     }

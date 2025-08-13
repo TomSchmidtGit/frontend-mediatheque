@@ -118,7 +118,7 @@ src/services/           # ❌ Tous les services
 ├── adminMediaService.ts
 └── adminUserService.ts
 
-src/context/            # ❌ AuthContext
+src/context/            # ✅ AuthContext
 └── AuthContext.tsx
 ```
 
