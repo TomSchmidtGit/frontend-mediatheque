@@ -128,6 +128,10 @@ const CreateBorrowModal: React.FC<CreateBorrowModalProps> = ({
   };
 
   const onSubmit = (data: CreateBorrowFormData) => {
+    // Protection contre les clics multiples
+    if (createBorrowMutation.isPending) {
+      return;
+    }
     createBorrowMutation.mutate(data);
   };
 
@@ -182,7 +186,7 @@ const CreateBorrowModal: React.FC<CreateBorrowModalProps> = ({
                         'input pl-10 w-full',
                         selectedUser && 'bg-green-50 border-green-300'
                       )}
-                      disabled={isSubmitting}
+                      disabled={createBorrowMutation.isPending}
                     />
                   </div>
 
@@ -272,7 +276,7 @@ const CreateBorrowModal: React.FC<CreateBorrowModalProps> = ({
                         'input pl-10 w-full',
                         selectedMedia && 'bg-green-50 border-green-300'
                       )}
-                      disabled={isSubmitting}
+                      disabled={createBorrowMutation.isPending}
                     />
                   </div>
 
@@ -364,7 +368,7 @@ const CreateBorrowModal: React.FC<CreateBorrowModalProps> = ({
                   label="Date d'échéance"
                   type='date'
                   error={errors.dueDate?.message}
-                  disabled={isSubmitting}
+                  disabled={createBorrowMutation.isPending}
                 />
                 <p className='text-xs text-gray-500 mt-1'>
                   Par défaut : 14 jours à partir d'aujourd'hui
@@ -397,17 +401,21 @@ const CreateBorrowModal: React.FC<CreateBorrowModalProps> = ({
               <button
                 type='button'
                 onClick={handleClose}
-                disabled={isSubmitting}
+                disabled={createBorrowMutation.isPending}
                 className='flex-1 btn-secondary'
               >
                 Annuler
               </button>
               <button
                 type='submit'
-                disabled={isSubmitting || !selectedUser || !selectedMedia}
+                disabled={
+                  createBorrowMutation.isPending ||
+                  !selectedUser ||
+                  !selectedMedia
+                }
                 className='flex-1 btn-primary'
               >
-                {isSubmitting ? (
+                {createBorrowMutation.isPending ? (
                   <>
                     <div className='animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2'></div>
                     Création...
