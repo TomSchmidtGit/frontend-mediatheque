@@ -449,6 +449,9 @@ const AboutPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Espace entre localisation et CTA */}
+      <div className="py-16"></div>
+
       {/* CTA Section */}
       <div className="py-20 bg-primary-600">
         <div className="page-container text-center">
