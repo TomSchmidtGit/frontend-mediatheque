@@ -20,7 +20,6 @@ Application React moderne pour la gestion d'une médiathèque, développée avec
 - [🎨 UI/UX](#-uiux)
 - [🚀 Performance](#-performance)
 - [🤝 Contribution](#-contribution)
-- [📄 Licence](#-licence)
 
 ## 🚀 Fonctionnalités
 
