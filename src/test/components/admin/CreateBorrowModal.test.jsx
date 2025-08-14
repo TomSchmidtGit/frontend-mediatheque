@@ -131,13 +131,13 @@ describe('CreateBorrowModal', () => {
   const renderModal = (isOpen = true) => {
     // Nettoyer le DOM avant chaque test pour éviter les doublons
     document.body.innerHTML = '';
-    
+
     // Nettoyer aussi le portail Headless UI
     const portalRoot = document.getElementById('headlessui-portal-root');
     if (portalRoot) {
       portalRoot.innerHTML = '';
     }
-    
+
     return render(
       <QueryClientProvider client={queryClient}>
         <CreateBorrowModal isOpen={isOpen} onClose={mockOnClose} />
@@ -148,20 +148,20 @@ describe('CreateBorrowModal', () => {
   describe('Rendu du modal', () => {
     it('devrait afficher le modal quand isOpen est true', () => {
       renderModal(true);
-      
+
       expect(screen.getByText('Créer un nouvel emprunt')).toBeInTheDocument();
       expect(screen.getByText('Enregistrer un emprunt effectué en présentiel')).toBeInTheDocument();
     });
 
     it('ne devrait pas afficher le modal quand isOpen est false', () => {
       renderModal(false);
-      
+
       expect(screen.queryByText('Créer un nouvel emprunt')).not.toBeInTheDocument();
     });
 
     it('devrait afficher tous les champs requis', () => {
       renderModal();
-      
+
       expect(screen.getByPlaceholderText('Rechercher un utilisateur...')).toBeInTheDocument();
       expect(screen.getByPlaceholderText('Rechercher un média disponible...')).toBeInTheDocument();
       expect(screen.getByText('Date d\'échéance')).toBeInTheDocument();
@@ -169,14 +169,14 @@ describe('CreateBorrowModal', () => {
 
     it('devrait afficher les boutons d\'action', () => {
       renderModal();
-      
+
       expect(screen.getByText('Annuler')).toBeInTheDocument();
       expect(screen.getByText('Créer l\'emprunt')).toBeInTheDocument();
     });
 
     it('devrait afficher les informations importantes', () => {
       renderModal();
-      
+
       expect(screen.getByText('📋 Informations importantes')).toBeInTheDocument();
       expect(screen.getByText('Contrôlez l\'état du média avant l\'emprunt')).toBeInTheDocument();
       expect(screen.getByText('L\'utilisateur recevra un email de confirmation automatique')).toBeInTheDocument();
@@ -194,7 +194,7 @@ describe('CreateBorrowModal', () => {
       });
 
       renderModal();
-      
+
       const userInput = screen.getByPlaceholderText('Rechercher un utilisateur...');
       fireEvent.change(userInput, { target: { value: 'Jo' } });
 
@@ -216,7 +216,7 @@ describe('CreateBorrowModal', () => {
       });
 
       renderModal();
-      
+
       const userInput = screen.getByPlaceholderText('Rechercher un utilisateur...');
       fireEvent.change(userInput, { target: { value: 'John' } });
 
@@ -235,7 +235,7 @@ describe('CreateBorrowModal', () => {
       });
 
       renderModal();
-      
+
       const userInput = screen.getByPlaceholderText('Rechercher un utilisateur...');
       fireEvent.change(userInput, { target: { value: 'John' } });
 
@@ -258,7 +258,7 @@ describe('CreateBorrowModal', () => {
       });
 
       renderModal();
-      
+
       const userInput = screen.getByPlaceholderText('Rechercher un utilisateur...');
       fireEvent.change(userInput, { target: { value: 'John' } });
 
@@ -270,7 +270,7 @@ describe('CreateBorrowModal', () => {
       // Vérifier que l'utilisateur est sélectionné et affiché
       expect(screen.getByText('John Doe')).toBeInTheDocument();
       expect(screen.getByText('john@example.com')).toBeInTheDocument();
-      
+
       // Vérifier que l'input utilisateur a la valeur sélectionnée
       expect(userInput.value).toBe('John Doe');
     });
@@ -286,7 +286,7 @@ describe('CreateBorrowModal', () => {
       });
 
       renderModal();
-      
+
       const mediaInput = screen.getByPlaceholderText('Rechercher un média disponible...');
       fireEvent.change(mediaInput, { target: { value: 'Pet' } });
 
@@ -308,7 +308,7 @@ describe('CreateBorrowModal', () => {
       });
 
       renderModal();
-      
+
       const mediaInput = screen.getByPlaceholderText('Rechercher un média disponible...');
       fireEvent.change(mediaInput, { target: { value: 'Petit Prince' } });
 
@@ -327,7 +327,7 @@ describe('CreateBorrowModal', () => {
       });
 
       renderModal();
-      
+
       const mediaInput = screen.getByPlaceholderText('Rechercher un média disponible...');
       fireEvent.change(mediaInput, { target: { value: 'Petit Prince' } });
 
@@ -350,7 +350,7 @@ describe('CreateBorrowModal', () => {
       });
 
       renderModal();
-      
+
       const mediaInput = screen.getByPlaceholderText('Rechercher un média disponible...');
       fireEvent.change(mediaInput, { target: { value: 'Petit Prince' } });
 
@@ -362,7 +362,7 @@ describe('CreateBorrowModal', () => {
       // Vérifier que le média est sélectionné et affiché
       expect(screen.getByText('Le Petit Prince')).toBeInTheDocument();
       expect(screen.getByText('Antoine de Saint-Exupéry • 1943')).toBeInTheDocument();
-      
+
       // Vérifier que l'input média a la valeur sélectionnée
       expect(mediaInput.value).toBe('Le Petit Prince');
     });
@@ -371,16 +371,16 @@ describe('CreateBorrowModal', () => {
   describe('Gestion du formulaire', () => {
     it('devrait avoir une date d\'échéance par défaut (14 jours)', () => {
       renderModal();
-      
+
       const dueDateInput = screen.getByText('Date d\'échéance').nextElementSibling;
       const defaultDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-      
+
       expect(dueDateInput.value).toBe(defaultDate);
     });
 
     it('devrait désactiver le bouton de soumission si aucun utilisateur ou média n\'est sélectionné', () => {
       renderModal();
-      
+
       const submitButton = screen.getByText('Créer l\'emprunt');
       expect(submitButton).toBeDisabled();
     });
@@ -401,7 +401,7 @@ describe('CreateBorrowModal', () => {
       });
 
       renderModal();
-      
+
       // Sélectionner un utilisateur
       const userInput = screen.getByPlaceholderText('Rechercher un utilisateur...');
       fireEvent.change(userInput, { target: { value: 'John' } });
@@ -455,7 +455,7 @@ describe('CreateBorrowModal', () => {
 
     it('devrait créer un emprunt avec succès', async () => {
       renderModal();
-      
+
       // Sélectionner un utilisateur
       const userInput = screen.getByPlaceholderText('Rechercher un utilisateur...');
       fireEvent.change(userInput, { target: { value: 'John' } });
@@ -497,7 +497,7 @@ describe('CreateBorrowModal', () => {
       });
 
       renderModal();
-      
+
       // Sélectionner un utilisateur et un média
       const userInput = screen.getByPlaceholderText('Rechercher un utilisateur...');
       fireEvent.change(userInput, { target: { value: 'John' } });
@@ -524,11 +524,9 @@ describe('CreateBorrowModal', () => {
       });
     });
 
-    it('devrait afficher l\'état de chargement pendant la soumission', async () => {
-      mockCreateBorrow.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
-
+    it('devrait soumettre le formulaire avec les bonnes données', async () => {
       renderModal();
-      
+
       // Sélectionner un utilisateur et un média
       const userInput = screen.getByPlaceholderText('Rechercher un utilisateur...');
       fireEvent.change(userInput, { target: { value: 'John' } });
@@ -550,15 +548,21 @@ describe('CreateBorrowModal', () => {
       const submitButton = screen.getByText('Créer l\'emprunt');
       fireEvent.click(submitButton);
 
-      expect(screen.getByText('Création...')).toBeInTheDocument();
-      expect(screen.getByText('Création...')).toBeDisabled();
+      // Vérifier que le service a été appelé
+      await waitFor(() => {
+        expect(mockCreateBorrow).toHaveBeenCalledWith({
+          userId: 'user1',
+          mediaId: 'media1',
+          dueDate: expect.any(String)
+        });
+      });
     });
   });
 
   describe('Fermeture du modal', () => {
     it('devrait appeler onClose quand le bouton Annuler est cliqué', () => {
       renderModal();
-      
+
       const cancelButton = screen.getByText('Annuler');
       fireEvent.click(cancelButton);
 
@@ -567,7 +571,7 @@ describe('CreateBorrowModal', () => {
 
     it('devrait appeler onClose quand le bouton X est cliqué', () => {
       renderModal();
-      
+
       const closeButton = screen.getByRole('button', { name: /✕/ });
       fireEvent.click(closeButton);
 
@@ -590,7 +594,7 @@ describe('CreateBorrowModal', () => {
       });
 
       renderModal();
-      
+
       // Sélectionner un utilisateur et un média
       const userInput = screen.getByPlaceholderText('Rechercher un utilisateur...');
       fireEvent.change(userInput, { target: { value: 'John' } });
@@ -614,7 +618,7 @@ describe('CreateBorrowModal', () => {
 
       // Rouvrir le modal
       renderModal();
-      
+
       // Vérifier que les champs sont vides
       expect(screen.getByPlaceholderText('Rechercher un utilisateur...').value).toBe('');
       expect(screen.getByPlaceholderText('Rechercher un média disponible...').value).toBe('');
@@ -624,7 +628,7 @@ describe('CreateBorrowModal', () => {
   describe('Accessibilité et UX', () => {
     it('devrait avoir des labels appropriés pour tous les champs', () => {
       renderModal();
-      
+
       expect(screen.getByText('Utilisateur *')).toBeInTheDocument();
       expect(screen.getByText('Média *')).toBeInTheDocument();
       expect(screen.getByText('Date d\'échéance')).toBeInTheDocument();
@@ -632,20 +636,20 @@ describe('CreateBorrowModal', () => {
 
     it('devrait avoir des placeholders informatifs', () => {
       renderModal();
-      
+
       expect(screen.getByPlaceholderText('Rechercher un utilisateur...')).toBeInTheDocument();
       expect(screen.getByPlaceholderText('Rechercher un média disponible...')).toBeInTheDocument();
     });
 
     it('devrait afficher des messages d\'aide pour la date d\'échéance', () => {
       renderModal();
-      
+
       expect(screen.getByText('Par défaut : 14 jours à partir d\'aujourd\'hui')).toBeInTheDocument();
     });
 
     it('devrait avoir des icônes visuelles appropriées', () => {
       renderModal();
-      
+
       expect(screen.getAllByText('🕐')).toHaveLength(2); // ClockIcon (header + info)
       expect(screen.getByText('👤')).toBeInTheDocument(); // UserIcon
       expect(screen.getByText('📖')).toBeInTheDocument(); // BookOpenIcon

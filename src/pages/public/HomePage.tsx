@@ -124,9 +124,9 @@ const HomePage: React.FC = () => {
 
       {/* Statistiques */}
       <div className="py-20">
-        <div className="page-container">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative">
-            <div className="bg-gradient-to-r from-primary-600 to-primary-800 rounded-3xl p-12 lg:p-16 text-white overflow-hidden">
+            <div className="bg-gradient-to-r from-primary-600 to-primary-800 rounded-3xl p-12 lg:p-16 text-white">
               <div className="relative z-10">
                 <div className="text-center mb-12">
                   <h2 className="text-3xl lg:text-4xl font-bold mb-4">
