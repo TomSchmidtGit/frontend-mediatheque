@@ -8,6 +8,8 @@ import { Link } from 'react-router-dom';
 import authService from '../../services/authService';
 import FormField from '../../components/forms/FormField';
 import toast from 'react-hot-toast';
+import { MetaTagsComponent } from '../../components/common/MetaTags';
+import { generateMetaTags } from '../../config/metaTags';
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Email invalide'),
@@ -16,6 +18,7 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 const ForgotPasswordPage: React.FC = () => {
+  const metaTags = generateMetaTags('forgotPassword');
   const [isEmailSent, setIsEmailSent] = useState(false);
 
   const {
@@ -110,57 +113,60 @@ const ForgotPasswordPage: React.FC = () => {
   }
 
   return (
-    <div className='min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
-      <div className='sm:mx-auto sm:w-full sm:max-w-md'>
-        <div className='text-center'>
-          <h2 className='text-3xl font-bold tracking-tight text-gray-900'>
-            Mot de passe oublié ?
-          </h2>
-          <p className='mt-2 text-sm text-gray-600'>
-            Entrez votre adresse email et nous vous enverrons un lien pour
-            réinitialiser votre mot de passe.
-          </p>
+    <>
+      <MetaTagsComponent metaTags={metaTags} />
+      <div className='min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
+        <div className='sm:mx-auto sm:w-full sm:max-w-md'>
+          <div className='text-center'>
+            <h2 className='text-3xl font-bold tracking-tight text-gray-900'>
+              Mot de passe oublié ?
+            </h2>
+            <p className='mt-2 text-sm text-gray-600'>
+              Entrez votre adresse email et nous vous enverrons un lien pour
+              réinitialiser votre mot de passe.
+            </p>
+          </div>
         </div>
-      </div>
 
-      <div className='mt-8 sm:mx-auto sm:w-full sm:max-w-md'>
-        <div className='bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10'>
-          <form className='space-y-6' onSubmit={handleSubmit(onSubmit)}>
-            <FormField
-              {...register('email')}
-              name='email'
-              label='Adresse email'
-              type='email'
-              error={errors.email?.message}
-              placeholder='votre@email.com'
-              required
-            />
+        <div className='mt-8 sm:mx-auto sm:w-full sm:max-w-md'>
+          <div className='bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10'>
+            <form className='space-y-6' onSubmit={handleSubmit(onSubmit)}>
+              <FormField
+                {...register('email')}
+                name='email'
+                label='Adresse email'
+                type='email'
+                error={errors.email?.message}
+                placeholder='votre@email.com'
+                required
+              />
 
-            <div>
-              <button
-                type='submit'
-                disabled={isSubmitting}
-                className='w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed'
+              <div>
+                <button
+                  type='submit'
+                  disabled={isSubmitting}
+                  className='w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed'
+                >
+                  {isSubmitting
+                    ? 'Envoi en cours...'
+                    : 'Envoyer le lien de réinitialisation'}
+                </button>
+              </div>
+            </form>
+
+            <div className='mt-6 text-center'>
+              <Link
+                to='/login'
+                className='inline-flex items-center text-sm text-blue-600 hover:text-blue-500'
               >
-                {isSubmitting
-                  ? 'Envoi en cours...'
-                  : 'Envoyer le lien de réinitialisation'}
-              </button>
+                <ArrowLeftIcon className='h-4 w-4 mr-1' />
+                Retour à la connexion
+              </Link>
             </div>
-          </form>
-
-          <div className='mt-6 text-center'>
-            <Link
-              to='/login'
-              className='inline-flex items-center text-sm text-blue-600 hover:text-blue-500'
-            >
-              <ArrowLeftIcon className='h-4 w-4 mr-1' />
-              Retour à la connexion
-            </Link>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
