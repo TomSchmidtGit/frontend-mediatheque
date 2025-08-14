@@ -26,6 +26,19 @@ vi.mock('../../components/catalog/MediaCard', () => ({
   ),
 }));
 
+vi.mock('../../components/catalog/MediaListItem', () => ({
+  default: ({ media, onToggleFavorite }) => (
+    <div data-testid={`media-list-item-${media._id}`} className="media-list-item">
+      <h3>{media.title}</h3>
+      <p>{media.author}</p>
+      <p>{media.year}</p>
+      <button onClick={() => onToggleFavorite(media._id, false)}>
+        Toggle Favorite
+      </button>
+    </div>
+  ),
+}));
+
 vi.mock('../../components/catalog/CatalogFilters', () => ({
   default: ({ filters, onFiltersChange, categories, tags, loading, searchInput, onSearchInputChange }) => (
     <div data-testid="catalog-filters">
@@ -109,7 +122,7 @@ const renderWithProviders = (component) => {
 describe('CatalogPage', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    
+
     // Mock des données par défaut
     const mockMediaService = await import('../../services/mediaService');
     mockMediaService.default.getMedia.mockResolvedValue({
@@ -164,7 +177,7 @@ describe('CatalogPage', () => {
   describe('Affichage de base', () => {
     it('affiche le titre principal "Catalogue des médias"', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         expect(screen.getByText('Catalogue des médias')).toBeInTheDocument();
       });
@@ -172,7 +185,7 @@ describe('CatalogPage', () => {
 
     it('affiche la description du catalogue', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         expect(screen.getByText('Découvrez notre collection de livres, films et musiques')).toBeInTheDocument();
       });
@@ -180,7 +193,7 @@ describe('CatalogPage', () => {
 
     it('affiche le composant CatalogFilters', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('catalog-filters')).toBeInTheDocument();
       });
@@ -188,7 +201,7 @@ describe('CatalogPage', () => {
 
     it('affiche le composant Pagination', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('pagination')).toBeInTheDocument();
       });
@@ -198,7 +211,7 @@ describe('CatalogPage', () => {
   describe('Affichage des médias', () => {
     it('affiche les cartes de médias', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('media-card-1')).toBeInTheDocument();
         expect(screen.getByTestId('media-card-2')).toBeInTheDocument();
@@ -207,7 +220,7 @@ describe('CatalogPage', () => {
 
     it('affiche les informations des médias', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         expect(screen.getByText('Le Seigneur des Anneaux')).toBeInTheDocument();
         expect(screen.getByText('J.R.R. Tolkien')).toBeInTheDocument();
@@ -220,7 +233,7 @@ describe('CatalogPage', () => {
 
     it('affiche le nombre total de médias', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         expect(screen.getByText('2')).toBeInTheDocument();
         expect(screen.getByText('médias trouvés')).toBeInTheDocument();
@@ -231,7 +244,7 @@ describe('CatalogPage', () => {
   describe('Modes d\'affichage', () => {
     it('affiche par défaut en mode grille', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         const gridButton = screen.getByTestId('grid-icon').closest('button');
         expect(gridButton).toHaveClass('bg-primary-600');
@@ -240,7 +253,7 @@ describe('CatalogPage', () => {
 
     it('permet de basculer vers le mode liste', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         const listButton = screen.getByTestId('list-icon').closest('button');
         fireEvent.click(listButton);
@@ -250,7 +263,7 @@ describe('CatalogPage', () => {
 
     it('affiche les icônes pour les modes d\'affichage', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('grid-icon')).toBeInTheDocument();
         expect(screen.getByTestId('list-icon')).toBeInTheDocument();
@@ -261,7 +274,7 @@ describe('CatalogPage', () => {
   describe('Filtres et recherche', () => {
     it('affiche le bouton de filtres sur mobile', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         const filtersButton = screen.getByRole('button', { name: /Filtres/i });
         expect(filtersButton).toBeInTheDocument();
@@ -271,7 +284,7 @@ describe('CatalogPage', () => {
 
     it('permet de saisir dans le champ de recherche', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         const searchInput = screen.getByTestId('search-input');
         fireEvent.change(searchInput, { target: { value: 'test' } });
@@ -281,7 +294,7 @@ describe('CatalogPage', () => {
 
     it('permet de filtrer par type de média', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         const bookFilterButton = screen.getByRole('button', { name: /Filtrer par livre/i });
         fireEvent.click(bookFilterButton);
@@ -290,7 +303,7 @@ describe('CatalogPage', () => {
 
     it('permet de filtrer par catégorie', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         const categoryFilterButton = screen.getByRole('button', { name: /Filtrer par catégorie/i });
         fireEvent.click(categoryFilterButton);
@@ -299,7 +312,7 @@ describe('CatalogPage', () => {
 
     it('permet de filtrer par tag', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         const tagFilterButton = screen.getByRole('button', { name: /Filtrer par tag/i });
         fireEvent.click(tagFilterButton);
@@ -310,7 +323,7 @@ describe('CatalogPage', () => {
   describe('Pagination', () => {
     it('affiche la pagination avec les bonnes informations', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         expect(screen.getByTestId('current-page')).toHaveTextContent('1');
         expect(screen.getByTestId('total-pages')).toHaveTextContent('/ 1');
@@ -319,7 +332,7 @@ describe('CatalogPage', () => {
 
     it('permet de naviguer vers la page suivante', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         const nextButton = screen.getByRole('button', { name: /Suivant/i });
         fireEvent.click(nextButton);
@@ -328,7 +341,7 @@ describe('CatalogPage', () => {
 
     it('permet de naviguer vers la page précédente', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         const prevButton = screen.getByRole('button', { name: /Précédent/i });
         fireEvent.click(prevButton);
@@ -339,7 +352,7 @@ describe('CatalogPage', () => {
   describe('Gestion des favoris', () => {
     it('permet de basculer les favoris', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         const toggleButtons = screen.getAllByText('Toggle Favorite');
         fireEvent.click(toggleButtons[0]);
@@ -351,9 +364,9 @@ describe('CatalogPage', () => {
     it('affiche un indicateur de chargement', async () => {
       const mockMediaService = await import('../../services/mediaService');
       mockMediaService.default.getMedia.mockImplementation(() => new Promise(() => {}));
-      
+
       renderWithProviders(<CatalogPage />);
-      
+
       expect(screen.getByText('Chargement des médias...')).toBeInTheDocument();
       expect(screen.getByText('Chargement...')).toBeInTheDocument();
     });
@@ -363,9 +376,9 @@ describe('CatalogPage', () => {
     it('affiche un message d\'erreur en cas d\'échec', async () => {
       const mockMediaService = await import('../../services/mediaService');
       mockMediaService.default.getMedia.mockRejectedValue(new Error('Erreur de chargement'));
-      
+
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         expect(screen.getByText('Erreur de chargement')).toBeInTheDocument();
         expect(screen.getByText('Impossible de charger le catalogue des médias.')).toBeInTheDocument();
@@ -376,9 +389,9 @@ describe('CatalogPage', () => {
     it('permet de réessayer après une erreur', async () => {
       const mockMediaService = await import('../../services/mediaService');
       mockMediaService.default.getMedia.mockRejectedValueOnce(new Error('Erreur de chargement'));
-      
+
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         const retryButton = screen.getByRole('button', { name: /Réessayer/i });
         fireEvent.click(retryButton);
@@ -395,9 +408,9 @@ describe('CatalogPage', () => {
         totalPages: 0,
         totalItems: 0,
       });
-      
+
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         expect(screen.getByText('Aucun média trouvé')).toBeInTheDocument();
         expect(screen.getByText('Essayez de modifier vos critères de recherche.')).toBeInTheDocument();
@@ -413,9 +426,9 @@ describe('CatalogPage', () => {
         totalPages: 0,
         totalItems: 0,
       });
-      
+
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         const resetButton = screen.getByRole('button', { name: /Réinitialiser les filtres/i });
         fireEvent.click(resetButton);
@@ -426,7 +439,7 @@ describe('CatalogPage', () => {
   describe('Responsive design', () => {
     it('affiche le bouton de filtres sur mobile', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         const filtersButton = screen.getByRole('button', { name: /Filtres/i });
         expect(filtersButton).toHaveClass('lg:hidden');
@@ -435,7 +448,7 @@ describe('CatalogPage', () => {
 
     it('affiche la sidebar des filtres sur desktop', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         const sidebar = screen.getByTestId('catalog-filters').closest('aside');
         expect(sidebar).toHaveClass('lg:w-80');
@@ -446,7 +459,7 @@ describe('CatalogPage', () => {
   describe('Structure et layout', () => {
     it('affiche la page avec la classe de fond gris', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         const mainContainer = document.querySelector('.bg-gray-50');
         expect(mainContainer).toBeInTheDocument();
@@ -455,7 +468,7 @@ describe('CatalogPage', () => {
 
     it('affiche la barre d\'outils avec les contrôles', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         const toolbar = screen.getByText('Affichage :').closest('div').parentElement.parentElement;
         expect(toolbar).toHaveClass('bg-white');
@@ -464,10 +477,104 @@ describe('CatalogPage', () => {
 
     it('affiche la grille des médias', async () => {
       renderWithProviders(<CatalogPage />);
-      
+
       await waitFor(() => {
         const mediaGrid = screen.getByTestId('media-card-1').closest('div').parentElement;
         expect(mediaGrid).toHaveClass('grid');
+      });
+    });
+  });
+
+  describe('Modes d\'affichage', () => {
+    it('affiche par défaut en mode grille', async () => {
+      renderWithProviders(<CatalogPage />);
+
+      await waitFor(() => {
+        // Vérifier que le bouton grille est actif
+        const gridButton = screen.getByTestId('grid-icon').closest('button');
+        expect(gridButton).toHaveClass('bg-primary-600');
+
+        // Vérifier que le bouton liste n'est pas actif
+        const listButton = screen.getByTestId('list-icon').closest('button');
+        expect(listButton).toHaveClass('bg-white');
+
+        // Vérifier que les MediaCard sont affichés
+        expect(screen.getByTestId('media-card-1')).toBeInTheDocument();
+      });
+    });
+
+    it('permet de basculer vers le mode liste', async () => {
+      renderWithProviders(<CatalogPage />);
+
+      await waitFor(() => {
+        const listButton = screen.getByTestId('list-icon').closest('button');
+        fireEvent.click(listButton);
+      });
+
+      // Vérifier que le bouton liste est maintenant actif
+      const listButton = screen.getByTestId('list-icon').closest('button');
+      expect(listButton).toHaveClass('bg-primary-600');
+
+      // Vérifier que le bouton grille n'est plus actif
+      const gridButton = screen.getByTestId('grid-icon').closest('button');
+      expect(gridButton).toHaveClass('bg-white');
+    });
+
+    it('affiche les MediaListItem en mode liste', async () => {
+      renderWithProviders(<CatalogPage />);
+
+      // Basculer vers le mode liste
+      await waitFor(() => {
+        const listButton = screen.getByTestId('list-icon').closest('button');
+        fireEvent.click(listButton);
+      });
+
+      // Vérifier que les MediaListItem sont affichés
+      expect(screen.getByTestId('media-list-item-1')).toBeInTheDocument();
+
+      // Vérifier que le conteneur a la classe space-y-3 pour le mode liste
+      const mediaContainer = screen.getByTestId('media-list-item-1').closest('div').parentElement;
+      expect(mediaContainer).toHaveClass('space-y-3');
+    });
+
+    it('affiche les MediaCard en mode grille', async () => {
+      renderWithProviders(<CatalogPage />);
+
+      // Basculer vers le mode liste puis revenir en grille
+      await waitFor(() => {
+        const listButton = screen.getByTestId('list-icon').closest('button');
+        fireEvent.click(listButton);
+      });
+
+      await waitFor(() => {
+        const gridButton = screen.getByTestId('grid-icon').closest('button');
+        fireEvent.click(gridButton);
+      });
+
+      // Vérifier que les MediaCard sont affichés
+      expect(screen.getByTestId('media-card-1')).toBeInTheDocument();
+
+      // Vérifier que le conteneur a la classe grid pour le mode grille
+      const mediaContainer = screen.getByTestId('media-card-1').closest('div').parentElement;
+      expect(mediaContainer).toHaveClass('grid');
+    });
+
+    it('applique les bonnes classes CSS selon le mode d\'affichage', async () => {
+      renderWithProviders(<CatalogPage />);
+
+      // Mode grille par défaut
+      await waitFor(() => {
+        const mediaContainer = screen.getByTestId('media-card-1').closest('div').parentElement;
+        expect(mediaContainer).toHaveClass('grid', 'gap-6', 'grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3', 'xl:grid-cols-4');
+      });
+
+      // Basculer vers le mode liste
+      const listButton = screen.getByTestId('list-icon').closest('button');
+      fireEvent.click(listButton);
+
+      await waitFor(() => {
+        const mediaContainer = screen.getByTestId('media-list-item-1').closest('div').parentElement;
+        expect(mediaContainer).toHaveClass('space-y-3');
       });
     });
   });

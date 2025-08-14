@@ -64,7 +64,27 @@ vi.mock('../../components/catalog/MediaCard', () => ({
         <p>{media.author}</p>
         <span className="media-type">{media.type}</span>
       </div>
-      <button 
+      <button
+        onClick={() => onToggleFavorite && onToggleFavorite(media._id)}
+        className="favorite-button"
+        data-testid={`favorite-button-${media._id}`}
+      >
+        {isInFavoritesPage ? 'Retirer' : 'Ajouter'}
+      </button>
+    </div>
+  )
+}));
+
+// Mock du composant MediaListItem
+vi.mock('../../components/catalog/MediaListItem', () => ({
+  default: ({ media, onToggleFavorite, isInFavoritesPage }) => (
+    <div className="media-list-item" data-testid={`media-list-item-${media._id}`}>
+      <div className="media-info">
+        <h3>{media.title}</h3>
+        <p>{media.author}</p>
+        <span className="media-type">{media.type}</span>
+      </div>
+      <button
         onClick={() => onToggleFavorite && onToggleFavorite(media._id)}
         className="favorite-button"
         data-testid={`favorite-button-${media._id}`}
@@ -244,7 +264,7 @@ describe('FavoritesPage', () => {
     // Sélectionner le premier élément
     const checkboxes = screen.getAllByRole('checkbox');
     const firstCheckbox = checkboxes[1]; // Le premier est "Tout sélectionner"
-    
+
     await user.click(firstCheckbox);
     expect(firstCheckbox).toBeChecked();
 
@@ -347,7 +367,7 @@ describe('FavoritesPage', () => {
       totalPages: 3,
       totalItems: 30
     };
-    
+
     mockGetFavorites.mockResolvedValueOnce(mockDataWithPagination);
 
     renderWithProviders(<FavoritesPage />);
@@ -368,7 +388,7 @@ describe('FavoritesPage', () => {
       totalPages: 3,
       totalItems: 30
     };
-    
+
     mockGetFavorites.mockResolvedValueOnce(mockDataWithPagination);
 
     const user = userEvent.setup();
@@ -524,8 +544,137 @@ describe('FavoritesPage', () => {
     // Vérifier que "Tout sélectionner" n'est pas complètement coché
     const selectAllCheckbox = checkboxes[0];
     expect(selectAllCheckbox).not.toBeChecked();
-    
+
     // Vérifier que le compteur affiche le bon nombre
     expect(screen.getByText('2 sélectionnés')).toBeInTheDocument();
+  });
+
+  describe('Modes d\'affichage', () => {
+    it('affiche par défaut en mode grille', async () => {
+      renderWithProviders(<FavoritesPage />);
+
+      await waitFor(() => {
+        // Vérifier que le bouton grille est actif
+        const gridButton = screen.getByTestId('grid-icon').closest('button');
+        expect(gridButton).toHaveClass('bg-primary-600');
+
+        // Vérifier que le bouton liste n'est pas actif
+        const listButton = screen.getByTestId('list-icon').closest('button');
+        expect(listButton).toHaveClass('bg-white');
+
+        // Vérifier que les MediaCard sont affichés
+        expect(screen.getByTestId('media-card-media1')).toBeInTheDocument();
+      });
+    });
+
+    it('permet de basculer vers le mode liste', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<FavoritesPage />);
+
+      await waitFor(() => {
+        const listButton = screen.getByTestId('list-icon').closest('button');
+        user.click(listButton);
+      });
+
+      // Attendre que le composant se mette à jour
+      await waitFor(() => {
+        const listButton = screen.getByTestId('list-icon').closest('button');
+        expect(listButton).toHaveClass('bg-primary-600');
+      });
+
+      // Vérifier que le bouton grille n'est plus actif
+      const gridButton = screen.getByTestId('grid-icon').closest('button');
+      expect(gridButton).toHaveClass('bg-white');
+    });
+
+    it('affiche les MediaListItem en mode liste', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<FavoritesPage />);
+
+      // Basculer vers le mode liste
+      await waitFor(() => {
+        const listButton = screen.getByTestId('list-icon').closest('button');
+        user.click(listButton);
+      });
+
+      // Attendre que les MediaListItem soient affichés
+      await waitFor(() => {
+        expect(screen.getByTestId('media-list-item-media1')).toBeInTheDocument();
+      });
+
+      // Vérifier que le conteneur a la classe space-y-3 pour le mode liste
+      const mediaContainer = screen.getByTestId('media-list-item-media1').closest('div').parentElement.parentElement;
+      expect(mediaContainer).toHaveClass('space-y-3');
+    });
+
+    it('affiche les MediaCard en mode grille', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<FavoritesPage />);
+
+      // Basculer vers le mode liste puis revenir en grille
+      await waitFor(() => {
+        const listButton = screen.getByTestId('list-icon').closest('button');
+        user.click(listButton);
+      });
+
+      await waitFor(() => {
+        const gridButton = screen.getByTestId('grid-icon').closest('button');
+        user.click(gridButton);
+      });
+
+      // Attendre que les MediaCard soient affichés
+      await waitFor(() => {
+        expect(screen.getByTestId('media-card-media1')).toBeInTheDocument();
+      });
+
+      // Vérifier que le conteneur a la classe grid pour le mode grille
+      const mediaContainer = screen.getByTestId('media-card-media1').closest('div').parentElement.parentElement;
+      expect(mediaContainer).toHaveClass('grid');
+    });
+
+    it('applique les bonnes classes CSS selon le mode d\'affichage', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<FavoritesPage />);
+
+      // Mode grille par défaut
+      await waitFor(() => {
+        const mediaContainer = screen.getByTestId('media-card-media1').closest('div').parentElement.parentElement;
+        expect(mediaContainer).toHaveClass('grid', 'gap-6', 'grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3', 'xl:grid-cols-4');
+      });
+
+      // Basculer vers le mode liste
+      const listButton = screen.getByTestId('list-icon').closest('button');
+      await user.click(listButton);
+
+      // Attendre que le mode liste soit actif
+      await waitFor(() => {
+        expect(screen.getByTestId('media-list-item-media1')).toBeInTheDocument();
+      });
+
+      // Vérifier les classes du conteneur en mode liste
+      const mediaContainer = screen.getByTestId('media-list-item-media1').closest('div').parentElement.parentElement;
+      expect(mediaContainer).toHaveClass('space-y-3');
+    });
+
+    it('gère correctement les checkboxes dans les deux modes', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(<FavoritesPage />);
+
+      // Mode grille par défaut
+      await waitFor(() => {
+        const checkboxes = screen.getAllByRole('checkbox');
+        expect(checkboxes).toHaveLength(4); // 1 select-all + 3 médias
+      });
+
+      // Basculer vers le mode liste
+      const listButton = screen.getByTestId('list-icon').closest('button');
+      await user.click(listButton);
+
+      // Vérifier que les checkboxes sont toujours présentes
+      await waitFor(() => {
+        const checkboxes = screen.getAllByRole('checkbox');
+        expect(checkboxes).toHaveLength(4);
+      });
+    });
   });
 });

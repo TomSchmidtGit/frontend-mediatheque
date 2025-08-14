@@ -45,7 +45,7 @@ const CreateBorrowModal: React.FC<CreateBorrowModalProps> = ({
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
     setValue,
   } = useForm<CreateBorrowFormData>({

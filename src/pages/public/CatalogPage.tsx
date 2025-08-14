@@ -8,7 +8,7 @@ import {
   SparklesIcon
 } from '@heroicons/react/24/outline';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import MediaCard from '../../components/catalog/MediaCard';
+import { MediaCard, MediaListItem } from '../../components/catalog';
 import CatalogFilters from '../../components/catalog/CatalogFilters';
 import Pagination from '../../components/common/Pagination';
 import type { MediaFilters } from '../../types';
@@ -320,17 +320,25 @@ const CatalogPage: React.FC = () => {
             ) : displayData.data.length > 0 ? (
               <>
                 <div className={cn(
-                  'grid gap-6 mb-8',
+                  'mb-8',
                   viewMode === 'grid'
-                    ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-                    : 'grid-cols-1'
+                    ? 'grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                    : 'space-y-3'
                 )}>
                   {displayData.data.map((media) => (
-                    <MediaCard
-                      key={media._id}
-                      media={media}
-                      onToggleFavorite={handleToggleFavorite}
-                    />
+                    viewMode === 'grid' ? (
+                      <MediaCard
+                        key={media._id}
+                        media={media}
+                        onToggleFavorite={handleToggleFavorite}
+                      />
+                    ) : (
+                      <MediaListItem
+                        key={media._id}
+                        media={media}
+                        onToggleFavorite={handleToggleFavorite}
+                      />
+                    )
                   ))}
                 </div>
 

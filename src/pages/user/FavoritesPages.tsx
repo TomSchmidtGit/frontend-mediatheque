@@ -9,7 +9,7 @@ import {
   ListBulletIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
-import MediaCard from '../../components/catalog/MediaCard';
+import { MediaCard, MediaListItem } from '../../components/catalog';
 import Pagination from '../../components/common/Pagination';
 import { useAuth } from '../../context/AuthContext';
 import mediaService from '../../services/mediaService';
@@ -272,31 +272,51 @@ const FavoritesPage: React.FC = () => {
 
           <div
             className={cn(
-              'grid gap-6 mb-8',
+              'mb-8',
               viewMode === 'grid'
-                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-                : 'grid-cols-1'
+                ? 'grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                : 'space-y-3'
             )}
           >
             {favoritesData.data.map(media => (
               <div key={media._id} className='relative'>
-                <div className='absolute top-3 left-3 z-10'>
-                  <input
-                    type='checkbox'
-                    checked={selectedItems.has(media._id)}
-                    onChange={e =>
-                      handleSelectItem(media._id, e.target.checked)
-                    }
-                    className='h-4 w-4 text-primary-600 focus:ring-primary-500 border-white rounded shadow-sm bg-white/90 backdrop-blur-sm'
-                  />
-                </div>
-
-                {/* ✅ MediaCard avec la prop isInFavoritesPage */}
-                <MediaCard
-                  media={media}
-                  onToggleFavorite={handleRemoveFavorite}
-                  isInFavoritesPage={true}
-                />
+                {viewMode === 'grid' ? (
+                  <>
+                    <div className='absolute top-3 left-3 z-10'>
+                      <input
+                        type='checkbox'
+                        checked={selectedItems.has(media._id)}
+                        onChange={e =>
+                          handleSelectItem(media._id, e.target.checked)
+                        }
+                        className='h-4 w-4 text-primary-600 focus:ring-primary-500 border-white rounded shadow-sm bg-white/90 backdrop-blur-sm'
+                      />
+                    </div>
+                    <MediaCard
+                      media={media}
+                      onToggleFavorite={handleRemoveFavorite}
+                      isInFavoritesPage={true}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <div className='absolute top-4 left-4 z-10'>
+                      <input
+                        type='checkbox'
+                        checked={selectedItems.has(media._id)}
+                        onChange={e =>
+                          handleSelectItem(media._id, e.target.checked)
+                        }
+                        className='h-4 w-4 text-primary-600 focus:ring-primary-500 border-white rounded shadow-sm bg-white/90 backdrop-blur-sm'
+                      />
+                    </div>
+                    <MediaListItem
+                      media={media}
+                      onToggleFavorite={handleRemoveFavorite}
+                      isInFavoritesPage={true}
+                    />
+                  </>
+                )}
               </div>
             ))}
           </div>
