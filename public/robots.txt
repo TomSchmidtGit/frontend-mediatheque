@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://frontend-mediatheque.vercel.app/sitemap.xml
+
+# Empecher l'indexation des pages d'administration
+Disallow: /admin/
+Disallow: /api/
+
+# Autoriser l'indexation des pages publiques
+Allow: /catalog
+Allow: /about
+Allow: /contact
+Allow: /media/
+
+# Delai entre les requetes (en secondes)
+Crawl-delay: 1

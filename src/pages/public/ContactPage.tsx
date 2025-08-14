@@ -15,6 +15,8 @@ import FormField from '../../components/forms/FormField';
 import { contactService } from '../../services';
 import { cn } from '../../utils';
 import toast from 'react-hot-toast';
+import { MetaTagsComponent } from '../../components/common/MetaTags';
+import { generateMetaTags } from '../../config/metaTags';
 
 // Schéma de validation pour le formulaire de contact
 const contactSchema = z.object({
@@ -62,6 +64,7 @@ const contactSchema = z.object({
 type ContactFormData = z.infer<typeof contactSchema>;
 
 const ContactPage: React.FC = () => {
+  const metaTags = generateMetaTags('contact');
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const {
@@ -194,9 +197,11 @@ const ContactPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white overflow-hidden">
+    <>
+      <MetaTagsComponent metaTags={metaTags} />
+      <div className="bg-gray-50 min-h-screen">
+        {/* Hero Section */}
+        <div className="relative bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-black opacity-20"></div>
           <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full"></div>
@@ -527,6 +532,7 @@ const ContactPage: React.FC = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

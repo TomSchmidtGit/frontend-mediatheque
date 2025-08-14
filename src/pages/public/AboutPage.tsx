@@ -1,9 +1,9 @@
 // src/pages/public/AboutPage.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  BookOpenIcon, 
-  HeartIcon, 
+import {
+  BookOpenIcon,
+  HeartIcon,
   UsersIcon,
   GlobeAltIcon,
   AcademicCapIcon,
@@ -14,8 +14,11 @@ import {
   ClockIcon,
   PhoneIcon
 } from '@heroicons/react/24/outline';
+import { MetaTagsComponent } from '../../components/common/MetaTags';
+import { generateMetaTags } from '../../config/metaTags';
 
 const AboutPage: React.FC = () => {
+  const metaTags = generateMetaTags('about');
   const teamMembers = [
     {
       name: "Marie Dubois",
@@ -93,16 +96,18 @@ const AboutPage: React.FC = () => {
   ];
 
   return (
-    <div className="bg-white min-h-screen">
-      {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white overflow-hidden">
+    <>
+      <MetaTagsComponent metaTags={metaTags} />
+      <div className="bg-white min-h-screen">
+        {/* Hero Section */}
+        <div className="relative bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-black opacity-20"></div>
           <div className="absolute top-10 right-10 w-32 h-32 bg-white/10 rounded-full"></div>
           <div className="absolute bottom-20 left-20 w-24 h-24 bg-white/5 rounded-full"></div>
           <div className="absolute top-1/2 left-1/3 w-16 h-16 bg-white/10 rounded-full"></div>
         </div>
-        
+
         <div className="relative page-container py-20 lg:py-32">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl lg:text-6xl font-bold mb-6 animate-fade-in">
@@ -110,19 +115,19 @@ const AboutPage: React.FC = () => {
               <span className="block text-primary-200">Médiathèque</span>
             </h1>
             <p className="text-xl lg:text-2xl text-primary-100 mb-8 leading-relaxed animate-slide-in">
-              Depuis 1984, nous mettons la culture à portée de tous avec passion et engagement. 
+              Depuis 1984, nous mettons la culture à portée de tous avec passion et engagement.
               Découvrez notre histoire, notre équipe et notre vision pour l'avenir.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in">
-              <Link 
-                to="/catalog" 
+              <Link
+                to="/catalog"
                 className="inline-flex items-center px-8 py-4 bg-white text-primary-700 rounded-lg font-semibold hover:bg-primary-50 transition-all duration-200 transform hover:-translate-y-1 shadow-lg"
               >
                 <BookOpenIcon className="w-5 h-5 mr-2" />
                 Explorer le catalogue
               </Link>
-              <Link 
-                to="/contact" 
+              <Link
+                to="/contact"
                 className="inline-flex items-center px-8 py-4 border-2 border-white text-white rounded-lg font-semibold hover:bg-white hover:text-primary-700 transition-all duration-200"
               >
                 <EnvelopeIcon className="w-5 h-5 mr-2" />
@@ -141,7 +146,7 @@ const AboutPage: React.FC = () => {
               Notre mission
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Démocratiser l'accès à la culture et au savoir en proposant une expérience 
+              Démocratiser l'accès à la culture et au savoir en proposant une expérience
               moderne et inclusive pour tous les publics.
             </p>
           </div>
@@ -193,7 +198,7 @@ const AboutPage: React.FC = () => {
               Nos valeurs
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Des principes fondamentaux qui guident chacune de nos actions 
+              Des principes fondamentaux qui guident chacune de nos actions
               et définissent notre approche unique du service public culturel.
             </p>
           </div>
@@ -227,7 +232,7 @@ const AboutPage: React.FC = () => {
               Notre équipe
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Des professionnels passionnés et expérimentés, unis par l'amour 
+              Des professionnels passionnés et expérimentés, unis par l'amour
               de la culture et le désir de vous accompagner dans vos découvertes.
             </p>
           </div>
@@ -236,7 +241,7 @@ const AboutPage: React.FC = () => {
             {teamMembers.map((member, index) => (
               <div key={index} className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
                 <div className="aspect-square overflow-hidden">
-                  <img 
+                  <img
                     src={member.image}
                     alt={member.name}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
@@ -268,10 +273,10 @@ const AboutPage: React.FC = () => {
                 Nos services
               </h2>
               <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                Une gamme complète de services pensés pour répondre aux besoins 
+                Une gamme complète de services pensés pour répondre aux besoins
                 de tous nos publics, du plus jeune âge aux seniors.
               </p>
-              
+
               <div className="grid gap-3">
                 {services.map((service, index) => (
                   <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-primary-50 transition-colors">
@@ -284,7 +289,7 @@ const AboutPage: React.FC = () => {
 
             <div className="bg-gradient-to-br from-primary-600 to-primary-800 rounded-2xl p-8 text-white">
               <h3 className="text-2xl font-bold mb-6">📍 Informations pratiques</h3>
-              
+
               <div className="space-y-4">
                 <div className="flex items-start">
                   <MapPinIcon className="w-6 h-6 mr-3 mt-1 flex-shrink-0" />
@@ -323,8 +328,8 @@ const AboutPage: React.FC = () => {
 
               <div className="mt-8 pt-6 border-t border-primary-500">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Link 
-                    to="/contact" 
+                  <Link
+                    to="/contact"
                     className="inline-flex items-center justify-center px-4 py-3 text-white hover:text-primary-200 font-medium border-2 border-white rounded-lg hover:bg-white/10 transition-colors group"
                   >
                     <EnvelopeIcon className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
@@ -338,7 +343,7 @@ const AboutPage: React.FC = () => {
                     Appeler maintenant
                   </a>
                 </div>
-                
+
                 <div className="mt-4">
                   <a
                     href="mailto:contact@mediatheque.fr?subject=Contact depuis la page A propos"
@@ -451,19 +456,19 @@ const AboutPage: React.FC = () => {
             Rejoignez notre communauté !
           </h2>
           <p className="text-xl text-primary-100 mb-10 max-w-2xl mx-auto">
-            Inscrivez-vous dès aujourd'hui et découvrez tout ce que notre 
+            Inscrivez-vous dès aujourd'hui et découvrez tout ce que notre
             médiathèque peut vous offrir. C'est gratuit et sans engagement.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              to="/register" 
+            <Link
+              to="/register"
               className="inline-flex items-center px-8 py-4 bg-white text-primary-700 rounded-lg font-semibold hover:bg-primary-50 transition-all duration-200 transform hover:-translate-y-1 shadow-lg"
             >
               <UsersIcon className="w-5 h-5 mr-2" />
               S'inscrire maintenant
             </Link>
-            <Link 
-              to="/catalog" 
+            <Link
+              to="/catalog"
               className="inline-flex items-center px-8 py-4 border-2 border-white text-white rounded-lg font-semibold hover:bg-white hover:text-primary-700 transition-all duration-200"
             >
               <BookOpenIcon className="w-5 h-5 mr-2" />
@@ -473,6 +478,7 @@ const AboutPage: React.FC = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

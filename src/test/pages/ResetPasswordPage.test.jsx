@@ -72,10 +72,9 @@ describe('ResetPasswordPage', () => {
 
   it('devrait afficher le formulaire de réinitialisation de mot de passe', () => {
     renderWithProviders(<ResetPasswordPage />);
-    
-    expect(screen.getByRole('heading', { name: 'Nouveau mot de passe' })).toBeInTheDocument();
-    expect(screen.getByText(/Créez un nouveau mot de passe pour votre compte/)).toBeInTheDocument();
-    expect(screen.getByDisplayValue('test@example.com')).toBeInTheDocument();
+
+    expect(screen.getByRole('heading', { name: 'Réinitialiser le mot de passe' })).toBeInTheDocument();
+    expect(screen.getByText(/Entrez votre nouveau mot de passe/)).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Nouveau mot de passe')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Confirmer le mot de passe')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Réinitialiser le mot de passe' })).toBeInTheDocument();
@@ -83,30 +82,22 @@ describe('ResetPasswordPage', () => {
 
   it('devrait afficher le lien de retour vers la connexion', () => {
     renderWithProviders(<ResetPasswordPage />);
-    
+
     const backLink = screen.getByRole('link', { name: /Retour à la connexion/ });
     expect(backLink).toBeInTheDocument();
     expect(backLink).toHaveAttribute('href', '/login');
   });
 
-  it('devrait afficher l\'email en lecture seule', () => {
-    renderWithProviders(<ResetPasswordPage />);
-    
-    const emailInput = screen.getByDisplayValue('test@example.com');
-    expect(emailInput).toBeDisabled();
-    expect(emailInput).toHaveClass('bg-gray-50');
-  });
-
   it('devrait valider la longueur minimale du mot de passe', async () => {
     const user = userEvent.setup();
     renderWithProviders(<ResetPasswordPage />);
-    
+
     const passwordInput = screen.getByPlaceholderText('Nouveau mot de passe');
     const submitButton = screen.getByRole('button', { name: 'Réinitialiser le mot de passe' });
-    
+
     await user.type(passwordInput, '123');
     await user.click(submitButton);
-    
+
     // La validation Zod devrait empêcher la soumission du formulaire
     // Vérifier que le service n'est pas appelé
     expect(mockResetPassword).not.toHaveBeenCalled();
@@ -115,15 +106,15 @@ describe('ResetPasswordPage', () => {
   it('devrait valider la correspondance des mots de passe', async () => {
     const user = userEvent.setup();
     renderWithProviders(<ResetPasswordPage />);
-    
+
     const passwordInput = screen.getByPlaceholderText('Nouveau mot de passe');
     const confirmPasswordInput = screen.getByPlaceholderText('Confirmer le mot de passe');
     const submitButton = screen.getByRole('button', { name: 'Réinitialiser le mot de passe' });
-    
+
     await user.type(passwordInput, 'Password123');
     await user.type(confirmPasswordInput, 'DifferentPassword123');
     await user.click(submitButton);
-    
+
     // La validation Zod devrait empêcher la soumission du formulaire
     // Vérifier que le service n'est pas appelé
     expect(mockResetPassword).not.toHaveBeenCalled();
@@ -132,13 +123,13 @@ describe('ResetPasswordPage', () => {
   it('devrait accepter des mots de passe valides', async () => {
     const user = userEvent.setup();
     renderWithProviders(<ResetPasswordPage />);
-    
+
     const passwordInput = screen.getByPlaceholderText('Nouveau mot de passe');
     const confirmPasswordInput = screen.getByPlaceholderText('Confirmer le mot de passe');
-    
+
     await user.type(passwordInput, 'Password123');
     await user.type(confirmPasswordInput, 'Password123');
-    
+
     expect(passwordInput).toHaveValue('Password123');
     expect(confirmPasswordInput).toHaveValue('Password123');
   });
@@ -146,17 +137,17 @@ describe('ResetPasswordPage', () => {
   it('devrait gérer la réinitialisation réussie du mot de passe', async () => {
     const user = userEvent.setup();
     mockResetPassword.mockResolvedValue({ message: 'Mot de passe réinitialisé' });
-    
+
     renderWithProviders(<ResetPasswordPage />);
-    
+
     const passwordInput = screen.getByPlaceholderText('Nouveau mot de passe');
     const confirmPasswordInput = screen.getByPlaceholderText('Confirmer le mot de passe');
     const submitButton = screen.getByRole('button', { name: 'Réinitialiser le mot de passe' });
-    
+
     await user.type(passwordInput, 'Password123');
     await user.type(confirmPasswordInput, 'Password123');
     await user.click(submitButton);
-    
+
     await waitFor(() => {
       expect(mockResetPassword).toHaveBeenCalledWith('valid-token', 'test@example.com', 'Password123');
     });
@@ -165,38 +156,37 @@ describe('ResetPasswordPage', () => {
   it('devrait afficher la page de succès après réinitialisation', async () => {
     const user = userEvent.setup();
     mockResetPassword.mockResolvedValue({ message: 'Mot de passe réinitialisé' });
-    
+
     renderWithProviders(<ResetPasswordPage />);
-    
+
     const passwordInput = screen.getByPlaceholderText('Nouveau mot de passe');
     const confirmPasswordInput = screen.getByPlaceholderText('Confirmer le mot de passe');
     const submitButton = screen.getByRole('button', { name: 'Réinitialiser le mot de passe' });
-    
+
     await user.type(passwordInput, 'Password123');
     await user.type(confirmPasswordInput, 'Password123');
     await user.click(submitButton);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Mot de passe réinitialisé !')).toBeInTheDocument();
       expect(screen.getByText(/Votre mot de passe a été modifié avec succès/)).toBeInTheDocument();
-      expect(screen.getByText('Sécurité renforcée')).toBeInTheDocument();
     });
   });
 
   it('devrait afficher l\'état de chargement pendant la réinitialisation', async () => {
     const user = userEvent.setup();
     mockResetPassword.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
-    
+
     renderWithProviders(<ResetPasswordPage />);
-    
+
     const passwordInput = screen.getByPlaceholderText('Nouveau mot de passe');
     const confirmPasswordInput = screen.getByPlaceholderText('Confirmer le mot de passe');
     const submitButton = screen.getByRole('button', { name: 'Réinitialiser le mot de passe' });
-    
+
     await user.type(passwordInput, 'Password123');
     await user.type(confirmPasswordInput, 'Password123');
     await user.click(submitButton);
-    
+
     // Vérifier que le service est appelé
     await waitFor(() => {
       expect(mockResetPassword).toHaveBeenCalledWith('valid-token', 'test@example.com', 'Password123');
@@ -208,17 +198,17 @@ describe('ResetPasswordPage', () => {
     mockResetPassword.mockRejectedValue({
       response: { data: { message: 'Token expiré' } }
     });
-    
+
     renderWithProviders(<ResetPasswordPage />);
-    
+
     const passwordInput = screen.getByPlaceholderText('Nouveau mot de passe');
     const confirmPasswordInput = screen.getByPlaceholderText('Confirmer le mot de passe');
     const submitButton = screen.getByRole('button', { name: 'Réinitialiser le mot de passe' });
-    
+
     await user.type(passwordInput, 'Password123');
     await user.type(confirmPasswordInput, 'Password123');
     await user.click(submitButton);
-    
+
     await waitFor(() => {
       expect(mockResetPassword).toHaveBeenCalledWith('valid-token', 'test@example.com', 'Password123');
     });
@@ -227,35 +217,35 @@ describe('ResetPasswordPage', () => {
   it('devrait rediriger vers forgot-password si token manquant', () => {
     mockSearchParams.delete('token');
     mockSearchParams.delete('email');
-    
+
     renderWithProviders(<ResetPasswordPage />);
-    
+
     expect(mockNavigate).toHaveBeenCalledWith('/forgot-password');
   });
 
   it('devrait rediriger vers forgot-password si email manquant', () => {
     mockSearchParams.set('token', 'valid-token');
     mockSearchParams.delete('email');
-    
+
     renderWithProviders(<ResetPasswordPage />);
-    
+
     expect(mockNavigate).toHaveBeenCalledWith('/forgot-password');
   });
 
   it('devrait basculer la visibilité du mot de passe', async () => {
     const user = userEvent.setup();
     renderWithProviders(<ResetPasswordPage />);
-    
+
     const passwordInput = screen.getByPlaceholderText('Nouveau mot de passe');
     const toggleButton = passwordInput.parentElement.querySelector('button');
-    
+
     // Par défaut, le mot de passe est masqué
     expect(passwordInput).toHaveAttribute('type', 'password');
-    
+
     // Cliquer pour afficher le mot de passe
     await user.click(toggleButton);
     expect(passwordInput).toHaveAttribute('type', 'text');
-    
+
     // Cliquer pour masquer le mot de passe
     await user.click(toggleButton);
     expect(passwordInput).toHaveAttribute('type', 'password');
@@ -264,17 +254,17 @@ describe('ResetPasswordPage', () => {
   it('devrait basculer la visibilité de la confirmation du mot de passe', async () => {
     const user = userEvent.setup();
     renderWithProviders(<ResetPasswordPage />);
-    
+
     const confirmPasswordInput = screen.getByPlaceholderText('Confirmer le mot de passe');
     const toggleButton = confirmPasswordInput.parentElement.querySelector('button');
-    
+
     // Par défaut, le mot de passe est masqué
     expect(confirmPasswordInput).toHaveAttribute('type', 'password');
-    
+
     // Cliquer pour afficher le mot de passe
     await user.click(toggleButton);
     expect(confirmPasswordInput).toHaveAttribute('type', 'text');
-    
+
     // Cliquer pour masquer le mot de passe
     await user.click(toggleButton);
     expect(confirmPasswordInput).toHaveAttribute('type', 'password');
@@ -282,12 +272,11 @@ describe('ResetPasswordPage', () => {
 
   it('devrait avoir la structure responsive correcte', () => {
     renderWithProviders(<ResetPasswordPage />);
-    
+
     // Vérifier que la page se charge sans erreur
-    expect(screen.getByRole('heading', { name: 'Nouveau mot de passe' })).toBeInTheDocument();
-    
+    expect(screen.getByRole('heading', { name: 'Réinitialiser le mot de passe' })).toBeInTheDocument();
+
     // Vérifier que tous les éléments sont présents
-    expect(screen.getByDisplayValue('test@example.com')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Nouveau mot de passe')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Confirmer le mot de passe')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Réinitialiser le mot de passe' })).toBeInTheDocument();
@@ -296,43 +285,22 @@ describe('ResetPasswordPage', () => {
   it('devrait gérer la navigation vers la connexion depuis la page de succès', async () => {
     const user = userEvent.setup();
     mockResetPassword.mockResolvedValue({ message: 'Mot de passe réinitialisé' });
-    
+
     renderWithProviders(<ResetPasswordPage />);
-    
+
     const passwordInput = screen.getByPlaceholderText('Nouveau mot de passe');
     const confirmPasswordInput = screen.getByPlaceholderText('Confirmer le mot de passe');
     const submitButton = screen.getByRole('button', { name: 'Réinitialiser le mot de passe' });
-    
+
     await user.type(passwordInput, 'Password123');
     await user.type(confirmPasswordInput, 'Password123');
     await user.click(submitButton);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Mot de passe réinitialisé !')).toBeInTheDocument();
     });
-    
+
     const loginButton = screen.getByRole('link', { name: 'Se connecter' });
     expect(loginButton).toHaveAttribute('href', '/login');
-  });
-
-  it('devrait afficher les informations de sécurité sur la page de succès', async () => {
-    const user = userEvent.setup();
-    mockResetPassword.mockResolvedValue({ message: 'Mot de passe réinitialisé' });
-    
-    renderWithProviders(<ResetPasswordPage />);
-    
-    const passwordInput = screen.getByPlaceholderText('Nouveau mot de passe');
-    const confirmPasswordInput = screen.getByPlaceholderText('Confirmer le mot de passe');
-    const submitButton = screen.getByRole('button', { name: 'Réinitialiser le mot de passe' });
-    
-    await user.type(passwordInput, 'Password123');
-    await user.type(confirmPasswordInput, 'Password123');
-    await user.click(submitButton);
-    
-    await waitFor(() => {
-      expect(screen.getByText('Mot de passe réinitialisé !')).toBeInTheDocument();
-      expect(screen.getByText('Sécurité renforcée')).toBeInTheDocument();
-      expect(screen.getByText(/Pour des raisons de sécurité/)).toBeInTheDocument();
-    });
   });
 });

@@ -14,6 +14,8 @@ import Pagination from '../../components/common/Pagination';
 import type { MediaFilters } from '../../types';
 import mediaService from '../../services/mediaService';
 import { cn } from '../../utils';
+import { MetaTagsComponent } from '../../components/common/MetaTags';
+import { generateMetaTags } from '../../config/metaTags';
 // import { useAuth } from '../../context/AuthContext';
 
 interface PaginatedData {
@@ -24,6 +26,7 @@ interface PaginatedData {
 }
 
 const CatalogPage: React.FC = () => {
+  const metaTags = generateMetaTags('catalog');
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
@@ -217,8 +220,10 @@ const CatalogPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="page-container py-8">
+    <>
+      <MetaTagsComponent metaTags={metaTags} />
+      <div className="bg-gray-50 min-h-screen">
+        <div className="page-container py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
@@ -363,6 +368,7 @@ const CatalogPage: React.FC = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

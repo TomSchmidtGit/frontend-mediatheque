@@ -1,0 +1,25 @@
+{
+  "name": "Médiathèque",
+  "short_name": "Médiathèque",
+  "description": "Explorez notre vaste collection de livres, films, musique et autres médias. Empruntez, découvrez et enrichissez vos connaissances avec notre médiathèque.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "education",
+    "books",
+    "entertainment"
+  ],
+  "lang": "fr",
+  "dir": "ltr"
+}

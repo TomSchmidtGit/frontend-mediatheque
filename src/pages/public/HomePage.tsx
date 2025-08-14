@@ -1,17 +1,23 @@
 // src/pages/public/HomePage.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  BookOpenIcon, 
-  FilmIcon, 
+import {
+  BookOpenIcon,
+  FilmIcon,
   MusicalNoteIcon,
   SparklesIcon,
   ClockIcon,
   UsersIcon
 } from '@heroicons/react/24/outline';
+import { MetaTagsComponent } from '../../components/common/MetaTags';
+import { generateMetaTags } from '../../config/metaTags';
 
 const HomePage: React.FC = () => {
+  const metaTags = generateMetaTags('home');
+
   return (
+    <>
+      <MetaTagsComponent metaTags={metaTags} />
     <div className="bg-white min-h-screen overflow-x-hidden">
       {/* Hero Section */}
       <div className="relative overflow-hidden pt-6">
@@ -25,19 +31,19 @@ const HomePage: React.FC = () => {
                 </span>
               </h1>
               <p className="text-xl lg:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed animate-slide-in">
-                Découvrez notre riche collection de livres, films et musiques. 
+                Découvrez notre riche collection de livres, films et musiques.
                 Une expérience de lecture et de divertissement unique vous attend.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in">
-                <Link 
-                  to="/catalog" 
+                <Link
+                  to="/catalog"
                   className="btn-primary text-lg px-8 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200"
                 >
                   <SparklesIcon className="w-5 h-5 mr-2" />
                   Explorer le catalogue
                 </Link>
-                <Link 
-                  to="/register" 
+                <Link
+                  to="/register"
                   className="btn-secondary text-lg px-8 py-4 hover:shadow-md transform hover:-translate-y-1 transition-all duration-200"
                 >
                   Créer un compte gratuit
@@ -46,7 +52,7 @@ const HomePage: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Background decoration */}
         <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full opacity-20 animate-pulse"></div>
         <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-60 h-60 bg-gradient-to-tr from-secondary-100 to-secondary-200 rounded-full opacity-20 animate-pulse"></div>
@@ -63,7 +69,7 @@ const HomePage: React.FC = () => {
               Explorez nos différents univers culturels
             </p>
           </div>
-          
+
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="group relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
               <div className="w-20 h-20 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -71,7 +77,7 @@ const HomePage: React.FC = () => {
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">Livres</h3>
               <p className="text-gray-600 text-center leading-relaxed">
-                Romans, essais, bandes dessinées et bien plus encore. 
+                Romans, essais, bandes dessinées et bien plus encore.
                 Plongez dans des univers littéraires captivants.
               </p>
               <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -80,14 +86,14 @@ const HomePage: React.FC = () => {
                 </span>
               </div>
             </div>
-            
+
             <div className="group relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
               <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                 <FilmIcon className="w-10 h-10 text-red-600" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">Films</h3>
               <p className="text-gray-600 text-center leading-relaxed">
-                Découvrez notre sélection de films classiques et contemporains 
+                Découvrez notre sélection de films classiques et contemporains
                 pour tous les goûts et tous les âges.
               </p>
               <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -96,14 +102,14 @@ const HomePage: React.FC = () => {
                 </span>
               </div>
             </div>
-            
+
             <div className="group relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
               <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                 <MusicalNoteIcon className="w-10 h-10 text-purple-600" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-3 text-center">Musique</h3>
               <p className="text-gray-600 text-center leading-relaxed">
-                Explorez notre collection musicale variée, 
+                Explorez notre collection musicale variée,
                 du classique au contemporain, en passant par le jazz.
               </p>
               <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -130,7 +136,7 @@ const HomePage: React.FC = () => {
                     Une communauté dynamique et en constante croissance
                   </p>
                 </div>
-                
+
                 <div className="grid md:grid-cols-3 gap-8">
                   <div className="text-center">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-full mb-4">
@@ -155,7 +161,7 @@ const HomePage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Background decoration */}
               <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/5 rounded-full"></div>
               <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-32 h-32 bg-white/5 rounded-full"></div>
@@ -172,19 +178,19 @@ const HomePage: React.FC = () => {
               Prêt à commencer votre aventure ?
             </h2>
             <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-              Rejoignez notre communauté dès aujourd'hui et accédez à toute notre collection. 
+              Rejoignez notre communauté dès aujourd'hui et accédez à toute notre collection.
               L'inscription est gratuite et ne prend que quelques secondes.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link 
-                to="/register" 
+              <Link
+                to="/register"
                 className="btn-primary text-lg px-8 py-4 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200"
               >
                 <SparklesIcon className="w-5 h-5 mr-2" />
                 S'inscrire gratuitement
               </Link>
-              <Link 
-                to="/catalog" 
+              <Link
+                to="/catalog"
                 className="text-primary-600 hover:text-primary-700 font-medium text-lg underline decoration-2 underline-offset-4 hover:underline-offset-8 transition-all duration-200"
               >
                 Ou explorer sans compte
@@ -194,6 +200,7 @@ const HomePage: React.FC = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

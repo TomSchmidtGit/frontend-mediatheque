@@ -15,8 +15,11 @@ import { useAuth } from '../../context/AuthContext';
 import mediaService from '../../services/mediaService';
 import { cn } from '../../utils';
 import toast from 'react-hot-toast';
+import { MetaTagsComponent } from '../../components/common/MetaTags';
+import { generateMetaTags } from '../../config/metaTags';
 
 const FavoritesPage: React.FC = () => {
+  const metaTags = generateMetaTags('favorites');
   const { user, updateUser } = useAuth();
   const queryClient = useQueryClient();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -179,146 +182,151 @@ const FavoritesPage: React.FC = () => {
   }
 
   return (
-    <div className='bg-gray-50 min-h-screen'>
-      <div className='page-container py-8'>
-        <div className='mb-8'>
-          <div className='flex items-center space-x-3 mb-4'>
-            <HeartIcon className='h-8 w-8 text-red-500' />
-            <h1 className='text-3xl lg:text-4xl font-bold text-gray-900'>
-              Mes favoris
-            </h1>
+    <>
+      <MetaTagsComponent metaTags={metaTags} />
+      <div className='bg-gray-50 min-h-screen'>
+        <div className='page-container py-8'>
+          <div className='mb-8'>
+            <div className='flex items-center space-x-3 mb-4'>
+              <HeartIcon className='h-8 w-8 text-red-500' />
+              <h1 className='text-3xl lg:text-4xl font-bold text-gray-900'>
+                Mes favoris
+              </h1>
+            </div>
+            <p className='text-gray-600 text-lg'>
+              {favoritesData.totalItems} média
+              {favoritesData.totalItems > 1 ? 's' : ''} en favoris
+            </p>
           </div>
-          <p className='text-gray-600 text-lg'>
-            {favoritesData.totalItems} média
-            {favoritesData.totalItems > 1 ? 's' : ''} en favoris
-          </p>
-        </div>
 
-        <div className='bg-white rounded-xl border border-gray-200 p-4 mb-6'>
-          <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0'>
-            <div className='flex items-center space-x-4'>
-              <div className='flex items-center space-x-2'>
-                <input
-                  type='checkbox'
-                  checked={
-                    selectedItems.size === favoritesData.data.length &&
-                    favoritesData.data.length > 0
-                  }
-                  onChange={handleSelectAll}
-                  className='h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded'
-                />
-                <label className='text-sm text-gray-700'>
-                  Tout sélectionner
-                </label>
+          <div className='bg-white rounded-xl border border-gray-200 p-4 mb-6'>
+            <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0'>
+              <div className='flex items-center space-x-4'>
+                <div className='flex items-center space-x-2'>
+                  <input
+                    type='checkbox'
+                    checked={
+                      selectedItems.size === favoritesData.data.length &&
+                      favoritesData.data.length > 0
+                    }
+                    onChange={handleSelectAll}
+                    className='h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded'
+                  />
+                  <label className='text-sm text-gray-700'>
+                    Tout sélectionner
+                  </label>
+                </div>
+
+                {selectedItems.size > 0 && (
+                  <span className='text-sm text-primary-600 font-medium'>
+                    {selectedItems.size} sélectionné
+                    {selectedItems.size > 1 ? 's' : ''}
+                  </span>
+                )}
               </div>
 
-              {selectedItems.size > 0 && (
-                <span className='text-sm text-primary-600 font-medium'>
-                  {selectedItems.size} sélectionné
-                  {selectedItems.size > 1 ? 's' : ''}
-                </span>
-              )}
-            </div>
-
-            <div className='flex items-center space-x-4'>
-              {selectedItems.size > 0 && (
-                <button
-                  onClick={handleBulkRemove}
-                  disabled={removeFavoriteMutation.isPending}
-                  className='flex items-center px-3 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors'
-                >
-                  <TrashIcon className='h-4 w-4 mr-1' />
-                  {removeFavoriteMutation.isPending
-                    ? 'Suppression...'
-                    : 'Retirer la sélection'}
-                </button>
-              )}
-
-              <div className='flex items-center space-x-2'>
-                <span className='text-sm text-gray-600'>Affichage :</span>
-                <div className='flex rounded-md border border-gray-300 overflow-hidden'>
+              <div className='flex items-center space-x-4'>
+                {selectedItems.size > 0 && (
                   <button
-                    onClick={() => setViewMode('grid')}
-                    className={cn(
-                      'p-2 text-sm font-medium transition-colors',
-                      viewMode === 'grid'
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
-                    )}
+                    onClick={handleBulkRemove}
+                    disabled={removeFavoriteMutation.isPending}
+                    className='flex items-center px-3 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors'
                   >
-                    <Squares2X2Icon className='h-4 w-4' />
+                    <TrashIcon className='h-4 w-4 mr-1' />
+                    {removeFavoriteMutation.isPending
+                      ? 'Suppression...'
+                      : 'Retirer la sélection'}
                   </button>
-                  <button
-                    onClick={() => setViewMode('list')}
-                    className={cn(
-                      'p-2 text-sm font-medium transition-colors border-l border-gray-300',
-                      viewMode === 'list'
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-50'
-                    )}
-                  >
-                    <ListBulletIcon className='h-4 w-4' />
-                  </button>
+                )}
+
+                <div className='flex items-center space-x-2'>
+                  <span className='text-sm text-gray-600'>Affichage :</span>
+                  <div className='flex rounded-md border border-gray-300 overflow-hidden'>
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={cn(
+                        'p-2 text-sm font-medium transition-colors',
+                        viewMode === 'grid'
+                          ? 'bg-primary-600 text-white'
+                          : 'bg-white text-gray-700 hover:bg-gray-50'
+                      )}
+                    >
+                      <Squares2X2Icon className='h-4 w-4' />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={cn(
+                        'p-2 text-sm font-medium transition-colors border-l border-gray-300',
+                        viewMode === 'list'
+                          ? 'bg-primary-600 text-white'
+                          : 'bg-white text-gray-700 hover:bg-gray-50'
+                      )}
+                    >
+                      <ListBulletIcon className='h-4 w-4' />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div
-          className={cn(
-            'grid gap-6 mb-8',
-            viewMode === 'grid'
-              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-              : 'grid-cols-1'
-          )}
-        >
-          {favoritesData.data.map(media => (
-            <div key={media._id} className='relative'>
-              <div className='absolute top-3 left-3 z-10'>
-                <input
-                  type='checkbox'
-                  checked={selectedItems.has(media._id)}
-                  onChange={e => handleSelectItem(media._id, e.target.checked)}
-                  className='h-4 w-4 text-primary-600 focus:ring-primary-500 border-white rounded shadow-sm bg-white/90 backdrop-blur-sm'
+          <div
+            className={cn(
+              'grid gap-6 mb-8',
+              viewMode === 'grid'
+                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                : 'grid-cols-1'
+            )}
+          >
+            {favoritesData.data.map(media => (
+              <div key={media._id} className='relative'>
+                <div className='absolute top-3 left-3 z-10'>
+                  <input
+                    type='checkbox'
+                    checked={selectedItems.has(media._id)}
+                    onChange={e =>
+                      handleSelectItem(media._id, e.target.checked)
+                    }
+                    className='h-4 w-4 text-primary-600 focus:ring-primary-500 border-white rounded shadow-sm bg-white/90 backdrop-blur-sm'
+                  />
+                </div>
+
+                {/* ✅ MediaCard avec la prop isInFavoritesPage */}
+                <MediaCard
+                  media={media}
+                  onToggleFavorite={handleRemoveFavorite}
+                  isInFavoritesPage={true}
                 />
               </div>
+            ))}
+          </div>
 
-              {/* ✅ MediaCard avec la prop isInFavoritesPage */}
-              <MediaCard
-                media={media}
-                onToggleFavorite={handleRemoveFavorite}
-                isInFavoritesPage={true}
-              />
-            </div>
-          ))}
-        </div>
+          {favoritesData.totalPages > 1 && (
+            <Pagination
+              currentPage={favoritesData.currentPage}
+              totalPages={favoritesData.totalPages}
+              totalItems={favoritesData.totalItems}
+              itemsPerPage={limit}
+              onPageChange={setCurrentPage}
+              loading={false}
+            />
+          )}
 
-        {favoritesData.totalPages > 1 && (
-          <Pagination
-            currentPage={favoritesData.currentPage}
-            totalPages={favoritesData.totalPages}
-            totalItems={favoritesData.totalItems}
-            itemsPerPage={limit}
-            onPageChange={setCurrentPage}
-            loading={false}
-          />
-        )}
-
-        <div className='mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4'>
-          <div className='flex items-start'>
-            <SparklesIcon className='h-5 w-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0' />
-            <div className='text-sm'>
-              <p className='text-blue-800 font-medium mb-1'>💡 Conseil :</p>
-              <p className='text-blue-700'>
-                Vos favoris sont synchronisés sur tous vos appareils. N'hésitez
-                pas à ajouter tous les médias qui vous intéressent !
-              </p>
+          <div className='mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4'>
+            <div className='flex items-start'>
+              <SparklesIcon className='h-5 w-5 text-blue-600 mr-3 mt-0.5 flex-shrink-0' />
+              <div className='text-sm'>
+                <p className='text-blue-800 font-medium mb-1'>💡 Conseil :</p>
+                <p className='text-blue-700'>
+                  Vos favoris sont synchronisés sur tous vos appareils.
+                  N'hésitez pas à ajouter tous les médias qui vous intéressent !
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
