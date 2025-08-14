@@ -23,6 +23,35 @@ export interface Media {
   imageUrl?: string;
   reviews: Review[];
   averageRating: number;
+  // Données externes
+  externalData?: {
+    source?: 'google_books' | 'tmdb' | 'musicbrainz';
+    externalId?: string;
+    externalUrl?: string;
+    isbn?: string;
+    publisher?: string;
+    pageCount?: number;
+    language?: string;
+    runtime?: number;
+    genres?: string[];
+    backdropUrl?: string;
+    releaseDate?: string;
+    originalTitle?: string;
+    budget?: number;
+    revenue?: string;
+    status?: string;
+    country?: string;
+    barcode?: string;
+    asin?: string;
+    media?: Array<{
+      format: string;
+      trackCount: number;
+      tracks: Array<{
+        title: string;
+        length: number;
+      }>;
+    }>;
+  };
   createdAt: string;
   updatedAt: string;
 }
