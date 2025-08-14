@@ -11,11 +11,16 @@ import {
   MusicalNoteIcon,
   PhotoIcon,
   PlusIcon,
+  GlobeAltIcon,
+  PencilIcon,
 } from '@heroicons/react/24/outline';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import FormField from '../forms/FormField';
 import adminMediaService from '../../services/adminMediaService';
+import externalApiService from '../../services/externalApiService';
+import ExternalMediaSearch from './ExternalMediaSearch';
 import type { Media, Category, Tag } from '../../types';
+import type { ExternalMedia } from '../../types/externalApi';
 import { cn } from '../../utils';
 import toast from 'react-hot-toast';
 
@@ -68,6 +73,9 @@ const MediaFormModal: React.FC<MediaFormModalProps> = ({
   const [showNewTagForm, setShowNewTagForm] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newTagName, setNewTagName] = useState('');
+  const [activeTab, setActiveTab] = useState<'manual' | 'external'>('manual');
+  const [selectedExternalMedia, setSelectedExternalMedia] =
+    useState<ExternalMedia | null>(null);
 
   const isEditMode = !!media;
 
@@ -79,6 +87,7 @@ const MediaFormModal: React.FC<MediaFormModalProps> = ({
     watch,
     control,
     setValue,
+    getValues,
   } = useForm<MediaFormData>({
     resolver: zodResolver(mediaFormSchema),
     defaultValues: {
@@ -189,6 +198,55 @@ const MediaFormModal: React.FC<MediaFormModalProps> = ({
     },
   });
 
+  // Mutation pour créer un média à partir de données externes
+  const createExternalMediaMutation = useMutation({
+    mutationFn: async (externalMedia: ExternalMedia) => {
+      const mediaData = {
+        title: externalMedia.title,
+        type: externalMedia.type,
+        author: externalMedia.author,
+        year: externalMedia.year || new Date().getFullYear(),
+        description: externalMedia.description || '',
+        category: '',
+        tags: [],
+        externalData: {
+          source: externalMedia.source,
+          externalId: externalMedia.externalId,
+          imageUrl: externalMedia.imageUrl,
+          isbn: externalMedia.isbn,
+          publisher: externalMedia.publisher,
+          pageCount: externalMedia.pageCount,
+          language: externalMedia.language,
+          runtime: externalMedia.runtime,
+          genres: externalMedia.genres,
+          backdropUrl: externalMedia.backdropUrl,
+          releaseDate: externalMedia.releaseDate,
+          originalTitle: externalMedia.originalTitle,
+          budget: externalMedia.budget,
+          revenue: externalMedia.revenue,
+          status: externalMedia.status,
+          country: externalMedia.country,
+          barcode: externalMedia.barcode,
+          asin: externalMedia.asin,
+          media: externalMedia.media,
+        },
+      };
+
+      return externalApiService.createMediaFromExternal(mediaData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-media'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-media-stats'] });
+      toast.success('Média ajouté avec succès depuis les données publiques');
+      handleClose();
+    },
+    onError: (error: any) => {
+      const message =
+        error.response?.data?.message || 'Erreur lors de la création';
+      toast.error(message);
+    },
+  });
+
   const handleClose = () => {
     reset();
     setSelectedImage(null);
@@ -197,6 +255,8 @@ const MediaFormModal: React.FC<MediaFormModalProps> = ({
     setShowNewTagForm(false);
     setNewCategoryName('');
     setNewTagName('');
+    setActiveTab('manual');
+    setSelectedExternalMedia(null);
     onClose();
   };
 
@@ -213,7 +273,21 @@ const MediaFormModal: React.FC<MediaFormModalProps> = ({
   };
 
   const onSubmit = (data: MediaFormData) => {
-    saveMediaMutation.mutate(data);
+    // Si un média externe est sélectionné, utiliser createExternalMediaMutation
+    if (selectedExternalMedia) {
+      // Créer un objet ExternalMedia avec les données du formulaire
+      const externalMediaData = {
+        ...selectedExternalMedia,
+        title: data.title,
+        author: data.author,
+        year: data.year,
+        description: data.description || '', // Assurer que description n'est jamais undefined
+      };
+      createExternalMediaMutation.mutate(externalMediaData);
+    } else {
+      // Sinon, utiliser saveMediaMutation pour un média manuel
+      saveMediaMutation.mutate(data);
+    }
   };
 
   const getTypeIcon = (type: string) => {
@@ -242,6 +316,45 @@ const MediaFormModal: React.FC<MediaFormModalProps> = ({
     }
   };
 
+  const handleExternalMediaSelect = (externalMedia: ExternalMedia) => {
+    setSelectedExternalMedia(externalMedia);
+
+    // Pré-remplir le formulaire avec les données externes
+    reset({
+      title: externalMedia.title,
+      type: externalMedia.type,
+      author: externalMedia.author,
+      year: externalMedia.year || new Date().getFullYear(),
+      description: externalMedia.description || '',
+      category: '',
+      tags: [],
+      available: true,
+    });
+
+    setImagePreview(externalMedia.imageUrl);
+
+    // Basculer vers l'onglet manuel pour finaliser
+    setActiveTab('manual');
+  };
+
+  const handleCreateFromExternal = () => {
+    if (selectedExternalMedia) {
+      // Récupérer les valeurs actuelles du formulaire si elles ont été modifiées
+      const currentFormData = getValues();
+      const externalMediaData = {
+        ...selectedExternalMedia,
+        title: currentFormData.title,
+        author: currentFormData.author,
+        year: currentFormData.year,
+        description:
+          currentFormData.description ||
+          selectedExternalMedia.description ||
+          '',
+      };
+      createExternalMediaMutation.mutate(externalMediaData);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onClose={handleClose} className='relative z-50'>
       {/* Backdrop */}
@@ -249,7 +362,7 @@ const MediaFormModal: React.FC<MediaFormModalProps> = ({
 
       {/* Container */}
       <div className='fixed inset-0 flex items-center justify-center p-4 overflow-y-auto'>
-        <Dialog.Panel className='mx-auto max-w-2xl w-full bg-white rounded-xl shadow-xl max-h-[90vh] overflow-y-auto'>
+        <Dialog.Panel className='mx-auto max-w-4xl w-full bg-white rounded-xl shadow-xl max-h-[90vh] overflow-y-auto'>
           {/* Header */}
           <div className='flex items-center justify-between p-6 border-b border-gray-200'>
             <div className='flex items-center'>
@@ -279,347 +392,431 @@ const MediaFormModal: React.FC<MediaFormModalProps> = ({
             </button>
           </div>
 
-          {/* Content */}
-          <form onSubmit={handleSubmit(onSubmit)} className='p-6'>
-            <div className='grid lg:grid-cols-2 gap-6'>
-              {/* Colonne gauche - Image */}
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Image du média
-                </label>
-                <div className='border-2 border-dashed border-gray-300 rounded-lg p-4'>
-                  {imagePreview ? (
-                    <div className='relative'>
-                      <img
-                        src={imagePreview}
-                        alt='Preview'
-                        className='w-full h-48 object-cover rounded-lg'
-                      />
-                      <button
-                        type='button'
-                        onClick={() => {
-                          setImagePreview(null);
-                          setSelectedImage(null);
-                        }}
-                        className='absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600'
-                      >
-                        <XMarkIcon className='h-4 w-4' />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className='text-center'>
-                      <PhotoIcon className='mx-auto h-12 w-12 text-gray-400' />
-                      <div className='mt-2'>
-                        <label
-                          htmlFor='image-upload'
-                          className='cursor-pointer'
-                        >
-                          <span className='text-primary-600 hover:text-primary-500 font-medium'>
-                            Télécharger une image
-                          </span>
-                          <input
-                            id='image-upload'
-                            type='file'
-                            accept='image/*'
-                            onChange={handleImageChange}
-                            className='sr-only'
-                          />
-                        </label>
-                      </div>
-                      <p className='text-xs text-gray-500 mt-1'>
-                        PNG, JPG, JPEG jusqu'à 10MB
+          {/* Onglets */}
+          {!isEditMode && (
+            <div className='px-6 pt-2'>
+              <div className='border-b border-gray-200'>
+                <nav className='-mb-px flex space-x-8'>
+                  <button
+                    onClick={() => setActiveTab('manual')}
+                    className={cn(
+                      'py-2 px-1 border-b-2 font-medium text-sm',
+                      activeTab === 'manual'
+                        ? 'border-primary-500 text-primary-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    )}
+                  >
+                    <PencilIcon className='h-4 w-4 inline mr-2' />
+                    Ajout manuel
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('external')}
+                    className={cn(
+                      'py-2 px-1 border-b-2 font-medium text-sm',
+                      activeTab === 'external'
+                        ? 'border-primary-500 text-primary-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    )}
+                  >
+                    <GlobeAltIcon className='h-4 w-4 inline mr-2' />
+                    Données publiques
+                  </button>
+                </nav>
+              </div>
+            </div>
+          )}
+
+          {/* Contenu des onglets */}
+          {activeTab === 'external' && !isEditMode && (
+            <div className='p-6'>
+              <div className='mb-6'>
+                <h3 className='text-lg font-medium text-gray-900 mb-2'>
+                  Rechercher dans les bases de données publiques
+                </h3>
+                <p className='text-sm text-gray-600'>
+                  Recherchez des médias via Google Books, TMDB et MusicBrainz
+                  pour récupérer automatiquement les informations.
+                </p>
+              </div>
+
+              <ExternalMediaSearch
+                onMediaSelect={handleExternalMediaSelect}
+                selectedType={watch('type')}
+              />
+
+              {selectedExternalMedia && (
+                <div className='mt-6 p-4 bg-green-50 border border-green-200 rounded-lg'>
+                  <div className='flex items-center justify-between'>
+                    <div>
+                      <h4 className='text-sm font-medium text-green-800'>
+                        Média sélectionné: {selectedExternalMedia.title}
+                      </h4>
+                      <p className='text-sm text-green-600'>
+                        Cliquez sur "Ajouter depuis données publiques" pour
+                        l'ajouter directement, ou utilisez l'onglet "Ajout
+                        manuel" pour personnaliser.
                       </p>
+                    </div>
+                    <button
+                      onClick={handleCreateFromExternal}
+                      disabled={createExternalMediaMutation.isPending}
+                      className='px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50'
+                    >
+                      {createExternalMediaMutation.isPending
+                        ? 'Ajout...'
+                        : 'Ajouter depuis données publiques'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Onglet ajout manuel */}
+          {activeTab === 'manual' && (
+            <form onSubmit={handleSubmit(onSubmit)} className='p-6'>
+              <div className='grid lg:grid-cols-2 gap-6'>
+                {/* Colonne gauche - Image */}
+                <div>
+                  <label className='block text-sm font-medium text-gray-700 mb-2'>
+                    Image du média
+                  </label>
+                  <div className='border-2 border-dashed border-gray-300 rounded-lg p-4'>
+                    {imagePreview ? (
+                      <div className='relative'>
+                        <img
+                          src={imagePreview}
+                          alt='Preview'
+                          className='w-full h-48 object-cover rounded-lg'
+                        />
+                        <button
+                          type='button'
+                          onClick={() => {
+                            setImagePreview(null);
+                            setSelectedImage(null);
+                          }}
+                          className='absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600'
+                        >
+                          <XMarkIcon className='h-4 w-4' />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className='text-center'>
+                        <PhotoIcon className='mx-auto h-12 w-12 text-gray-400' />
+                        <div className='mt-2'>
+                          <label
+                            htmlFor='image-upload'
+                            className='cursor-pointer'
+                          >
+                            <span className='text-primary-600 hover:text-primary-500 font-medium'>
+                              Télécharger une image
+                            </span>
+                            <input
+                              id='image-upload'
+                              type='file'
+                              accept='image/*'
+                              onChange={handleImageChange}
+                              className='sr-only'
+                            />
+                          </label>
+                        </div>
+                        <p className='text-xs text-gray-500 mt-1'>
+                          PNG, JPG, JPEG jusqu'à 10MB
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Colonne droite - Informations */}
+                <div className='space-y-4'>
+                  <FormField
+                    {...register('title')}
+                    label='Titre *'
+                    placeholder='Titre du média'
+                    error={errors.title?.message}
+                    disabled={isSubmitting}
+                  />
+
+                  <div>
+                    <label className='block text-sm font-medium text-gray-700 mb-2'>
+                      Type de média *
+                    </label>
+                    <Controller
+                      name='type'
+                      control={control}
+                      render={({ field }) => (
+                        <div className='grid grid-cols-3 gap-2'>
+                          {(['book', 'movie', 'music'] as const).map(type => {
+                            const isSelected = field.value === type;
+                            const typeLabels = {
+                              book: 'Livre',
+                              movie: 'Film',
+                              music: 'Musique',
+                            };
+
+                            return (
+                              <button
+                                key={type}
+                                type='button'
+                                onClick={() => field.onChange(type)}
+                                className={cn(
+                                  'flex flex-col items-center space-y-2 p-3 rounded-lg border-2 transition-all',
+                                  isSelected
+                                    ? getTypeColor(type)
+                                    : 'border-gray-200 hover:border-gray-300'
+                                )}
+                              >
+                                {getTypeIcon(type)}
+                                <span className='text-sm font-medium'>
+                                  {typeLabels[type]}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    />
+                    {errors.type && (
+                      <p className='text-sm text-red-600 mt-1'>
+                        {errors.type.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <FormField
+                    {...register('author')}
+                    label='Auteur/Réalisateur/Artiste *'
+                    placeholder="Nom de l'auteur"
+                    error={errors.author?.message}
+                    disabled={isSubmitting}
+                  />
+
+                  <FormField
+                    {...register('year', { valueAsNumber: true })}
+                    label='Année *'
+                    type='number'
+                    placeholder='2024'
+                    error={errors.year?.message}
+                    disabled={isSubmitting}
+                  />
+
+                  {isEditMode && (
+                    <div className='flex items-center'>
+                      <input
+                        {...register('available')}
+                        type='checkbox'
+                        className='h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded'
+                      />
+                      <label className='ml-2 text-sm text-gray-700'>
+                        Média disponible
+                      </label>
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Colonne droite - Informations */}
-              <div className='space-y-4'>
-                <FormField
-                  {...register('title')}
-                  label='Titre *'
-                  placeholder='Titre du média'
-                  error={errors.title?.message}
+              {/* Description */}
+              <div className='mt-6'>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
+                  Description
+                </label>
+                <textarea
+                  {...register('description')}
+                  rows={3}
+                  className='input w-full resize-none'
+                  placeholder='Description du média...'
                   disabled={isSubmitting}
                 />
+                {errors.description && (
+                  <p className='text-sm text-red-600 mt-1'>
+                    {errors.description.message}
+                  </p>
+                )}
+              </div>
 
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-2'>
-                    Type de média *
-                  </label>
-                  <Controller
-                    name='type'
-                    control={control}
-                    render={({ field }) => (
-                      <div className='grid grid-cols-3 gap-2'>
-                        {(['book', 'movie', 'music'] as const).map(type => {
-                          const isSelected = field.value === type;
-                          const typeLabels = {
-                            book: 'Livre',
-                            movie: 'Film',
-                            music: 'Musique',
-                          };
+              {/* Catégorie */}
+              <div className='mt-6'>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
+                  Catégorie
+                </label>
+                <div className='flex space-x-2'>
+                  <select
+                    {...register('category')}
+                    className='input flex-1'
+                    disabled={isSubmitting}
+                  >
+                    <option value=''>Aucune catégorie</option>
+                    {categories.map(category => (
+                      <option key={category._id} value={category._id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type='button'
+                    onClick={() => setShowNewCategoryForm(true)}
+                    className='btn-secondary flex items-center'
+                  >
+                    <PlusIcon className='h-4 w-4 mr-1' />
+                    Nouvelle
+                  </button>
+                </div>
 
+                {showNewCategoryForm && (
+                  <div className='mt-2 flex space-x-2'>
+                    <input
+                      type='text'
+                      value={newCategoryName}
+                      onChange={e => setNewCategoryName(e.target.value)}
+                      placeholder='Nom de la catégorie'
+                      className='input flex-1'
+                    />
+                    <button
+                      type='button'
+                      onClick={() =>
+                        createCategoryMutation.mutate(newCategoryName)
+                      }
+                      disabled={
+                        !newCategoryName.trim() ||
+                        createCategoryMutation.isPending
+                      }
+                      className='btn-primary'
+                    >
+                      {createCategoryMutation.isPending
+                        ? 'Création...'
+                        : 'Créer'}
+                    </button>
+                    <button
+                      type='button'
+                      onClick={() => {
+                        setShowNewCategoryForm(false);
+                        setNewCategoryName('');
+                      }}
+                      className='btn-secondary'
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Tags */}
+              <div className='mt-6'>
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
+                  Tags
+                </label>
+                <Controller
+                  name='tags'
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <div className='flex flex-wrap gap-2 mb-2'>
+                        {tags.map(tag => {
+                          const isSelected = field.value?.includes(tag._id);
                           return (
                             <button
-                              key={type}
+                              key={tag._id}
                               type='button'
-                              onClick={() => field.onChange(type)}
+                              onClick={() => {
+                                const currentTags = field.value || [];
+                                if (isSelected) {
+                                  field.onChange(
+                                    currentTags.filter(id => id !== tag._id)
+                                  );
+                                } else {
+                                  field.onChange([...currentTags, tag._id]);
+                                }
+                              }}
                               className={cn(
-                                'flex flex-col items-center space-y-2 p-3 rounded-lg border-2 transition-all',
+                                'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition-colors',
                                 isSelected
-                                  ? getTypeColor(type)
-                                  : 'border-gray-200 hover:border-gray-300'
+                                  ? 'bg-primary-100 text-primary-800 border border-primary-300'
+                                  : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
                               )}
                             >
-                              {getTypeIcon(type)}
-                              <span className='text-sm font-medium'>
-                                {typeLabels[type]}
-                              </span>
+                              #{tag.name}
                             </button>
                           );
                         })}
                       </div>
-                    )}
-                  />
-                  {errors.type && (
-                    <p className='text-sm text-red-600 mt-1'>
-                      {errors.type.message}
-                    </p>
-                  )}
-                </div>
 
-                <FormField
-                  {...register('author')}
-                  label='Auteur/Réalisateur/Artiste *'
-                  placeholder="Nom de l'auteur"
-                  error={errors.author?.message}
-                  disabled={isSubmitting}
-                />
+                      <button
+                        type='button'
+                        onClick={() => setShowNewTagForm(true)}
+                        className='text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center'
+                      >
+                        <PlusIcon className='h-4 w-4 mr-1' />
+                        Créer un nouveau tag
+                      </button>
 
-                <FormField
-                  {...register('year', { valueAsNumber: true })}
-                  label='Année *'
-                  type='number'
-                  placeholder='2024'
-                  error={errors.year?.message}
-                  disabled={isSubmitting}
-                />
-
-                {isEditMode && (
-                  <div className='flex items-center'>
-                    <input
-                      {...register('available')}
-                      type='checkbox'
-                      className='h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded'
-                    />
-                    <label className='ml-2 text-sm text-gray-700'>
-                      Média disponible
-                    </label>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Description */}
-            <div className='mt-6'>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Description
-              </label>
-              <textarea
-                {...register('description')}
-                rows={3}
-                className='input w-full resize-none'
-                placeholder='Description du média...'
-                disabled={isSubmitting}
-              />
-              {errors.description && (
-                <p className='text-sm text-red-600 mt-1'>
-                  {errors.description.message}
-                </p>
-              )}
-            </div>
-
-            {/* Catégorie */}
-            <div className='mt-6'>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Catégorie
-              </label>
-              <div className='flex space-x-2'>
-                <select
-                  {...register('category')}
-                  className='input flex-1'
-                  disabled={isSubmitting}
-                >
-                  <option value=''>Aucune catégorie</option>
-                  {categories.map(category => (
-                    <option key={category._id} value={category._id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  type='button'
-                  onClick={() => setShowNewCategoryForm(true)}
-                  className='btn-secondary flex items-center'
-                >
-                  <PlusIcon className='h-4 w-4 mr-1' />
-                  Nouvelle
-                </button>
-              </div>
-
-              {showNewCategoryForm && (
-                <div className='mt-2 flex space-x-2'>
-                  <input
-                    type='text'
-                    value={newCategoryName}
-                    onChange={e => setNewCategoryName(e.target.value)}
-                    placeholder='Nom de la catégorie'
-                    className='input flex-1'
-                  />
-                  <button
-                    type='button'
-                    onClick={() =>
-                      createCategoryMutation.mutate(newCategoryName)
-                    }
-                    disabled={
-                      !newCategoryName.trim() ||
-                      createCategoryMutation.isPending
-                    }
-                    className='btn-primary'
-                  >
-                    {createCategoryMutation.isPending ? 'Création...' : 'Créer'}
-                  </button>
-                  <button
-                    type='button'
-                    onClick={() => {
-                      setShowNewCategoryForm(false);
-                      setNewCategoryName('');
-                    }}
-                    className='btn-secondary'
-                  >
-                    Annuler
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Tags */}
-            <div className='mt-6'>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Tags
-              </label>
-              <Controller
-                name='tags'
-                control={control}
-                render={({ field }) => (
-                  <div>
-                    <div className='flex flex-wrap gap-2 mb-2'>
-                      {tags.map(tag => {
-                        const isSelected = field.value?.includes(tag._id);
-                        return (
+                      {showNewTagForm && (
+                        <div className='mt-2 flex space-x-2'>
+                          <input
+                            type='text'
+                            value={newTagName}
+                            onChange={e => setNewTagName(e.target.value)}
+                            placeholder='Nom du tag'
+                            className='input flex-1'
+                          />
                           <button
-                            key={tag._id}
+                            type='button'
+                            onClick={() => createTagMutation.mutate(newTagName)}
+                            disabled={
+                              !newTagName.trim() || createTagMutation.isPending
+                            }
+                            className='btn-primary'
+                          >
+                            {createTagMutation.isPending
+                              ? 'Création...'
+                              : 'Créer'}
+                          </button>
+                          <button
                             type='button'
                             onClick={() => {
-                              const currentTags = field.value || [];
-                              if (isSelected) {
-                                field.onChange(
-                                  currentTags.filter(id => id !== tag._id)
-                                );
-                              } else {
-                                field.onChange([...currentTags, tag._id]);
-                              }
+                              setShowNewTagForm(false);
+                              setNewTagName('');
                             }}
-                            className={cn(
-                              'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition-colors',
-                              isSelected
-                                ? 'bg-primary-100 text-primary-800 border border-primary-300'
-                                : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
-                            )}
+                            className='btn-secondary'
                           >
-                            #{tag.name}
+                            Annuler
                           </button>
-                        );
-                      })}
+                        </div>
+                      )}
                     </div>
+                  )}
+                />
+              </div>
 
-                    <button
-                      type='button'
-                      onClick={() => setShowNewTagForm(true)}
-                      className='text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center'
-                    >
-                      <PlusIcon className='h-4 w-4 mr-1' />
-                      Créer un nouveau tag
-                    </button>
-
-                    {showNewTagForm && (
-                      <div className='mt-2 flex space-x-2'>
-                        <input
-                          type='text'
-                          value={newTagName}
-                          onChange={e => setNewTagName(e.target.value)}
-                          placeholder='Nom du tag'
-                          className='input flex-1'
-                        />
-                        <button
-                          type='button'
-                          onClick={() => createTagMutation.mutate(newTagName)}
-                          disabled={
-                            !newTagName.trim() || createTagMutation.isPending
-                          }
-                          className='btn-primary'
-                        >
-                          {createTagMutation.isPending
-                            ? 'Création...'
-                            : 'Créer'}
-                        </button>
-                        <button
-                          type='button'
-                          onClick={() => {
-                            setShowNewTagForm(false);
-                            setNewTagName('');
-                          }}
-                          className='btn-secondary'
-                        >
-                          Annuler
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              />
-            </div>
-
-            {/* Actions */}
-            <div className='flex space-x-3 mt-8 pt-6 border-t border-gray-200'>
-              <button
-                type='button'
-                onClick={handleClose}
-                disabled={isSubmitting}
-                className='flex-1 btn-secondary'
-              >
-                Annuler
-              </button>
-              <button
-                type='submit'
-                disabled={isSubmitting}
-                className='flex-1 btn-primary'
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className='animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2'></div>
-                    {isEditMode ? 'Modification...' : 'Création...'}
-                  </>
-                ) : isEditMode ? (
-                  'Modifier le média'
-                ) : (
-                  'Créer le média'
-                )}
-              </button>
-            </div>
-          </form>
+              {/* Actions */}
+              <div className='flex space-x-3 mt-8 pt-6 border-t border-gray-200'>
+                <button
+                  type='button'
+                  onClick={handleClose}
+                  disabled={isSubmitting}
+                  className='flex-1 btn-secondary'
+                >
+                  Annuler
+                </button>
+                <button
+                  type='submit'
+                  disabled={isSubmitting}
+                  className='flex-1 btn-primary'
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className='animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2'></div>
+                      {isEditMode ? 'Modification...' : 'Création...'}
+                    </>
+                  ) : isEditMode ? (
+                    'Modifier le média'
+                  ) : (
+                    'Créer le média'
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
         </Dialog.Panel>
       </div>
     </Dialog>
