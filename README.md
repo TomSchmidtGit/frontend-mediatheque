@@ -318,6 +318,20 @@ describe('MyComponent', () => {
 
 ## 📦 Déploiement
 
+### Environnements
+
+| Environnement     | URL                                        | Commande           | Variables         |
+| ----------------- | ------------------------------------------ | ------------------ | ----------------- |
+| **Développement** | `http://localhost:5173`                    | `npm run dev`      | `.env.local`      |
+| **Staging**       | `http://localhost:5173` (dev local)        | `npm run dev`      | Variables locales |
+| **Production**    | `https://frontend-mediatheque.vercel.app/` | Auto (push `main`) | Vercel production |
+
+### Documentation CI/CD
+
+📚 **Protocole d'intégration et déploiement** : [Documentation CI/CD](./docs/ci-cd.md)
+
+📋 **Historique des versions** : [Changelog](./CHANGELOG.md)
+
 ### Déploiement avec Docker
 
 #### 1. Build de l'image
@@ -564,7 +578,7 @@ services/
 - **ESLint** : Règles de qualité du code
 - **Prettier** : Formatage automatique
 - **TypeScript** : Typage strict
-- **Tests** : Couverture minimale de 80%
+- **Tests** : Suite de tests complète avec Vitest
 
 ### Hooks pre-commit
 
